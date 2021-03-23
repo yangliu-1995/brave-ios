@@ -24,9 +24,21 @@ struct FormHeaderText: View {
     var body: some View {
         if #available(iOS 14.0, *) {
             Text(verbatim: text)
-                .padding([.leading, .trailing])
+                .padding([.leading, .trailing], 20)
         } else {
             Text(verbatim: text.uppercased())
+        }
+    }
+}
+
+struct FormFooterText: View {
+    var text: String
+    var body: some View {
+        if #available(iOS 14.0, *) {
+            Text(verbatim: text)
+                .padding([.leading, .trailing], 20)
+        } else {
+            Text(verbatim: text)
         }
     }
 }
@@ -81,15 +93,7 @@ struct SettingsView: View {
             header: FormHeaderText(text: Strings.features)
                 .padding(.top) // Needed for better spacing at the top of the table
         ) {
-            NavigationLink(destination: UIKitController { _ in
-                BraveShieldsAndPrivacySettingsController(
-                    profile: self.profile,
-                    tabManager: self.tabManager,
-                    feedDataSource: self.feedDataSource
-                )
-            }
-            .navigationBarTitle(Strings.braveShieldsAndPrivacy)
-            .edgesIgnoringSafeArea(.all)) {
+            NavigationLink(destination: BraveShieldsAndPrivacyView()) {
                 Image(uiImage: #imageLiteral(resourceName: "settings-shields"))
                 Text(verbatim: Strings.braveShieldsAndPrivacy)
             }
