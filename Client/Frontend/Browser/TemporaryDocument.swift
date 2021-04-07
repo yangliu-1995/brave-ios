@@ -24,14 +24,18 @@ class TemporaryDocument: NSObject {
         self.tab = tab
 
         super.init()
-        
-        self.session = URLSession(configuration: .default, delegate: self, delegateQueue: temporaryDocumentOperationQueue)
+
+        self.session = URLSession(
+            configuration: .default,
+            delegate: self,
+            delegateQueue: temporaryDocumentOperationQueue
+        )
     }
 
     deinit {
         downloadTask?.cancel()
         downloadTask = nil
-        
+
         // Delete the temp file.
         if let url = localFileURL {
             try? FileManager.default.removeItem(at: url)
@@ -51,13 +55,13 @@ class TemporaryDocument: NSObject {
 
         let result = Deferred<URL>()
         pendingResult = result
-        
+
         downloadTask = session?.downloadTask(with: request)
         downloadTask?.resume()
-        
+
         if let tab = self.tab, let url = request.url {
             ResourceDownloadManager.downloadResource(for: tab, url: url)
-            
+
             ensureMainThread {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
@@ -67,22 +71,28 @@ class TemporaryDocument: NSObject {
 
         return result
     }
-    
+
     func onDocumentDownloaded(document: DownloadedResourceResponse?, error: Error?) {
         ensureMainThread {
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
         }
-        
+
         // Store the blob/data in a local temporary file.
         if let document = document, let data = document.data, !data.isEmpty {
-            let tempDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("TempDocs")
+            let tempDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(
+                "TempDocs"
+            )
             let url = tempDirectory.appendingPathComponent(filename)
-            
+
             do {
-                try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true, attributes: nil)
+                try FileManager.default.createDirectory(
+                    at: tempDirectory,
+                    withIntermediateDirectories: true,
+                    attributes: nil
+                )
                 try FileManager.default.removeItem(at: url)
                 try data.write(to: url, options: [.atomic])
-                
+
                 localFileURL = url
                 pendingResult?.fill(url)
                 pendingResult = nil
@@ -91,13 +101,13 @@ class TemporaryDocument: NSObject {
                 // let the error pass through to the below handler..
             }
         }
-        
+
         // If we encounter an error downloading the temp file, just return with the
         // original remote URL so it can still be shared as a web URL.
         if let url = request.url {
             pendingResult?.fill(url)
         }
-        
+
         pendingResult = nil
     }
 }
@@ -116,11 +126,21 @@ extension TemporaryDocument: URLSessionTaskDelegate, URLSessionDownloadDelegate 
         }
     }
 
-    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        let tempDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("TempDocs")
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didFinishDownloadingTo location: URL
+    ) {
+        let tempDirectory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(
+            "TempDocs"
+        )
         let url = tempDirectory.appendingPathComponent(filename)
 
-        try? FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true, attributes: nil)
+        try? FileManager.default.createDirectory(
+            at: tempDirectory,
+            withIntermediateDirectories: true,
+            attributes: nil
+        )
         try? FileManager.default.removeItem(at: url)
 
         do {

@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import WebKit
-import Shared
-import Data
 import BraveShared
+import Data
+import Shared
+import WebKit
 
 private let log = Logger.browserLogger
 
 enum BlockerStatus: String {
     case Disabled
-    case NoBlockedURLs // When TP is enabled but nothing is being blocked
+    case NoBlockedURLs  // When TP is enabled but nothing is being blocked
     case Whitelisted
     case Blocking
 }
@@ -29,7 +29,9 @@ struct ContentBlockingConfig {
 }
 
 struct NoImageModeDefaults {
-    static let script = "[{'trigger':{'url-filter':'.*','resource-type':['image']},'action':{'type':'block'}}]".replacingOccurrences(of: "'", with: "\"")
+    static let script =
+        "[{'trigger':{'url-filter':'.*','resource-type':['image']},'action':{'type':'block'}}]"
+        .replacingOccurrences(of: "'", with: "\"")
     static let scriptName = "images"
 }
 
@@ -44,7 +46,7 @@ class ContentBlockerHelper {
 
     static let ruleStore: WKContentRuleListStore = WKContentRuleListStore.default()
     weak var tab: Tab?
-    
+
     static func compileBundledLists() -> Deferred<()> {
         return BlocklistName.compileBundledRules(ruleStore: ruleStore)
     }
@@ -71,9 +73,9 @@ class ContentBlockerHelper {
             statsDidChange?(stats)
         }
     }
-    
+
     var statsDidChange: ((TPPageStats) -> Void)?
-    
+
     var blockedRequests: Set<URL> = []
 
     static private var blockImagesRule: WKContentRuleList?
@@ -82,7 +84,12 @@ class ContentBlockerHelper {
     init(tab: Tab) {
         self.tab = tab
 
-        NotificationCenter.default.addObserver(self, selector: #selector(setupTabTrackingProtection), name: .contentBlockerTabSetupRequired, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(setupTabTrackingProtection),
+            name: .contentBlockerTabSetupRequired,
+            object: nil
+        )
     }
 
     class func prefsChanged() {
@@ -109,9 +116,12 @@ class ContentBlockerHelper {
         let rules = BlocklistName.allLists
         for list in rules {
             let name = list.filename
-            ContentBlockerHelper.ruleStore.lookUpContentRuleList(forIdentifier: name) { rule, error in
+            ContentBlockerHelper.ruleStore.lookUpContentRuleList(forIdentifier: name) {
+                rule,
+                error in
                 guard let rule = rule else {
-                    let msg = "lookUpContentRuleList for \(name):  \(error?.localizedDescription ?? "empty rules")"
+                    let msg =
+                        "lookUpContentRuleList for \(name):  \(error?.localizedDescription ?? "empty rules")"
                     log.error("Content blocker error: \(msg)")
                     return
                 }
@@ -143,8 +153,11 @@ class ContentBlockerHelper {
         }
 
         // Async required here to ensure remove() call is processed.
-        DispatchQueue.main.async() {
-            self.tab?.webView?.evaluateSafeJavaScript(functionName: "window.__firefox__.NoImageMode.setEnabled", args: [enabled])
+        DispatchQueue.main.async {
+            self.tab?.webView?.evaluateSafeJavaScript(
+                functionName: "window.__firefox__.NoImageMode.setEnabled",
+                args: [enabled]
+            )
         }
     }
 
@@ -154,7 +167,11 @@ class ContentBlockerHelper {
 
 extension ContentBlockerHelper {
 
-    static func setTrackingProtectionMode(_ enabled: Bool, for prefs: Prefs, with tabManager: TabManager) {
+    static func setTrackingProtectionMode(
+        _ enabled: Bool,
+        for prefs: Prefs,
+        with tabManager: TabManager
+    ) {
         guard let selectedTab = tabManager.selectedTab else {
             return
         }
@@ -181,4 +198,3 @@ extension ContentBlockerHelper {
         setTrackingProtectionMode(!isEnabled, for: prefs, with: tabManager)
     }
 }
-

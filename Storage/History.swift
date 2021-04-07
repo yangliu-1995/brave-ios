@@ -10,13 +10,11 @@ open class IgnoredSiteError: MaybeErrorType {
     }
 }
 
-/**
- * The base history protocol for front-end code.
- *
- * Note that the implementation of these methods might be complicated if
- * the implementing class also implements SyncableHistory -- for example,
- * `clear` might or might not need to set a bunch of flags to upload deletions.
- */
+/// The base history protocol for front-end code.
+///
+/// Note that the implementation of these methods might be complicated if
+/// the implementing class also implements SyncableHistory -- for example,
+/// `clear` might or might not need to set a bunch of flags to upload deletions.
 public protocol BrowserHistory {
     @discardableResult func addLocalVisit(_ visit: SiteVisit) -> Success
     func clearHistory() -> Success
@@ -37,29 +35,27 @@ public protocol BrowserHistory {
     func isPinnedTopSite(_ url: String) -> Deferred<Maybe<Bool>>
 }
 
-/**
- * An interface for fast repeated frecency queries.
- */
+/// An interface for fast repeated frecency queries.
 public protocol FrecentHistory {
-    func getSites(whereURLContains filter: String?, historyLimit limit: Int, bookmarksLimit: Int) -> Deferred<Maybe<Cursor<Site>>>
+    func getSites(whereURLContains filter: String?, historyLimit limit: Int, bookmarksLimit: Int)
+        -> Deferred<Maybe<Cursor<Site>>>
     func updateTopSitesCacheQuery() -> (String, Args?)
 }
 
-/**
- * An interface for accessing recommendation content from Storage
- */
+/// An interface for accessing recommendation content from Storage
 public protocol HistoryRecommendations {
     func getHighlights() -> Deferred<Maybe<Cursor<Site>>>
     func getRecentBookmarks(_ limit: Int) -> Deferred<Maybe<Cursor<Site>>>
 
     func removeHighlightForURL(_ url: String) -> Success
-    func repopulate(invalidateTopSites shouldInvalidateTopSites: Bool, invalidateHighlights shouldInvalidateHighlights: Bool) -> Success
+    func repopulate(
+        invalidateTopSites shouldInvalidateTopSites: Bool,
+        invalidateHighlights shouldInvalidateHighlights: Bool
+    ) -> Success
 }
 
-/**
- * The interface that history storage needs to provide in order to be
- * synced by a `HistorySynchronizer`.
- */
+/// The interface that history storage needs to provide in order to be
+/// synced by a `HistorySynchronizer`.
 public protocol SyncableHistory: AccountRemovalDelegate {
     /**
      * Make sure that the local place with the provided URL has the provided GUID.

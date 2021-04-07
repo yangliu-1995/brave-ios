@@ -17,14 +17,23 @@ protocol DataObserver {
 }
 
 protocol DataObserverDelegate: class {
-    func didInvalidateDataSources(refresh forced: Bool, highlightsRefreshed: Bool, topSitesRefreshed: Bool)
+    func didInvalidateDataSources(
+        refresh forced: Bool,
+        highlightsRefreshed: Bool,
+        topSitesRefreshed: Bool
+    )
     func willInvalidateDataSources(forceHighlights highlights: Bool, forceTopSites topSites: Bool)
 }
 
 // Make these delegate methods optional by providing default implementations
 extension DataObserverDelegate {
-    func didInvalidateDataSources(refresh forced: Bool, highlightsRefreshed: Bool, topSitesRefreshed: Bool) {}
-    func willInvalidateDataSources(forceHighlights highlights: Bool, forceTopSites topSites: Bool) {}
+    func didInvalidateDataSources(
+        refresh forced: Bool,
+        highlightsRefreshed: Bool,
+        topSitesRefreshed: Bool
+    ) {}
+    func willInvalidateDataSources(forceHighlights highlights: Bool, forceTopSites topSites: Bool) {
+    }
 }
 
 open class PanelDataObservers {
@@ -40,12 +49,21 @@ class ActivityStreamDataObserver: DataObserver {
     let invalidationTime: UInt64
     weak var delegate: DataObserverDelegate?
 
-    fileprivate let events: [Notification.Name] = [.profileDidFinishSyncing, .privateDataClearedHistory]
+    fileprivate let events: [Notification.Name] = [
+        .profileDidFinishSyncing, .privateDataClearedHistory,
+    ]
 
     init(profile: Profile) {
         self.profile = profile
         self.invalidationTime = OneMinuteInMilliseconds * 15
-        events.forEach { NotificationCenter.default.addObserver(self, selector: #selector(self.notificationReceived), name: $0, object: nil) }
+        events.forEach {
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(self.notificationReceived),
+                name: $0,
+                object: nil
+            )
+        }
     }
 
     /*
@@ -60,7 +78,7 @@ class ActivityStreamDataObserver: DataObserver {
     @objc func notificationReceived(_ notification: Notification) {
         switch notification.name {
         case .profileDidFinishSyncing, .privateDataClearedHistory:
-             refreshIfNeeded(forceHighlights: true, forceTopSites: true)
+            refreshIfNeeded(forceHighlights: true, forceTopSites: true)
         default:
             log.warning("Received unexpected notification \(notification.name)")
         }

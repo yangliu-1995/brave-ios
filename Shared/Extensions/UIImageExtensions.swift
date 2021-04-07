@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
 import SDWebImage
+import UIKit
 
 private let imageLock = NSLock()
 
@@ -61,30 +61,30 @@ extension UIImage {
         UIGraphicsEndImageContext()
         return scaledImage!
     }
-    
+
     /// Return a UIImage which will always render as a template
     public var template: UIImage {
         return withRenderingMode(.alwaysTemplate)
     }
-    
+
     public func scale(toSize size: CGSize) -> UIImage {
         if self.size == size {
             return self
         }
-        
+
         let rendererFormat = UIGraphicsImageRendererFormat.default()
         rendererFormat.opaque = false
         rendererFormat.scale = 1.0
-        
+
         let scaledImageRect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
         let renderer = UIGraphicsImageRenderer(size: size, format: rendererFormat)
         let scaledImage = renderer.image { context in
             self.draw(in: scaledImageRect)
         }
-        
+
         return scaledImage
     }
-    
+
     public func withAlpha(_ alpha: CGFloat) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, scale)
         draw(at: .zero, blendMode: .normal, alpha: alpha)
@@ -92,19 +92,24 @@ extension UIImage {
         UIGraphicsEndImageContext()
         return newImage
     }
-    
-    public func textToImage(drawText text: String, textFont: UIFont? = nil, textColor: UIColor? = nil, atPoint point: CGPoint) -> UIImage? {
+
+    public func textToImage(
+        drawText text: String,
+        textFont: UIFont? = nil,
+        textColor: UIColor? = nil,
+        atPoint point: CGPoint
+    ) -> UIImage? {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
-        
+
         let font = textFont ?? UIFont.systemFont(ofSize: 20, weight: .medium)
 
         let fontAttributes: [NSAttributedString.Key: Any] = [
             .paragraphStyle: paragraphStyle,
             .font: font,
-            .foregroundColor: textColor ?? UIColor.white
+            .foregroundColor: textColor ?? UIColor.white,
         ]
-        
+
         UIGraphicsBeginImageContextWithOptions(size, false, scale)
         draw(in: CGRect(origin: CGPoint.zero, size: size))
         let rect = CGRect(origin: point, size: size)
@@ -113,7 +118,7 @@ extension UIImage {
         UIGraphicsEndImageContext()
         return newImage
     }
-    
+
     // TESTING ONLY: not for use in release/production code.
     // PNG comparison can return false negatives, be very careful using for non-equal comparison.
     // PNG comparison requires UIImages to be constructed the same way in order for the metadata block to match,

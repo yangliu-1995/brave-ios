@@ -8,56 +8,71 @@ import XCGLogger
 public struct Logger {}
 
 // MARK: - Singleton Logger Instances
-public extension Logger {
-    static let logPII = false
+extension Logger {
+    public static let logPII = false
 
     /// Logger used for recording happenings with Sync, Accounts, Providers, Storage, and Profiles
-    static let syncLogger = RollingFileLogger(filenameRoot: "sync", logDirectoryPath: Logger.logFileDirectoryPath())
+    public static let syncLogger = RollingFileLogger(
+        filenameRoot: "sync",
+        logDirectoryPath: Logger.logFileDirectoryPath()
+    )
 
     /// Logger used for recording frontend/browser happenings
-    static let browserLogger = RollingFileLogger(filenameRoot: "browser", logDirectoryPath: Logger.logFileDirectoryPath())
-    
+    public static let browserLogger = RollingFileLogger(
+        filenameRoot: "browser",
+        logDirectoryPath: Logger.logFileDirectoryPath()
+    )
+
     /// Logger used for things recorded on BraveRewards framework.
-    static let rewardsLogger: RollingFileLogger = {
+    public static let rewardsLogger: RollingFileLogger = {
         let logger = RollingFileLogger(filenameRoot: "rewards", logDirectoryPath: nil)
         logger.identifier = "BraveRewards"
-        logger.newLogWithDate(Date(), configureDestination: { destination in
-            // Same as debug log, Rewards framework handles function names in message
-            destination.showFunctionName = false
-            destination.showThreadName = false
-        })
-        
+        logger.newLogWithDate(
+            Date(),
+            configureDestination: { destination in
+                // Same as debug log, Rewards framework handles function names in message
+                destination.showFunctionName = false
+                destination.showThreadName = false
+            }
+        )
+
         if !AppConstants.buildChannel.isPublic {
             // For rewards logs we want to show it only using the Apple System Log to make it visible
             // via console.app
             logger.destinations.removeAll(where: { ($0 is ConsoleDestination) })
-            
+
             // Create a destination for the system console log (via NSLog)
             let systemDestination = AppleSystemLogDestination(identifier: "com.brave.ios.logs")
 
             systemDestination.outputLevel = .debug
             systemDestination.showLogIdentifier = true
             systemDestination.showLevel = true
-            
+
             // Since we redirect from Rewards framework we don't have function
             // name's or thread names
             systemDestination.showFunctionName = false
             systemDestination.showThreadName = false
-            
+
             logger.add(destination: systemDestination)
         }
-        
+
         return logger
     }()
-    
-    static let braveSyncLogger = RollingFileLogger(filenameRoot: "bravesync", logDirectoryPath: Logger.logFileDirectoryPath())
+
+    public static let braveSyncLogger = RollingFileLogger(
+        filenameRoot: "bravesync",
+        logDirectoryPath: Logger.logFileDirectoryPath()
+    )
 
     /// Logger used for recording interactions with the keychain
-    static let keychainLogger: XCGLogger = Logger.fileLoggerWithName("keychain")
+    public static let keychainLogger: XCGLogger = Logger.fileLoggerWithName("keychain")
 
     /// Logger used for logging database errors such as corruption
-    static let corruptLogger: RollingFileLogger = {
-        let logger = RollingFileLogger(filenameRoot: "corruptLogger", logDirectoryPath: Logger.logFileDirectoryPath())
+    public static let corruptLogger: RollingFileLogger = {
+        let logger = RollingFileLogger(
+            filenameRoot: "corruptLogger",
+            logDirectoryPath: Logger.logFileDirectoryPath()
+        )
         logger.newLogWithDate(Date())
         return logger
     }()
@@ -67,12 +82,21 @@ public extension Logger {
 
     :returns: Directory path where log files are stored
     */
-    static func logFileDirectoryPath() -> String? {
-        if let cacheDir = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first {
+    public static func logFileDirectoryPath() -> String? {
+        if let cacheDir = NSSearchPathForDirectoriesInDomains(
+            .cachesDirectory,
+            .userDomainMask,
+            true
+        )
+        .first {
             let logDir = "\(cacheDir)/Logs"
             if !FileManager.default.fileExists(atPath: logDir) {
                 do {
-                    try FileManager.default.createDirectory(atPath: logDir, withIntermediateDirectories: false, attributes: nil)
+                    try FileManager.default.createDirectory(
+                        atPath: logDir,
+                        withIntermediateDirectories: false,
+                        attributes: nil
+                    )
                     return logDir
                 } catch _ as NSError {
                     return nil
@@ -112,7 +136,7 @@ public extension Logger {
 
      - returns: Tuples of filenames to each file's contexts in a NSData object
      */
-    static func diskLogFilenamesAndData() throws -> [(String, Data?)] {
+    public static func diskLogFilenamesAndData() throws -> [(String, Data?)] {
         var filenamesAndURLs = [(String, URL)]()
         filenamesAndURLs.append(("browser", urlForLogNamed("browser")!))
         filenamesAndURLs.append(("keychain", urlForLogNamed("keychain")!))
@@ -125,7 +149,8 @@ public extension Logger {
         } catch _ {
         }
 
-        return filenamesAndURLs.map { ($0, try? Data(contentsOf: URL(fileURLWithPath: $1.absoluteString))) }
+        return filenamesAndURLs.map {
+            ($0, try? Data(contentsOf: URL(fileURLWithPath: $1.absoluteString)))
+        }
     }
 }
-

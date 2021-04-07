@@ -2,8 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import XCTest
 import BraveShared
+import XCTest
 
 class StringExtensionTests: XCTestCase {
 
@@ -11,35 +11,42 @@ class StringExtensionTests: XCTestCase {
         let urlString = "https://brave.com"
         let url = URL(string: urlString)!
         XCTAssertEqual(urlString, url.absoluteString)
-        
+
         let prefixedString = "Prefixed Text then the URL: \(urlString)"
         XCTAssertEqual(url, prefixedString.firstURL)
-        
+
         let postfixedString = "\(urlString) The url is before this text"
         XCTAssertEqual(url, postfixedString.firstURL)
-        
-        let stringWithMultipleURLs = "\(urlString) This one has more than one url https://duckduckgo.com"
+
+        let stringWithMultipleURLs =
+            "\(urlString) This one has more than one url https://duckduckgo.com"
         XCTAssertEqual(url, stringWithMultipleURLs.firstURL)
-        
+
         let stringWithNoURLs = "This one is just text"
         XCTAssertNil(stringWithNoURLs.firstURL)
-        
+
         let schemelessURL = "brave.com"
         XCTAssertNotNil(schemelessURL.firstURL)
     }
-    
+
     func testWords() {
         let longMultilinedText = """
-        Multiple words
+            Multiple words
 
-        On multiple lines.
-        
-        That will get stripped!\r
-        """
-        
-        XCTAssertEqual(longMultilinedText.words, ["Multiple", "words", "On", "multiple", "lines", "That", "will", "get", "stripped"])
-        
+            On multiple lines.
+
+            That will get stripped!\r
+            """
+
+        XCTAssertEqual(
+            longMultilinedText.words,
+            ["Multiple", "words", "On", "multiple", "lines", "That", "will", "get", "stripped"]
+        )
+
         let wordsWithPunctuation = "\"It's a wonderful life—isn't it…\""
-        XCTAssertEqual(wordsWithPunctuation.words, ["It's", "a", "wonderful", "life", "isn't", "it"])
+        XCTAssertEqual(
+            wordsWithPunctuation.words,
+            ["It's", "a", "wonderful", "life", "isn't", "it"]
+        )
     }
 }

@@ -10,20 +10,20 @@ struct UniversalLinkManager {
     enum LinkType: CaseIterable {
         // https://vpn.brave.com/.well-known/apple-app-site-association
         case buyVPN
-        
+
         var associatedDomain: String {
             switch self {
             case .buyVPN: return "vpn.brave.com"
             }
         }
-        
+
         var path: String {
             switch self {
             case .buyVPN: return "/dl/"
             }
         }
     }
-    
+
     /// Returns a universal link type for given URL. Returns nil if the URL is not a universal link
     ///
     /// - parameter url: URL to to check against.
@@ -33,8 +33,9 @@ struct UniversalLinkManager {
     /// app delegate doesn't handle such case, it must be handled manually.
     static func universalLinkType(for url: URL, checkPath: Bool) -> LinkType? {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              let host = components.host else { return nil }
-        
+            let host = components.host
+        else { return nil }
+
         if checkPath {
             for type in LinkType.allCases where type.associatedDomain == host {
                 if components.path.starts(with: type.path) { return type }
@@ -42,7 +43,7 @@ struct UniversalLinkManager {
         } else {
             return LinkType.allCases.first(where: { $0.associatedDomain == host })
         }
-        
+
         return nil
     }
 }

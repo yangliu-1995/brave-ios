@@ -6,7 +6,7 @@ import Foundation
 import UIKit
 
 extension UIBarButtonItem {
-    
+
     /// Creates a fixed space `UIBarButtonItem` with a given width
     class func fixedSpace(_ width: CGFloat) -> UIBarButtonItem {
         return UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil).then {

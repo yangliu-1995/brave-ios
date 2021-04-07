@@ -30,7 +30,12 @@ class Toast: UIView {
         superview?.addGestureRecognizer(gestureRecognizer)
     }
 
-    func showToast(viewController: UIViewController? = nil, delay: DispatchTimeInterval, duration: DispatchTimeInterval?, makeConstraints: @escaping (SnapKit.ConstraintMaker) -> Swift.Void) {
+    func showToast(
+        viewController: UIViewController? = nil,
+        delay: DispatchTimeInterval,
+        duration: DispatchTimeInterval?,
+        makeConstraints: @escaping (SnapKit.ConstraintMaker) -> Swift.Void
+    ) {
         self.viewController = viewController
 
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
@@ -39,10 +44,13 @@ class Toast: UIView {
             self.snp.makeConstraints(makeConstraints)
             self.layoutIfNeeded()
 
-            UIView.animate(withDuration: SimpleToastUX.toastAnimationDuration, animations: {
-                self.animationConstraint?.update(offset: 0)
-                self.layoutIfNeeded()
-            }) { finished in
+            UIView.animate(
+                withDuration: SimpleToastUX.toastAnimationDuration,
+                animations: {
+                    self.animationConstraint?.update(offset: 0)
+                    self.layoutIfNeeded()
+                }
+            ) { finished in
                 if let duration = duration {
                     DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
                         self.dismiss(false)
@@ -57,10 +65,13 @@ class Toast: UIView {
         dismissed = true
         superview?.removeGestureRecognizer(gestureRecognizer)
 
-        UIView.animate(withDuration: SimpleToastUX.toastAnimationDuration, animations: {
-            self.animationConstraint?.update(offset: SimpleToastUX.toastHeight)
-            self.layoutIfNeeded()
-        }) { finished in
+        UIView.animate(
+            withDuration: SimpleToastUX.toastAnimationDuration,
+            animations: {
+                self.animationConstraint?.update(offset: SimpleToastUX.toastHeight)
+                self.layoutIfNeeded()
+            }
+        ) { finished in
             self.removeFromSuperview()
             if !buttonPressed {
                 self.completionHandler?(false)

@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import UIKit
 import Shared
+import UIKit
 
 /// Defines behavior of a component which will be used with a `PopoverController`
 public protocol PopoverContentComponent {
@@ -22,29 +22,29 @@ public protocol PopoverContentComponent {
     var closeActionAccessibilityLabel: String { get }
 }
 
-public extension PopoverContentComponent {
-    var extendEdgeIntoArrow: Bool {
+extension PopoverContentComponent {
+    public var extendEdgeIntoArrow: Bool {
         return true
-    }
-    
-    var isPanToDismissEnabled: Bool {
-        return true
-    }
-    
-    func popoverShouldDismiss(_ popoverController: PopoverController) -> Bool {
-        return true
-    }
-    
-    func popoverDidDismiss(_ popoverController: PopoverController) {
     }
 
-    var closeActionAccessibilityLabel: String {
+    public var isPanToDismissEnabled: Bool {
+        return true
+    }
+
+    public func popoverShouldDismiss(_ popoverController: PopoverController) -> Bool {
+        return true
+    }
+
+    public func popoverDidDismiss(_ popoverController: PopoverController) {
+    }
+
+    public var closeActionAccessibilityLabel: String {
         return Strings.Popover.closeContextMenu
     }
 }
 
-public extension PopoverContentComponent where Self: UINavigationController {
-    var extendEdgeIntoArrow: Bool {
+extension PopoverContentComponent where Self: UINavigationController {
+    public var extendEdgeIntoArrow: Bool {
         return false
     }
 }

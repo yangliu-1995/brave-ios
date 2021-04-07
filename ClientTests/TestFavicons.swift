@@ -3,20 +3,24 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import XCTest
-import Storage
-@testable import Client
 import Shared
+import Storage
+import XCTest
+
+@testable import Client
 
 class TestFavicons: ProfileTest {
-    
+
     func testBundledFavicons() {
         let fetcher = FaviconFetcher(siteURL: URL(string: "http://www.google.de")!, kind: .favicon)
         XCTAssertNotNil(fetcher.bundledIcon)
-        let fetcher2 = FaviconFetcher(siteURL: URL(string: "http://vancouver.craigslist.ca")!, kind: .favicon)
+        let fetcher2 = FaviconFetcher(
+            siteURL: URL(string: "http://vancouver.craigslist.ca")!,
+            kind: .favicon
+        )
         XCTAssertNotNil(fetcher2.bundledIcon)
     }
-    
+
     func testImageViewLoad() {
         let expectation = XCTestExpectation(description: "favicon.load")
         let imageView = UIImageView()
@@ -27,7 +31,7 @@ class TestFavicons: ProfileTest {
         }
         wait(for: [expectation], timeout: 5.0)
     }
-    
+
     func testIconTransparentAroundEdges() {
         let expectation = XCTestExpectation(description: "favicon.transparent.1")
         var image: UIImage!
@@ -46,7 +50,7 @@ class TestFavicons: ProfileTest {
         }
         wait(for: [expectation], timeout: 5.0)
     }
-    
+
     func testIconNotTransparentAroundEdges() {
         let expectation = XCTestExpectation(description: "favicon.transparent.2")
         var image: UIImage!
@@ -65,7 +69,7 @@ class TestFavicons: ProfileTest {
         }
         wait(for: [expectation], timeout: 15.0)
     }
-    
+
     func testIconTransparencyDoesntCrashWithEmptyImage() {
         let expectation = XCTestExpectation(description: "favicon.transparent.3")
         let image = UIImage()

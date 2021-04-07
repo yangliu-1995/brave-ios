@@ -31,11 +31,17 @@ class PasscodeInputView: UIView, UIKeyInput {
     fileprivate var inputtedCode: String = ""
 
     fileprivate var blankDigitString: NSAttributedString {
-        return NSAttributedString(string: "\(blankCharacter)", attributes: [NSAttributedString.Key.font: digitFont])
+        return NSAttributedString(
+            string: "\(blankCharacter)",
+            attributes: [NSAttributedString.Key.font: digitFont]
+        )
     }
 
     fileprivate var filledDigitString: NSAttributedString {
-        return NSAttributedString(string: "\(filledCharacter)", attributes: [NSAttributedString.Key.font: digitFont])
+        return NSAttributedString(
+            string: "\(filledCharacter)",
+            attributes: [NSAttributedString.Key.font: digitFont]
+        )
     }
 
     @objc var keyboardType: UIKeyboardType = .numberPad
@@ -101,7 +107,10 @@ class PasscodeInputView: UIView, UIKeyInput {
         (0..<passcodeSize).forEach { index in
             let offset = floor(rect.width / CGFloat(passcodeSize))
             var circleRect = CGRect(size: circleSize)
-            circleRect.center = CGPoint(x: (offset * CGFloat(index + 1))  - offset / 2, y: rect.height / 2)
+            circleRect.center = CGPoint(
+                x: (offset * CGFloat(index + 1)) - offset / 2,
+                y: rect.height / 2
+            )
 
             if index < inputtedCode.count {
                 context.fillEllipse(in: circleRect)
@@ -134,8 +143,8 @@ class PasscodePane: UIView {
 
     override func accessibilityElement(at index: Int) -> Any? {
         switch index {
-        case 0:     return titleLabel
-        default:    return nil
+        case 0: return titleLabel
+        default: return nil
         }
     }
 
@@ -165,41 +174,68 @@ class PasscodePane: UIView {
             make.size.equalTo(PasscodeUX.passcodeFieldSize)
         }
         layoutIfNeeded()
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
     }
 
     func shakePasscode() {
-        UIView.animate(withDuration: 0.1, animations: {
+        UIView.animate(
+            withDuration: 0.1,
+            animations: {
                 self.codeViewCenterConstraint?.update(offset: -10)
                 self.layoutIfNeeded()
-        }, completion: { complete in
-            UIView.animate(withDuration: 0.1, animations: {
-                self.codeViewCenterConstraint?.update(offset: 0)
-                self.layoutIfNeeded()
-            }) 
-        }) 
+            },
+            completion: { complete in
+                UIView.animate(
+                    withDuration: 0.1,
+                    animations: {
+                        self.codeViewCenterConstraint?.update(offset: 0)
+                        self.layoutIfNeeded()
+                    }
+                )
+            }
+        )
     }
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     @objc func keyboardWillShow(_ sender: Notification) {
-        guard let keyboardFrame = (sender.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as AnyObject).cgRectValue else {
+        guard
+            let keyboardFrame =
+                (sender.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as AnyObject)
+                .cgRectValue
+        else {
             return
         }
-        
-        UIView.animate(withDuration: 0.1, animations: {
-            self.containerCenterConstraint?.update(offset: -keyboardFrame.height/2)
-            self.layoutIfNeeded()
-        })
+
+        UIView.animate(
+            withDuration: 0.1,
+            animations: {
+                self.containerCenterConstraint?.update(offset: -keyboardFrame.height / 2)
+                self.layoutIfNeeded()
+            }
+        )
     }
-    
+
     @objc func keyboardWillHide(_ sender: Notification) {
-        UIView.animate(withDuration: 0.1, animations: {
-            self.containerCenterConstraint?.update(offset: 0)
-            self.layoutIfNeeded()
-        })
+        UIView.animate(
+            withDuration: 0.1,
+            animations: {
+                self.containerCenterConstraint?.update(offset: 0)
+                self.layoutIfNeeded()
+            }
+        )
     }
 }

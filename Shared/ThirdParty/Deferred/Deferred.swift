@@ -41,7 +41,7 @@ open class Deferred<T> {
             return (data.protectedValue!, blocks)
         }
         for (queue, block) in blocks {
-            queue.async() { block(filledValue) }
+            queue.async { block(filledValue) }
         }
     }
 
@@ -60,12 +60,12 @@ open class Deferred<T> {
     public func uponQueue(_ queue: DispatchQueue, block: @escaping (T) -> Void) {
         let maybeValue: T? = protected.withWriteLock { data in
             if data.protectedValue == nil {
-                data.uponBlocks.append( (queue, block) )
+                data.uponBlocks.append((queue, block))
             }
             return data.protectedValue
         }
         if let value = maybeValue {
-            queue.async() { block(value) }
+            queue.async { block(value) }
         }
     }
 }
@@ -81,7 +81,10 @@ extension Deferred {
         let group = DispatchGroup()
         var result: T!
         group.enter()
-        self.upon { result = $0; group.leave() }
+        self.upon {
+            result = $0
+            group.leave()
+        }
         _ = group.wait(timeout: .distantFuture)
         return result
     }

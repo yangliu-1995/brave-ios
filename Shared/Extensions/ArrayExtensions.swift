@@ -4,8 +4,8 @@
 
 import Foundation
 
-public extension Array where Element: Comparable {
-    func sameElements(_ arr: [Element]) -> Bool {
+extension Array where Element: Comparable {
+    public func sameElements(_ arr: [Element]) -> Bool {
         guard self.count == arr.count else { return false }
         let sorted = self.sorted(by: <)
         let arrSorted = arr.sorted(by: <)
@@ -16,9 +16,9 @@ public extension Array where Element: Comparable {
     }
 }
 
-public extension Array {
+extension Array {
 
-    func find(_ f: (Iterator.Element) -> Bool) -> Iterator.Element? {
+    public func find(_ f: (Iterator.Element) -> Bool) -> Iterator.Element? {
         for x in self {
             if f(x) {
                 return x
@@ -26,8 +26,8 @@ public extension Array {
         }
         return nil
     }
-    
-    func contains(_ x: Element, f: (Element, Element) -> Bool) -> Bool {
+
+    public func contains(_ x: Element, f: (Element, Element) -> Bool) -> Bool {
         for y in self {
             if f(x, y) {
                 return true
@@ -37,13 +37,13 @@ public extension Array {
     }
 
     // Performs a union operator using the result of f(Element) as the value to base uniqueness on.
-    func union<T: Hashable>(_ arr: [Element], f: ((Element) -> T)) -> [Element] {
+    public func union<T: Hashable>(_ arr: [Element], f: ((Element) -> T)) -> [Element] {
         let result = self + arr
         return result.unique(f)
     }
 
     // Returns unique values in an array using the result of f()
-    func unique<T: Hashable>(_ f: ((Element) -> T)) -> [Element] {
+    public func unique<T: Hashable>(_ f: ((Element) -> T)) -> [Element] {
         var map: [T: Element] = [T: Element]()
         return self.compactMap { a in
             let t = f(a)
@@ -55,10 +55,10 @@ public extension Array {
             }
         }
     }
-    
+
     /// Returns a unique list of Elements using a custom comparator.
     /// Super inefficient.
-    func unique(f: (Element, Element) -> Bool) -> [Element] {
+    public func unique(f: (Element, Element) -> Bool) -> [Element] {
         var result = [Element]()
         self.forEach {
             if !result.contains($0, f: f) {
@@ -67,22 +67,22 @@ public extension Array {
         }
         return result
     }
-    
+
     /// Splits an array into smaller arrays.
     /// For example `[1, 2, 3 ,4 ,5 ,6].splitEvery(3)`
     /// results in `[[1, 2, 3], [4, 5, 6]]`
-    func splitEvery(_ n: Int) -> [[Element]] {
+    public func splitEvery(_ n: Int) -> [[Element]] {
         if n <= 0 || isEmpty { return [] }
         if n >= count { return [self] }
-        
+
         return stride(from: 0, to: self.count, by: n).map {
             Array(self[$0..<Swift.min($0 + n, self.count)])
         }
     }
 }
 
-public extension Sequence {
-    func every(_ f: (Self.Iterator.Element) -> Bool) -> Bool {
+extension Sequence {
+    public func every(_ f: (Self.Iterator.Element) -> Bool) -> Bool {
         for x in self {
             if !f(x) {
                 return false
@@ -92,9 +92,9 @@ public extension Sequence {
     }
 }
 
-public extension Collection {
+extension Collection {
     /// Returns the element at the specified index iff it is within bounds, otherwise nil.
-    subscript (safe index: Index) -> Element? {
+    public subscript(safe index: Index) -> Element? {
         return indices.contains(index) ? self[index] : nil
     }
 }

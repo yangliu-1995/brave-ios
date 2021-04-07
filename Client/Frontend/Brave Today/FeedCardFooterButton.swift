@@ -11,14 +11,16 @@ class FeedCardFooterButton: UIControl {
         $0.font = .systemFont(ofSize: 14, weight: .semibold)
         $0.isAccessibilityElement = false
     }
-    private let disclosureIcon = UIImageView(image: UIImage(imageLiteralResourceName: "disclosure-arrow").template).then {
+    private let disclosureIcon = UIImageView(
+        image: UIImage(imageLiteralResourceName: "disclosure-arrow").template
+    ).then {
         $0.tintColor = .white
         $0.setContentHuggingPriority(.required, for: .horizontal)
     }
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+
         let stackView = UIStackView(arrangedSubviews: [label, disclosureIcon])
         stackView.alignment = .center
         stackView.isUserInteractionEnabled = false
@@ -32,23 +34,26 @@ class FeedCardFooterButton: UIControl {
         accessibilityTraits.insert(.button)
         isAccessibilityElement = true
     }
-    
+
     override var accessibilityLabel: String? {
         get { label.text }
-        set { assertionFailure("Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored") }
+        set {
+            assertionFailure(
+                "Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored"
+            )
+        }
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()
     }
-    
+
     override var isHighlighted: Bool {
         didSet {
             UIViewPropertyAnimator(duration: 0.3, dampingRatio: 1.0) {
-                self.backgroundColor = self.isHighlighted ?
-                    UIColor(white: 1.0, alpha: 0.1) :
-                    UIColor.clear
+                self.backgroundColor =
+                    self.isHighlighted ? UIColor(white: 1.0, alpha: 0.1) : UIColor.clear
             }
             .startAnimation()
         }

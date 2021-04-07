@@ -5,7 +5,7 @@
 import UIKit
 
 extension UIGestureRecognizer {
-    
+
     /// Cancels the gesture recognizer by toggling `isEnabled`.
     func cancel() {
         isEnabled = false

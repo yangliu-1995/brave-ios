@@ -4,10 +4,10 @@
 
 import Foundation
 import Shared
-@testable import Storage
 import XCGLogger
-
 import XCTest
+
+@testable import Storage
 
 private let log = XCGLogger.default
 
@@ -16,7 +16,12 @@ class TestSQLiteLogins: XCTestCase {
     var logins: SQLiteLogins!
 
     let formSubmitURL = "http://submit.me"
-    let login = Login.createWithHostname("hostname1", username: "username1", password: "password1", formSubmitURL: "http://submit.me")
+    let login = Login.createWithHostname(
+        "hostname1",
+        username: "username1",
+        password: "password1",
+        formSubmitURL: "http://submit.me"
+    )
 
     override func setUp() {
         super.setUp()
@@ -45,12 +50,15 @@ class TestSQLiteLogins: XCTestCase {
         let expectation = self.expectation(description: "Add login")
 
         // Different GUID.
-        let login2 = Login.createWithHostname("hostname1", username: "username2", password: "password2")
+        let login2 = Login.createWithHostname(
+            "hostname1",
+            username: "username2",
+            password: "password2"
+        )
         login2.formSubmitURL = "http://submit.me"
 
-        addLogin(login) >>> { self.addLogin(login2) } >>>
-            getLoginsFor(login.protectionSpace, expected: [login2, login]) >>>
-            done(expectation)
+        addLogin(login) >>> { self.addLogin(login2) }
+            >>> getLoginsFor(login.protectionSpace, expected: [login2, login]) >>> done(expectation)
 
         waitForExpectations(timeout: 10.0, handler: nil)
     }
@@ -67,10 +75,30 @@ class TestSQLiteLogins: XCTestCase {
     }
 
     func testRemoveLogins() {
-        let loginA = Login.createWithHostname("alphabet.com", username: "username1", password: "password1", formSubmitURL: formSubmitURL)
-        let loginB = Login.createWithHostname("alpha.com", username: "username2", password: "password2", formSubmitURL: formSubmitURL)
-        let loginC = Login.createWithHostname("berry.com", username: "username3", password: "password3", formSubmitURL: formSubmitURL)
-        let loginD = Login.createWithHostname("candle.com", username: "username4", password: "password4", formSubmitURL: formSubmitURL)
+        let loginA = Login.createWithHostname(
+            "alphabet.com",
+            username: "username1",
+            password: "password1",
+            formSubmitURL: formSubmitURL
+        )
+        let loginB = Login.createWithHostname(
+            "alpha.com",
+            username: "username2",
+            password: "password2",
+            formSubmitURL: formSubmitURL
+        )
+        let loginC = Login.createWithHostname(
+            "berry.com",
+            username: "username3",
+            password: "password3",
+            formSubmitURL: formSubmitURL
+        )
+        let loginD = Login.createWithHostname(
+            "candle.com",
+            username: "username4",
+            password: "password4",
+            formSubmitURL: formSubmitURL
+        )
 
         func addLogins() -> Success {
             addLogin(loginA).succeeded()
@@ -86,12 +114,17 @@ class TestSQLiteLogins: XCTestCase {
         let result = logins.getAllLogins().value.successValue!
         XCTAssertEqual(result.count, 2)
     }
-    
+
     func testRemoveManyLogins() {
         log.debug("Remove a large number of logins at once")
         var guids: [GUID] = []
         for i in 0..<2000 {
-            let login = Login.createWithHostname("mozilla.org", username: "Fire", password: "fox", formSubmitURL: formSubmitURL)
+            let login = Login.createWithHostname(
+                "mozilla.org",
+                username: "Fire",
+                password: "fox",
+                formSubmitURL: formSubmitURL
+            )
             if i <= 1000 {
                 guids += [login.guid]
             }
@@ -104,85 +137,194 @@ class TestSQLiteLogins: XCTestCase {
 
     func testUpdateLogin() {
         let expectation = self.expectation(description: "Update login")
-        let updated = Login.createWithHostname("hostname1", username: "username1", password: "password3", formSubmitURL: formSubmitURL)
+        let updated = Login.createWithHostname(
+            "hostname1",
+            username: "username1",
+            password: "password3",
+            formSubmitURL: formSubmitURL
+        )
         updated.guid = self.login.guid
 
-        addLogin(login) >>> { self.updateLogin(updated) } >>>
-            getLoginsFor(login.protectionSpace, expected: [updated]) >>>
-            done(expectation)
+        addLogin(login) >>> { self.updateLogin(updated) }
+            >>> getLoginsFor(login.protectionSpace, expected: [updated]) >>> done(expectation)
 
         waitForExpectations(timeout: 10.0, handler: nil)
     }
 
     func testAddInvalidLogin() {
-        let emptyPasswordLogin = Login.createWithHostname("hostname1", username: "username1", password: "", formSubmitURL: formSubmitURL)
-        var result =  logins.addLogin(emptyPasswordLogin).value
+        let emptyPasswordLogin = Login.createWithHostname(
+            "hostname1",
+            username: "username1",
+            password: "",
+            formSubmitURL: formSubmitURL
+        )
+        var result = logins.addLogin(emptyPasswordLogin).value
         XCTAssertNil(result.successValue)
         XCTAssertNotNil(result.failureValue)
-        XCTAssertEqual(result.failureValue?.description, "Can't add a login with an empty password.")
+        XCTAssertEqual(
+            result.failureValue?.description,
+            "Can't add a login with an empty password."
+        )
 
-        let emptyHostnameLogin = Login.createWithHostname("", username: "username1", password: "password", formSubmitURL: formSubmitURL)
-        result =  logins.addLogin(emptyHostnameLogin).value
+        let emptyHostnameLogin = Login.createWithHostname(
+            "",
+            username: "username1",
+            password: "password",
+            formSubmitURL: formSubmitURL
+        )
+        result = logins.addLogin(emptyHostnameLogin).value
         XCTAssertNil(result.successValue)
         XCTAssertNotNil(result.failureValue)
-        XCTAssertEqual(result.failureValue?.description, "Can't add a login with an empty hostname.")
+        XCTAssertEqual(
+            result.failureValue?.description,
+            "Can't add a login with an empty hostname."
+        )
 
-        let credential = URLCredential(user: "username", password: "password", persistence: .forSession)
-        let protectionSpace = URLProtectionSpace(host: "https://website.com", port: 443, protocol: "https", realm: "Basic Auth", authenticationMethod: "Basic Auth")
-        let bothFormSubmitURLAndRealm = Login.createWithCredential(credential, protectionSpace: protectionSpace)
+        let credential = URLCredential(
+            user: "username",
+            password: "password",
+            persistence: .forSession
+        )
+        let protectionSpace = URLProtectionSpace(
+            host: "https://website.com",
+            port: 443,
+            protocol: "https",
+            realm: "Basic Auth",
+            authenticationMethod: "Basic Auth"
+        )
+        let bothFormSubmitURLAndRealm = Login.createWithCredential(
+            credential,
+            protectionSpace: protectionSpace
+        )
         bothFormSubmitURLAndRealm.formSubmitURL = "http://submit.me"
-        result =  logins.addLogin(bothFormSubmitURLAndRealm).value
+        result = logins.addLogin(bothFormSubmitURLAndRealm).value
         XCTAssertNil(result.successValue)
         XCTAssertNotNil(result.failureValue)
-        XCTAssertEqual(result.failureValue?.description, "Can't add a login with both a httpRealm and formSubmitURL.")
+        XCTAssertEqual(
+            result.failureValue?.description,
+            "Can't add a login with both a httpRealm and formSubmitURL."
+        )
 
-        let noFormSubmitURLOrRealm = Login.createWithHostname("host", username: "username1", password: "password", formSubmitURL: nil)
-        result =  logins.addLogin(noFormSubmitURLOrRealm).value
+        let noFormSubmitURLOrRealm = Login.createWithHostname(
+            "host",
+            username: "username1",
+            password: "password",
+            formSubmitURL: nil
+        )
+        result = logins.addLogin(noFormSubmitURLOrRealm).value
         XCTAssertNil(result.successValue)
         XCTAssertNotNil(result.failureValue)
-        XCTAssertEqual(result.failureValue?.description, "Can't add a login without a httpRealm or formSubmitURL.")
+        XCTAssertEqual(
+            result.failureValue?.description,
+            "Can't add a login without a httpRealm or formSubmitURL."
+        )
     }
 
     func testUpdateInvalidLogin() {
-        let updated = Login.createWithHostname("hostname1", username: "username1", password: "", formSubmitURL: formSubmitURL)
+        let updated = Login.createWithHostname(
+            "hostname1",
+            username: "username1",
+            password: "",
+            formSubmitURL: formSubmitURL
+        )
         updated.guid = self.login.guid
 
         addLogin(login).succeeded()
         var result = logins.updateLoginByGUID(login.guid, new: updated, significant: true).value
         XCTAssertNil(result.successValue)
         XCTAssertNotNil(result.failureValue)
-        XCTAssertEqual(result.failureValue?.description, "Can't add a login with an empty password.")
+        XCTAssertEqual(
+            result.failureValue?.description,
+            "Can't add a login with an empty password."
+        )
 
-        let emptyHostnameLogin = Login.createWithHostname("", username: "username1", password: "", formSubmitURL: formSubmitURL)
+        let emptyHostnameLogin = Login.createWithHostname(
+            "",
+            username: "username1",
+            password: "",
+            formSubmitURL: formSubmitURL
+        )
         emptyHostnameLogin.guid = self.login.guid
-        result = logins.updateLoginByGUID(login.guid, new: emptyHostnameLogin, significant: true).value
+        result =
+            logins.updateLoginByGUID(login.guid, new: emptyHostnameLogin, significant: true).value
         XCTAssertNil(result.successValue)
         XCTAssertNotNil(result.failureValue)
-        XCTAssertEqual(result.failureValue?.description, "Can't add a login with an empty hostname.")
+        XCTAssertEqual(
+            result.failureValue?.description,
+            "Can't add a login with an empty hostname."
+        )
 
-        let credential = URLCredential(user: "username", password: "password", persistence: .forSession)
-        let protectionSpace = URLProtectionSpace(host: "https://website.com", port: 443, protocol: "https", realm: "Basic Auth", authenticationMethod: "Basic Auth")
-        let bothFormSubmitURLAndRealm = Login.createWithCredential(credential, protectionSpace: protectionSpace)
+        let credential = URLCredential(
+            user: "username",
+            password: "password",
+            persistence: .forSession
+        )
+        let protectionSpace = URLProtectionSpace(
+            host: "https://website.com",
+            port: 443,
+            protocol: "https",
+            realm: "Basic Auth",
+            authenticationMethod: "Basic Auth"
+        )
+        let bothFormSubmitURLAndRealm = Login.createWithCredential(
+            credential,
+            protectionSpace: protectionSpace
+        )
         bothFormSubmitURLAndRealm.formSubmitURL = "http://submit.me"
         bothFormSubmitURLAndRealm.guid = self.login.guid
-        result = logins.updateLoginByGUID(login.guid, new: bothFormSubmitURLAndRealm, significant: true).value
+        result =
+            logins.updateLoginByGUID(login.guid, new: bothFormSubmitURLAndRealm, significant: true)
+            .value
         XCTAssertNil(result.successValue)
         XCTAssertNotNil(result.failureValue)
-        XCTAssertEqual(result.failureValue?.description, "Can't add a login with both a httpRealm and formSubmitURL.")
+        XCTAssertEqual(
+            result.failureValue?.description,
+            "Can't add a login with both a httpRealm and formSubmitURL."
+        )
 
-        let noFormSubmitURLOrRealm = Login.createWithHostname("host", username: "username1", password: "password", formSubmitURL: nil)
+        let noFormSubmitURLOrRealm = Login.createWithHostname(
+            "host",
+            username: "username1",
+            password: "password",
+            formSubmitURL: nil
+        )
         noFormSubmitURLOrRealm.guid = self.login.guid
-        result = logins.updateLoginByGUID(login.guid, new: noFormSubmitURLOrRealm, significant: true).value
+        result =
+            logins.updateLoginByGUID(login.guid, new: noFormSubmitURLOrRealm, significant: true)
+            .value
         XCTAssertNil(result.successValue)
         XCTAssertNotNil(result.failureValue)
-        XCTAssertEqual(result.failureValue?.description, "Can't add a login without a httpRealm or formSubmitURL.")
+        XCTAssertEqual(
+            result.failureValue?.description,
+            "Can't add a login without a httpRealm or formSubmitURL."
+        )
     }
 
     func testSearchLogins() {
-        let loginA = Login.createWithHostname("alphabet.com", username: "username1", password: "password1", formSubmitURL: formSubmitURL)
-        let loginB = Login.createWithHostname("alpha.com", username: "username2", password: "password2", formSubmitURL: formSubmitURL)
-        let loginC = Login.createWithHostname("berry.com", username: "username3", password: "password3", formSubmitURL: formSubmitURL)
-        let loginD = Login.createWithHostname("candle.com", username: "username4", password: "password4", formSubmitURL: formSubmitURL)
+        let loginA = Login.createWithHostname(
+            "alphabet.com",
+            username: "username1",
+            password: "password1",
+            formSubmitURL: formSubmitURL
+        )
+        let loginB = Login.createWithHostname(
+            "alpha.com",
+            username: "username2",
+            password: "password2",
+            formSubmitURL: formSubmitURL
+        )
+        let loginC = Login.createWithHostname(
+            "berry.com",
+            username: "username3",
+            password: "password3",
+            formSubmitURL: formSubmitURL
+        )
+        let loginD = Login.createWithHostname(
+            "candle.com",
+            username: "username4",
+            password: "password4",
+            formSubmitURL: formSubmitURL
+        )
 
         func addLogins() -> Success {
             addLogin(loginA).succeeded()
@@ -260,8 +402,8 @@ class TestSQLiteLogins: XCTestCase {
     func done(_ expectation: XCTestExpectation) -> () -> Success {
         return {
             self.removeAllLogins()
-               >>> self.getLoginsFor(self.login.protectionSpace, expected: [])
-               >>> {
+                >>> self.getLoginsFor(self.login.protectionSpace, expected: [])
+                >>> {
                     expectation.fulfill()
                     return succeed()
                 }
@@ -287,7 +429,9 @@ class TestSQLiteLogins: XCTestCase {
         return res
     }
 
-    func getLoginsFor(_ protectionSpace: URLProtectionSpace, expected: [LoginData]) -> (() -> Success) {
+    func getLoginsFor(_ protectionSpace: URLProtectionSpace, expected: [LoginData]) -> (
+        () -> Success
+    ) {
         return {
             log.debug("Get logins for \(protectionSpace)")
             return self.logins.getLoginsForProtectionSpace(protectionSpace) >>== { results in
@@ -386,7 +530,12 @@ class TestSQLiteLoginsPerf: XCTestCase {
 
     func populateTestLogins() {
         for i in 0..<1000 {
-            let login = Login.createWithHostname("website\(i).com", username: "username\(i)", password: "password\(i)", formSubmitURL: "test")
+            let login = Login.createWithHostname(
+                "website\(i).com",
+                username: "username\(i)",
+                password: "password\(i)",
+                formSubmitURL: "test"
+            )
             addLogin(login).succeeded()
         }
     }
@@ -451,7 +600,12 @@ class TestSyncableLogins: XCTestCase {
 
     func testLocalNewStaysNewAndIsRemoved() {
         let guidA = "abcdabcdabcd"
-        let loginA1 = Login(guid: guidA, hostname: "http://example.com", username: "username", password: "password")
+        let loginA1 = Login(
+            guid: guidA,
+            hostname: "http://example.com",
+            username: "username",
+            password: "password"
+        )
         loginA1.formSubmitURL = "http://example.com/form/"
         loginA1.timesUsed = 1
         XCTAssertTrue((self.logins as BrowserLogins).addLogin(loginA1).value.isSuccess)
@@ -478,7 +632,13 @@ class TestSyncableLogins: XCTestCase {
 
     func testApplyLogin() {
         let guidA = "abcdabcdabcd"
-        let loginA1 = ServerLogin(guid: guidA, hostname: "http://example.com", username: "username", password: "password", modified: 1234)
+        let loginA1 = ServerLogin(
+            guid: guidA,
+            hostname: "http://example.com",
+            username: "username",
+            password: "password",
+            modified: 1234
+        )
         loginA1.formSubmitURL = "http://example.com/form/"
         loginA1.timesUsed = 3
 
@@ -503,7 +663,13 @@ class TestSyncableLogins: XCTestCase {
         XCTAssertEqual(mirror!.password, "password")
 
         // Change it.
-        let loginA2 = ServerLogin(guid: guidA, hostname: "http://example.com", username: "username", password: "newpassword", modified: 2234)
+        let loginA2 = ServerLogin(
+            guid: guidA,
+            hostname: "http://example.com",
+            username: "username",
+            password: "newpassword",
+            modified: 2234
+        )
         loginA2.formSubmitURL = "http://example.com/form/"
         loginA2.timesUsed = 4
 
@@ -532,10 +698,10 @@ class TestSyncableLogins: XCTestCase {
         XCTAssertEqual(mirrorUsed!.password, "newpassword")
         XCTAssertEqual(localUsed!.password, "newpassword")
 
-        XCTAssertTrue(mirrorUsed!.isOverridden)                // It's now overridden.
+        XCTAssertTrue(mirrorUsed!.isOverridden)  // It's now overridden.
         XCTAssertEqual(mirrorUsed!.serverModified, Timestamp(2234), "Timestamp is new.")
 
-        XCTAssertTrue(localUsed!.localModified >= preUse)         // Local record is modified.
+        XCTAssertTrue(localUsed!.localModified >= preUse)  // Local record is modified.
         XCTAssertEqual(localUsed!.syncStatus, SyncStatus.synced)  // Uses aren't enough to warrant upload.
 
         // Uses are local until reconciled.
@@ -543,26 +709,34 @@ class TestSyncableLogins: XCTestCase {
         XCTAssertEqual(mirrorUsed!.timesUsed, 4)
 
         // Change the password and form URL locally.
-        let newLocalPassword = Login(guid: guidA, hostname: "http://example.com", username: "username", password: "yupyup")
+        let newLocalPassword = Login(
+            guid: guidA,
+            hostname: "http://example.com",
+            username: "username",
+            password: "yupyup"
+        )
         newLocalPassword.formSubmitURL = "http://example.com/form2/"
 
         let preUpdate = Date.now()
 
         // Updates always bump our usages, too.
-        XCTAssertTrue(self.logins.updateLoginByGUID(guidA, new: newLocalPassword, significant: true).value.isSuccess)
+        XCTAssertTrue(
+            self.logins.updateLoginByGUID(guidA, new: newLocalPassword, significant: true).value
+                .isSuccess
+        )
 
         let localAltered = self.logins.getExistingLocalRecordByGUID(guidA).value.successValue!
         let mirrorAltered = self.logins.getExistingMirrorRecordByGUID(guidA).value.successValue!
 
-        XCTAssertFalse(mirrorAltered!.isSignificantlyDifferentFrom(mirrorUsed!))      // The mirror is unchanged.
+        XCTAssertFalse(mirrorAltered!.isSignificantlyDifferentFrom(mirrorUsed!))  // The mirror is unchanged.
         XCTAssertFalse(mirrorAltered!.isSignificantlyDifferentFrom(localUsed!))
-        XCTAssertTrue(mirrorAltered!.isOverridden)                                // It's still overridden.
+        XCTAssertTrue(mirrorAltered!.isOverridden)  // It's still overridden.
 
         XCTAssertTrue(localAltered!.isSignificantlyDifferentFrom(localUsed!))
         XCTAssertEqual(localAltered!.password, "yupyup")
         XCTAssertEqual(localAltered!.formSubmitURL!, "http://example.com/form2/")
         XCTAssertTrue(localAltered!.localModified >= preUpdate)
-        XCTAssertEqual(localAltered!.syncStatus, SyncStatus.changed)              // Changes are enough to warrant upload.
+        XCTAssertEqual(localAltered!.syncStatus, SyncStatus.changed)  // Changes are enough to warrant upload.
         XCTAssertEqual(localAltered!.timesUsed, 6)
         XCTAssertEqual(mirrorAltered!.timesUsed, 4)
     }
@@ -570,7 +744,13 @@ class TestSyncableLogins: XCTestCase {
     func testDeltas() {
         // Shared.
         let guidA = "abcdabcdabcd"
-        let loginA1 = ServerLogin(guid: guidA, hostname: "http://example.com", username: "username", password: "password", modified: 1234)
+        let loginA1 = ServerLogin(
+            guid: guidA,
+            hostname: "http://example.com",
+            username: "username",
+            password: "password",
+            modified: 1234
+        )
         loginA1.timeCreated = 1200
         loginA1.timeLastUsed = 1234
         loginA1.timePasswordChanged = 1200
@@ -582,7 +762,13 @@ class TestSyncableLogins: XCTestCase {
         XCTAssertEqual(0, a1a1.nonConflicting.count)
         XCTAssertEqual(0, a1a1.commutative.count)
 
-        let loginA2 = ServerLogin(guid: guidA, hostname: "http://example.com", username: "username", password: "password", modified: 1235)
+        let loginA2 = ServerLogin(
+            guid: guidA,
+            hostname: "http://example.com",
+            username: "username",
+            password: "password",
+            modified: 1235
+        )
         loginA2.timeCreated = 1200
         loginA2.timeLastUsed = 1235
         loginA2.timePasswordChanged = 1200
@@ -614,7 +800,13 @@ class TestSyncableLogins: XCTestCase {
             XCTFail("Unexpected non-commutative login field.")
         }
 
-        let loginA3 = ServerLogin(guid: guidA, hostname: "http://example.com", username: "username", password: "something else", modified: 1280)
+        let loginA3 = ServerLogin(
+            guid: guidA,
+            hostname: "http://example.com",
+            username: "username",
+            password: "something else",
+            modified: 1280
+        )
         loginA3.timeCreated = 1200
         loginA3.timeLastUsed = 1250
         loginA3.timePasswordChanged = 1250
@@ -659,7 +851,10 @@ class TestSyncableLogins: XCTestCase {
         XCTAssertFalse(loginA1.applyDeltas(a1a2).isSignificantlyDifferentFrom(loginA2))
         XCTAssertFalse(loginA1.applyDeltas(a1a3).isSignificantlyDifferentFrom(loginA3))
 
-        let merged = Login.mergeDeltas(a: (loginA2.serverModified, a1a2), b: (loginA3.serverModified, a1a3))
+        let merged = Login.mergeDeltas(
+            a: (loginA2.serverModified, a1a2),
+            b: (loginA3.serverModified, a1a3)
+        )
         let mCCount = merged.commutative.count
         let a2CCount = a1a2.commutative.count
         let a3CCount = a1a3.commutative.count
@@ -716,7 +911,12 @@ class TestSyncableLogins: XCTestCase {
         }
 
         // Applying the merged deltas gives us the expected login.
-        let expected = Login(guid: guidA, hostname: "http://example.com", username: "username", password: "something else")
+        let expected = Login(
+            guid: guidA,
+            hostname: "http://example.com",
+            username: "username",
+            password: "something else"
+        )
         expected.timeCreated = 1200
         expected.timeLastUsed = 1250
         expected.timePasswordChanged = 1250
@@ -729,8 +929,18 @@ class TestSyncableLogins: XCTestCase {
     }
 
     func testLoginsIsSynced() {
-        let loginA = Login.createWithHostname("alphabet.com", username: "username1", password: "password1")
-        let serverLoginA = ServerLogin(guid: loginA.guid, hostname: "alpha.com", username: "username1", password: "password1", modified: Date.now())
+        let loginA = Login.createWithHostname(
+            "alphabet.com",
+            username: "username1",
+            password: "password1"
+        )
+        let serverLoginA = ServerLogin(
+            guid: loginA.guid,
+            hostname: "alpha.com",
+            username: "username1",
+            password: "password1",
+            modified: Date.now()
+        )
 
         XCTAssertFalse(logins.hasSyncedLogins().value.successValue ?? true)
         let _ = logins.addLogin(loginA).value

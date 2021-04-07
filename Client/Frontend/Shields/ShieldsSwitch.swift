@@ -2,27 +2,27 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import UIKit
-import pop
 import BraveUI
 import Shared
+import UIKit
+import pop
 
 /// A big UISwitch that has a fancy animated gradient when its turned on
 ///
 /// Treat it the same way you'd use a UISwitch (addTarget for .valueChanged)
 class ShieldsSwitch: UIControl {
-    
+
     /// The static size of this switch
     private static let size = CGSize(width: 100, height: 60)
-    
+
     /// Whether or not the switch is currently toggled on or off
     var isOn: Bool {
         get { _isOn }
         set { setOn(newValue, animated: false) }
     }
-    
+
     private var _isOn: Bool = false
-    
+
     func setOn(_ on: Bool, animated: Bool) {
         _isOn = on
         if animated {
@@ -54,14 +54,14 @@ class ShieldsSwitch: UIControl {
             }
         }
     }
-    
+
     /// The color of the background when the switch is off
     var offBackgroundColor = UIColor(white: 0.9, alpha: 1.0) {
         didSet {
             backgroundView.backgroundColor = offBackgroundColor
         }
     }
-    
+
     private let gradientView = GradientView().then {
         $0.isUserInteractionEnabled = false
         $0.gradientLayer.type = .radial
@@ -74,12 +74,12 @@ class ShieldsSwitch: UIControl {
         $0.gradientLayer.borderColor = UIColor(white: 0.0, alpha: 0.2).cgColor
         $0.gradientLayer.borderWidth = 1.0 / UIScreen.main.scale
     }
-    
+
     private let backgroundView = UIView().then {
         $0.backgroundColor = UIColor(white: 0.9, alpha: 1.0)
         $0.isUserInteractionEnabled = false
     }
-    
+
     private let thumbView = UIView().then {
         $0.backgroundColor = .white
         $0.layer.shadowColor = UIColor.black.cgColor
@@ -88,45 +88,45 @@ class ShieldsSwitch: UIControl {
         $0.layer.shadowOpacity = 0.3
         $0.isUserInteractionEnabled = false
     }
-    
+
     override init(frame: CGRect) {
         super.init(frame: CGRect(size: Self.size))
-        
+
         isAccessibilityElement = true
         accessibilityTraits = [.button]
         accessibilityHint = Strings.Shields.toggleHint
-        
+
         addSubview(backgroundView)
         addSubview(gradientView)
         addSubview(thumbView)
-        
+
         gradientView.isHidden = true
-        
+
         backgroundView.snp.makeConstraints {
             $0.edges.equalTo(self)
         }
         gradientView.snp.makeConstraints {
             $0.edges.equalTo(self)
         }
-        
+
         if let step = steps.first {
             gradientView.gradientLayer.colors = step.gradientColors
             gradientView.gradientLayer.shadowColor = step.shadowColor
         }
     }
-    
+
     override var accessibilityLabel: String? {
         get {
             "\(Strings.Shields.statusTitle): \(isOn ? Strings.Shields.statusValueUp : Strings.Shields.statusValueDown)"
         }
-        set { assertionFailure() } // swiftlint:disable:this unused_setter_value
+        set { assertionFailure() }  // swiftlint:disable:this unused_setter_value
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()
     }
-    
+
     override func action(for layer: CALayer, forKey event: String) -> CAAction? {
         if event == kCAOnOrderIn && isOn {
             // Resume animation
@@ -134,30 +134,31 @@ class ShieldsSwitch: UIControl {
         }
         return super.action(for: layer, forKey: event)
     }
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
-        
-        gradientView.layer.shadowPath = UIBezierPath(roundedRect: bounds, cornerRadius: bounds.height / 2.0).cgPath
+
+        gradientView.layer.shadowPath =
+            UIBezierPath(roundedRect: bounds, cornerRadius: bounds.height / 2.0).cgPath
         backgroundView.layer.cornerRadius = bounds.size.height / 2.0
         gradientView.layer.cornerRadius = bounds.size.height / 2.0
         thumbView.layer.cornerRadius = thumbView.bounds.size.height / 2.0
     }
-    
+
     override func accessibilityActivate() -> Bool {
         setOn(!isOn, animated: true)
         sendActions(for: .valueChanged)
         return true
     }
-    
+
     private var thumbViewFrame: CGRect {
         let inset: CGFloat = 3
         let expandedWidthDelta: CGFloat = 10
-        
+
         var frame: CGRect = .zero
         frame.origin.y = inset
         frame.size.height = bounds.height - (inset * 2)
-        
+
         if isHighlighted {
             // Expand width
             frame.size.width = frame.size.height + expandedWidthDelta
@@ -171,7 +172,7 @@ class ShieldsSwitch: UIControl {
         }
         return frame
     }
-    
+
     private func animateThumbViewFrameUpdate() {
         let nextFrame = thumbViewFrame
         thumbView.springAnimate(property: kPOPViewFrame, key: "frame") { animation, _ in
@@ -180,19 +181,19 @@ class ShieldsSwitch: UIControl {
             animation.toValue = nextFrame
         }
     }
-    
+
     override var isHighlighted: Bool {
         didSet {
             animateThumbViewFrameUpdate()
         }
     }
-    
+
     override var intrinsicContentSize: CGSize {
         return Self.size
     }
-    
+
     // MARK: - Animation
-    
+
     private struct AnimationStep {
         var gradientColors: [CGColor]
         var shadowColor: CGColor
@@ -201,34 +202,34 @@ class ShieldsSwitch: UIControl {
             shadowColor = UIColor(rgb: shadow).cgColor
         }
     }
-    
+
     private let steps: [AnimationStep] = [
         .init(colors: [0xFFA73B, 0xFF7654], shadow: 0xFF7654),
         .init(colors: [0xFF7654, 0xFB542B], shadow: 0xFB542B),
         .init(colors: [0xFB542B, 0xF7241C], shadow: 0xF7241C),
         .init(colors: [0xF7241C, 0xFC4F82], shadow: 0xFC4F82),
         .init(colors: [0xFC4F82, 0xFFA73B], shadow: 0xFFA73B),
-        .init(colors: [0xFFA73B, 0xFF7654], shadow: 0xFF7654)
+        .init(colors: [0xFFA73B, 0xFF7654], shadow: 0xFF7654),
     ]
-    
+
     private func beginGradientAnimations() {
         let colorsKeyframe = CAKeyframeAnimation(keyPath: "colors")
         colorsKeyframe.calculationMode = .paced
         colorsKeyframe.values = steps.map { $0.gradientColors }
-        
+
         let shadowKeyframe = CAKeyframeAnimation(keyPath: "shadowColor")
         shadowKeyframe.calculationMode = .paced
         shadowKeyframe.values = steps.map { $0.shadowColor }
-        
+
         let group = CAAnimationGroup()
         group.animations = [colorsKeyframe, shadowKeyframe]
         group.duration = 0.75 * Double(steps.count)
         group.repeatCount = Float.infinity
         group.beginTime = CACurrentMediaTime()
-        
+
         gradientView.gradientLayer.add(group, forKey: "animateBg")
     }
-    
+
     private func endGradientAnimations() {
         gradientView.gradientLayer.removeAllAnimations()
         if let step = steps.first {
@@ -236,7 +237,7 @@ class ShieldsSwitch: UIControl {
             gradientView.gradientLayer.shadowColor = step.shadowColor
         }
     }
-    
+
     override func endTracking(_ touch: UITouch?, with event: UIEvent?) {
         if isTouchInside {
             setOn(!isOn, animated: true)

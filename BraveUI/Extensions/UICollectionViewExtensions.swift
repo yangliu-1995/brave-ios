@@ -4,22 +4,24 @@
 
 import UIKit
 
-public protocol CollectionViewReusable { }
+public protocol CollectionViewReusable {}
 
 extension CollectionViewReusable {
-  fileprivate static var identifier: String {
-    return String(describing: type(of: self))
-  }
+    fileprivate static var identifier: String {
+        return String(describing: type(of: self))
+    }
 }
 
 extension UICollectionView {
-  /// Register a UICollectionViewCell subclass as a dequeable cell
-  public func register<T: UICollectionViewCell & CollectionViewReusable>(_ cellClass: T.Type) {
-    register(cellClass, forCellWithReuseIdentifier: cellClass.identifier)
-  }
-  // swiftlint:disable force_cast
-  public func dequeueReusableCell<T: UICollectionViewCell & CollectionViewReusable>(for indexPath: IndexPath) -> T {
-    return dequeueReusableCell(withReuseIdentifier: T.identifier, for: indexPath) as! T
-  }
-  // swiftlint:enable force_cast
+    /// Register a UICollectionViewCell subclass as a dequeable cell
+    public func register<T: UICollectionViewCell & CollectionViewReusable>(_ cellClass: T.Type) {
+        register(cellClass, forCellWithReuseIdentifier: cellClass.identifier)
+    }
+    // swiftlint:disable force_cast
+    public func dequeueReusableCell<T: UICollectionViewCell & CollectionViewReusable>(
+        for indexPath: IndexPath
+    ) -> T {
+        return dequeueReusableCell(withReuseIdentifier: T.identifier, for: indexPath) as! T
+    }
+    // swiftlint:enable force_cast
 }

@@ -4,13 +4,13 @@
 
 import Foundation
 import Shared
-import XCTest
 import SwiftKeychainWrapper
+import XCTest
 
 class AuthenticationKeychainInfoTests: XCTestCase {
-    
+
     /*
-    
+
     func testEncodingAndDecoding() {
         let passcode = "1234"
         let authInfo = AuthenticationKeychainInfo(passcode: passcode)

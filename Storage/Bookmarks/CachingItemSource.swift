@@ -60,7 +60,8 @@ private class CachedSource {
         self.seen.formUnion(guids)
     }
 
-    func takingGUIDs<T: Collection>(_ guids: T) -> Deferred<Maybe<[GUID: BookmarkMirrorItem]>> where T.Iterator.Element == GUID {
+    func takingGUIDs<T: Collection>(_ guids: T) -> Deferred<Maybe<[GUID: BookmarkMirrorItem]>>
+    where T.Iterator.Element == GUID {
         var out: [GUID: BookmarkMirrorItem] = [:]
         guids.forEach {
             if let v = self.cache[$0] {
@@ -89,17 +90,21 @@ open class CachingLocalItemSource: LocalItemSource {
             return found
         }
 
-        return self.source.getLocalItemWithGUID(guid) >>== effect {
-            self.cache.markSeen(guid)
-            self.cache[guid] = $0
-        }
+        return self.source.getLocalItemWithGUID(guid)
+            >>== effect {
+                self.cache.markSeen(guid)
+                self.cache[guid] = $0
+            }
     }
 
-    open func getLocalItemsWithGUIDs<T: Collection>(_ guids: T) -> Deferred<Maybe<[GUID: BookmarkMirrorItem]>> where T.Iterator.Element == GUID {
+    open func getLocalItemsWithGUIDs<T: Collection>(_ guids: T) -> Deferred<
+        Maybe<[GUID: BookmarkMirrorItem]>
+    > where T.Iterator.Element == GUID {
         return self.prefetchLocalItemsWithGUIDs(guids) >>> { self.cache.takingGUIDs(guids) }
     }
 
-    open func prefetchLocalItemsWithGUIDs<T: Collection>(_ guids: T) -> Success where T.Iterator.Element == GUID {
+    open func prefetchLocalItemsWithGUIDs<T: Collection>(_ guids: T) -> Success
+    where T.Iterator.Element == GUID {
         log.debug("Prefetching \(guids.count) local items: \(guids.prefix(10))….")
         if guids.isEmpty {
             return succeed()
@@ -126,17 +131,21 @@ open class CachingMirrorItemSource: MirrorItemSource {
             return found
         }
 
-        return self.source.getMirrorItemWithGUID(guid) >>== effect {
-            self.cache.markSeen(guid)
-            self.cache[guid] = $0
-        }
+        return self.source.getMirrorItemWithGUID(guid)
+            >>== effect {
+                self.cache.markSeen(guid)
+                self.cache[guid] = $0
+            }
     }
 
-    open func getMirrorItemsWithGUIDs<T: Collection>(_ guids: T) -> Deferred<Maybe<[GUID: BookmarkMirrorItem]>> where T.Iterator.Element == GUID {
+    open func getMirrorItemsWithGUIDs<T: Collection>(_ guids: T) -> Deferred<
+        Maybe<[GUID: BookmarkMirrorItem]>
+    > where T.Iterator.Element == GUID {
         return self.prefetchMirrorItemsWithGUIDs(guids) >>> { self.cache.takingGUIDs(guids) }
     }
 
-    open func prefetchMirrorItemsWithGUIDs<T: Collection>(_ guids: T) -> Success where T.Iterator.Element == GUID {
+    open func prefetchMirrorItemsWithGUIDs<T: Collection>(_ guids: T) -> Success
+    where T.Iterator.Element == GUID {
         log.debug("Prefetching \(guids.count) mirror items: \(guids.prefix(10))….")
         if guids.isEmpty {
             return succeed()
@@ -163,13 +172,16 @@ open class CachingBufferItemSource: BufferItemSource {
             return found
         }
 
-        return self.source.getBufferItemWithGUID(guid) >>== effect {
-            self.cache.markSeen(guid)
-            self.cache[guid] = $0
-        }
+        return self.source.getBufferItemWithGUID(guid)
+            >>== effect {
+                self.cache.markSeen(guid)
+                self.cache[guid] = $0
+            }
     }
 
-    open func getBufferItemsWithGUIDs<T: Collection>(_ guids: T) -> Deferred<Maybe<[GUID: BookmarkMirrorItem]>> where T.Iterator.Element == GUID {
+    open func getBufferItemsWithGUIDs<T: Collection>(_ guids: T) -> Deferred<
+        Maybe<[GUID: BookmarkMirrorItem]>
+    > where T.Iterator.Element == GUID {
         return self.prefetchBufferItemsWithGUIDs(guids) >>> { self.cache.takingGUIDs(guids) }
     }
 
@@ -177,7 +189,8 @@ open class CachingBufferItemSource: BufferItemSource {
         return self.source.getBufferChildrenGUIDsForParent(guid)
     }
 
-    open func prefetchBufferItemsWithGUIDs<T: Collection>(_ guids: T) -> Success where T.Iterator.Element == GUID {
+    open func prefetchBufferItemsWithGUIDs<T: Collection>(_ guids: T) -> Success
+    where T.Iterator.Element == GUID {
         log.debug("Prefetching \(guids.count) buffer items: \(guids.prefix(10))….")
         if guids.isEmpty {
             return succeed()

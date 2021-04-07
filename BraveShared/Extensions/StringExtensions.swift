@@ -7,14 +7,21 @@ import Foundation
 extension String {
     /// The first URL found within this String, or nil if no URL is found
     public var firstURL: URL? {
-        if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue),
-            let match = detector.firstMatch(in: self, options: [], range: NSRange(location: 0, length: self.count)),
-            let range = Range(match.range, in: self) {
+        if let detector = try? NSDataDetector(
+            types: NSTextCheckingResult.CheckingType.link.rawValue
+        ),
+            let match = detector.firstMatch(
+                in: self,
+                options: [],
+                range: NSRange(location: 0, length: self.count)
+            ),
+            let range = Range(match.range, in: self)
+        {
             return URL(string: String(self[range]))
         }
         return nil
     }
-    
+
     /// Obtain a list of words in a given string
     public var words: [String] {
         var words: [String] = []

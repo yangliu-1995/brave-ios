@@ -25,7 +25,9 @@ extension UIView {
      * Takes a screenshot of the view with the given aspect ratio.
      * An aspect ratio of 0 means capture the entire view.
      */
-    func screenshot(_ aspectRatio: CGFloat = 0, offset: CGPoint? = nil, quality: CGFloat = 1) -> UIImage? {
+    func screenshot(_ aspectRatio: CGFloat = 0, offset: CGPoint? = nil, quality: CGFloat = 1)
+        -> UIImage?
+    {
         assert(aspectRatio >= 0)
 
         var size: CGSize
@@ -45,7 +47,7 @@ extension UIView {
 
         return screenshot(size, offset: offset, quality: quality)
     }
-   
+
     /// Getting a snapshot from a view using image renderer
     var snapshot: UIImage {
         UIGraphicsImageRenderer(size: bounds.size).image { _ in
@@ -58,7 +60,11 @@ extension UIView {
      */
     func addRoundedCorners(_ cornersToRound: UIRectCorner, cornerRadius: CGSize, color: UIColor) {
         let rect = bounds
-        let maskPath = UIBezierPath(roundedRect: rect, byRoundingCorners: cornersToRound, cornerRadii: cornerRadius)
+        let maskPath = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: cornersToRound,
+            cornerRadii: cornerRadius
+        )
 
         // Create the shape layer and set its path
         let maskLayer = CAShapeLayer()
@@ -90,7 +96,7 @@ extension UIView {
         }
         return nil
     }
-    
+
     /// Creates empty view with specified height or width parameter.
     /// Used mainly to make empty space for UIStackView
     /// Note: on iOS 11+ setCustomSpacing(value, after: View) can be used instead.
@@ -108,17 +114,25 @@ extension UIView {
         }
         return spacer
     }
-    
+
     /// Returns a line with height of 1pt. Used to imitate a separator line in custom views.
     static var separatorLine: UIView {
         let view = UIView().then {
             $0.backgroundColor = UIColor(white: 0.0, alpha: 0.2)
             $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.addConstraint(NSLayoutConstraint(item: $0, attribute: .height, relatedBy: .equal,
-                                                toItem: nil, attribute: .notAnAttribute, multiplier: 1,
-                                                constant: 0.5))
+            $0.addConstraint(
+                NSLayoutConstraint(
+                    item: $0,
+                    attribute: .height,
+                    relatedBy: .equal,
+                    toItem: nil,
+                    attribute: .notAnAttribute,
+                    multiplier: 1,
+                    constant: 0.5
+                )
+            )
         }
-        
+
         return view
     }
 }

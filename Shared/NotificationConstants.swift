@@ -6,17 +6,23 @@ extension Notification.Name {
     public static let dataLoginDidChange = Notification.Name("DataLoginDidChange")
 
     public static let privateDataClearedHistory = Notification.Name("PrivateDataClearedHistory")
-    public static let privateDataClearedDownloadedFiles = Notification.Name("PrivateDataClearedDownloadedFiles")
+    public static let privateDataClearedDownloadedFiles = Notification.Name(
+        "PrivateDataClearedDownloadedFiles"
+    )
 
     // Fired when the user finishes navigating to a page and the location has changed
     public static let onLocationChange = Notification.Name("OnLocationChange")
     public static let didRestoreSession = Notification.Name("DidRestoreSession")
 
     // MARK: Notification UserInfo Keys
-    public static let userInfoKeyHasSyncableAccount = Notification.Name("UserInfoKeyHasSyncableAccount")
-  
+    public static let userInfoKeyHasSyncableAccount = Notification.Name(
+        "UserInfoKeyHasSyncableAccount"
+    )
+
     // Fired when the login synchronizer has finished applying remote changes
-    public static let dataRemoteLoginChangesWereApplied = Notification.Name("DataRemoteLoginChangesWereApplied")
+    public static let dataRemoteLoginChangesWereApplied = Notification.Name(
+        "DataRemoteLoginChangesWereApplied"
+    )
 
     // Fired when a the page metadata extraction script has completed and is being passed back to the native client
     public static let onPageMetadataFetched = Notification.Name("OnPageMetadataFetched")
@@ -43,17 +49,21 @@ extension Notification.Name {
 
     public static let reachabilityStatusChanged = Notification.Name("ReachabilityStatusChanged")
 
-    public static let contentBlockerTabSetupRequired = Notification.Name("ContentBlockerTabSetupRequired")
+    public static let contentBlockerTabSetupRequired = Notification.Name(
+        "ContentBlockerTabSetupRequired"
+    )
 
     public static let homePanelPrefsChanged = Notification.Name("HomePanelPrefsChanged")
 
     public static let fileDidDownload = Notification.Name("FileDidDownload")
-    
+
     public static let thumbnailEditOn = Notification.Name("ThumbnailEditOn")
     public static let thumbnailEditOff = Notification.Name("ThumbnailEditOff")
-    
+
     public static let privacyModeChanged = Notification.Name("PrivacyModeChanged")
-    
+
     // MARK: - Rewards
-    public static let adsOrRewardsToggledInSettings = Notification.Name("adsOrRewardsToggledInSettings")
+    public static let adsOrRewardsToggledInSettings = Notification.Name(
+        "adsOrRewardsToggledInSettings"
+    )
 }

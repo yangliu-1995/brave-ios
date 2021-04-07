@@ -4,13 +4,16 @@
 
 // This code is loosely based on https://github.com/Antol/APAutocompleteTextField
 
-import UIKit
 import Shared
+import UIKit
 
 /// Delegate for the text field events. Since AutocompleteTextField owns the UITextFieldDelegate,
 /// callers must use this instead.
 protocol AutocompleteTextFieldDelegate: class {
-    func autocompleteTextField(_ autocompleteTextField: AutocompleteTextField, didEnterText text: String)
+    func autocompleteTextField(
+        _ autocompleteTextField: AutocompleteTextField,
+        didEnterText text: String
+    )
     func autocompleteTextFieldShouldReturn(_ autocompleteTextField: AutocompleteTextField) -> Bool
     func autocompleteTextFieldShouldClear(_ autocompleteTextField: AutocompleteTextField) -> Bool
     func autocompleteTextFieldDidBeginEditing(_ autocompleteTextField: AutocompleteTextField)
@@ -18,7 +21,7 @@ protocol AutocompleteTextFieldDelegate: class {
 }
 
 private struct AutocompleteTextFieldUX {
-       static let highlightColor = UIColor.Defaults.iOSHighlightBlue
+    static let highlightColor = UIColor.Defaults.iOSHighlightBlue
 }
 
 class AutocompleteTextField: UITextField, UITextFieldDelegate {
@@ -35,7 +38,7 @@ class AutocompleteTextField: UITextField, UITextFieldDelegate {
     }
 
     // This variable is a solution to get the right behavior for refocusing
-    // the AutocompleteTextField. The initial transition into Overlay Mode 
+    // the AutocompleteTextField. The initial transition into Overlay Mode
     // doesn't involve the user interacting with AutocompleteTextField.
     // Thus, we update shouldApplyCompletion in touchesBegin() to reflect whether
     // the highlight is active and then the text field is updated accordingly
@@ -73,19 +76,41 @@ class AutocompleteTextField: UITextField, UITextFieldDelegate {
 
     fileprivate func commonInit() {
         super.delegate = self
-        super.addTarget(self, action: #selector(AutocompleteTextField.textDidChange), for: .editingChanged)
-        notifyTextChanged = debounce(0.1, action: {
-            if self.isEditing {
-                self.autocompleteDelegate?.autocompleteTextField(self, didEnterText: self.normalizeString(self.text ?? ""))
+        super.addTarget(
+            self,
+            action: #selector(AutocompleteTextField.textDidChange),
+            for: .editingChanged
+        )
+        notifyTextChanged = debounce(
+            0.1,
+            action: {
+                if self.isEditing {
+                    self.autocompleteDelegate?.autocompleteTextField(
+                        self,
+                        didEnterText: self.normalizeString(self.text ?? "")
+                    )
+                }
             }
-        })
+        )
     }
 
     override var keyCommands: [UIKeyCommand]? {
         return [
-            UIKeyCommand(input: UIKeyCommand.inputLeftArrow, modifierFlags: [], action: #selector(self.handleKeyCommand(sender:))),
-            UIKeyCommand(input: UIKeyCommand.inputRightArrow, modifierFlags: [], action: #selector(self.handleKeyCommand(sender:))),
-            UIKeyCommand(input: UIKeyCommand.inputEscape, modifierFlags: [], action: #selector(self.handleKeyCommand(sender:))),
+            UIKeyCommand(
+                input: UIKeyCommand.inputLeftArrow,
+                modifierFlags: [],
+                action: #selector(self.handleKeyCommand(sender:))
+            ),
+            UIKeyCommand(
+                input: UIKeyCommand.inputRightArrow,
+                modifierFlags: [],
+                action: #selector(self.handleKeyCommand(sender:))
+            ),
+            UIKeyCommand(
+                input: UIKeyCommand.inputEscape,
+                modifierFlags: [],
+                action: #selector(self.handleKeyCommand(sender:))
+            ),
         ]
     }
 
@@ -97,31 +122,31 @@ class AutocompleteTextField: UITextField, UITextFieldDelegate {
         case UIKeyCommand.inputLeftArrow:
             if isSelectionActive {
                 applyCompletion()
-                
+
                 // Set the current position to the beginning of the text.
                 selectedTextRange = textRange(from: beginningOfDocument, to: beginningOfDocument)
             } else if let range = selectedTextRange {
                 if range.start == beginningOfDocument {
                     break
                 }
-                
+
                 guard let cursorPosition = position(from: range.start, offset: -1) else {
                     break
                 }
-                
+
                 selectedTextRange = textRange(from: cursorPosition, to: cursorPosition)
             }
         case UIKeyCommand.inputRightArrow:
             if isSelectionActive {
                 applyCompletion()
-                
+
                 // Set the current position to the end of the text.
                 selectedTextRange = textRange(from: endOfDocument, to: endOfDocument)
             } else if let range = selectedTextRange {
                 if range.end == endOfDocument {
                     break
                 }
-                
+
                 guard let cursorPosition = position(from: range.end, offset: 1) else {
                     break
                 }
@@ -134,7 +159,7 @@ class AutocompleteTextField: UITextField, UITextFieldDelegate {
             break
         }
     }
-    
+
     func highlightAll() {
         let text = self.text
         self.text = ""
@@ -167,7 +192,11 @@ class AutocompleteTextField: UITextField, UITextFieldDelegate {
     // `shouldChangeCharactersInRange` is called before the text changes, and textDidChange is called after.
     // Since the text has changed, remove the completion here, and textDidChange will fire the callback to
     // get the new autocompletion.
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+    func textField(
+        _ textField: UITextField,
+        shouldChangeCharactersIn range: NSRange,
+        replacementString string: String
+    ) -> Bool {
         lastReplacement = string
         return true
     }
@@ -186,10 +215,18 @@ class AutocompleteTextField: UITextField, UITextFieldDelegate {
             return
         }
 
-        let suggestionText = String(suggestion.suffix(from: suggestion.index(suggestion.startIndex, offsetBy: normalized.count)))
+        let suggestionText = String(
+            suggestion.suffix(
+                from: suggestion.index(suggestion.startIndex, offsetBy: normalized.count)
+            )
+        )
         let autocompleteText = NSMutableAttributedString(string: suggestionText)
-        autocompleteText.addAttribute(NSAttributedString.Key.backgroundColor, value: highlightColor, range: NSRange(location: 0, length: suggestionText.count))
-        autocompleteTextLabel?.removeFromSuperview() // should be nil. But just in case
+        autocompleteText.addAttribute(
+            NSAttributedString.Key.backgroundColor,
+            value: highlightColor,
+            range: NSRange(location: 0, length: suggestionText.count)
+        )
+        autocompleteTextLabel?.removeFromSuperview()  // should be nil. But just in case
         autocompleteTextLabel = createAutocompleteLabelWith(autocompleteText)
         if let l = autocompleteTextLabel {
             addSubview(l)
@@ -212,7 +249,11 @@ class AutocompleteTextField: UITextField, UITextFieldDelegate {
         label.textColor = self.textColor
         label.textAlignment = .left
 
-        let enteredTextSize = self.attributedText?.boundingRect(with: self.frame.size, options: NSStringDrawingOptions.usesLineFragmentOrigin, context: nil)
+        let enteredTextSize = self.attributedText?.boundingRect(
+            with: self.frame.size,
+            options: NSStringDrawingOptions.usesLineFragmentOrigin,
+            context: nil
+        )
         frame.origin.x = (enteredTextSize?.width.rounded() ?? 0)
         // The autocomplete label overlaps whole uitextfield covering the clear button.
         // The label's frame must be slightly shorter to make the clear button visible.
@@ -255,7 +296,7 @@ class AutocompleteTextField: UITextField, UITextFieldDelegate {
         removeCompletion()
     }
 
-   @objc func textDidChange(_ textField: UITextField) {
+    @objc func textDidChange(_ textField: UITextField) {
         hideCursor = autocompleteTextLabel != nil
         removeCompletion()
 

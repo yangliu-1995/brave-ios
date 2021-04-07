@@ -50,7 +50,7 @@ class FeedItemView: UIView {
     lazy var promotedButton = PromotedButton().then {
         $0.setContentHuggingPriority(.required, for: .horizontal)
     }
-    
+
     /// Generates the view hierarchy given a layout component
     private func view(for component: Layout.Component) -> UIView {
         switch component {
@@ -66,8 +66,11 @@ class FeedItemView: UIView {
             thumbnailImageView.snp.remakeConstraints { maker in
                 switch imageLayout {
                 case .aspectRatio(let ratio):
-                    precondition(!ratio.isZero, "Invalid aspect ratio of 0 for component: \(component) in feed item layout: \(layout)")
-                    maker.height.equalTo(thumbnailImageView.snp.width).multipliedBy(1.0/ratio)
+                    precondition(
+                        !ratio.isZero,
+                        "Invalid aspect ratio of 0 for component: \(component) in feed item layout: \(layout)"
+                    )
+                    maker.height.equalTo(thumbnailImageView.snp.width).multipliedBy(1.0 / ratio)
                 case .fixedSize(let size):
                     maker.size.equalTo(size)
                 }
@@ -116,12 +119,12 @@ class FeedItemView: UIView {
             }
         }
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()
     }
-    
+
     override var accessibilityLabel: String? {
         get {
             var labels: [String] = []
@@ -139,15 +142,22 @@ class FeedItemView: UIView {
             }
             return labels.joined(separator: ". ")
         }
-        set { assertionFailure("Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored") }
+        set {
+            assertionFailure(
+                "Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored"
+            )
+        }
     }
 }
 
 extension FeedItemView {
-    
+
     class PromotedButton: UIControl {
-        
-        private let image = UIImageView(image: UIImage(imageLiteralResourceName: "graph-up").template).then {
+
+        private let image = UIImageView(
+            image: UIImage(imageLiteralResourceName: "graph-up").template
+        )
+        .then {
             $0.setContentHuggingPriority(.required, for: .horizontal)
             $0.setContentCompressionResistancePriority(.required, for: .horizontal)
             $0.tintColor = UIColor(white: 1.0, alpha: 0.8)
@@ -159,14 +169,14 @@ extension FeedItemView {
             $0.appearanceTextColor = UIColor(white: 1.0, alpha: 0.8)
             $0.setContentCompressionResistancePriority(.required, for: .horizontal)
         }
-        
+
         override init(frame: CGRect) {
             super.init(frame: frame)
-            
+
             backgroundColor = UIColor(white: 0.0, alpha: 0.2)
             layer.cornerRadius = 4
             layer.cornerCurve = .continuous
-            
+
             let stackView = UIStackView().then {
                 $0.spacing = 4
                 $0.alignment = .center
@@ -178,34 +188,40 @@ extension FeedItemView {
                 .view(label)
             )
             stackView.snp.makeConstraints {
-                $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 3, left: 5, bottom: 3, right: 5))
+                $0.edges.equalToSuperview().inset(
+                    UIEdgeInsets(top: 3, left: 5, bottom: 3, right: 5)
+                )
             }
-            
+
             isAccessibilityElement = true
             accessibilityTraits.insert(.button)
         }
-        
+
         override var accessibilityLabel: String? {
             get { label.text }
-            set { assertionFailure("Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored") }
+            set {
+                assertionFailure(
+                    "Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored"
+                )
+            }
         }
-        
+
         @available(*, unavailable)
         required init(coder: NSCoder) {
             fatalError()
         }
-        
+
         override var isHighlighted: Bool {
             didSet {
                 UIViewPropertyAnimator(duration: 0.3, dampingRatio: 1.0) {
-                    self.backgroundColor = self.isHighlighted ?
-                        UIColor(white: 0.0, alpha: 0.6) :
-                        UIColor(white: 0.0, alpha: 0.2)
+                    self.backgroundColor =
+                        self.isHighlighted
+                        ? UIColor(white: 0.0, alpha: 0.6) : UIColor(white: 0.0, alpha: 0.2)
                 }
                 .startAnimation()
             }
         }
-        
+
         override public func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
             if bounds.inset(by: UIEdgeInsets(equalInset: -8)).contains(point) {
                 return true
@@ -236,17 +252,29 @@ extension FeedItemView {
         struct LabelConfiguration {
             var numberOfLines: Int
             var font: UIFont
-            
+
             func withNumberOfLines(_ numberOfLines: Int) -> Self {
                 var copy = self
                 copy.numberOfLines = numberOfLines
                 return copy
             }
-            
-            static let title = LabelConfiguration(numberOfLines: 0, font: .systemFont(ofSize: 14.0, weight: .semibold))
-            static let description = LabelConfiguration(numberOfLines: 3, font: .systemFont(ofSize: 13.0, weight: .semibold))
-            static let date = LabelConfiguration(numberOfLines: 1, font: .systemFont(ofSize: 11.0, weight: .semibold))
-            static let brand = LabelConfiguration(numberOfLines: 0, font: .systemFont(ofSize: 13.0, weight: .semibold))
+
+            static let title = LabelConfiguration(
+                numberOfLines: 0,
+                font: .systemFont(ofSize: 14.0, weight: .semibold)
+            )
+            static let description = LabelConfiguration(
+                numberOfLines: 3,
+                font: .systemFont(ofSize: 13.0, weight: .semibold)
+            )
+            static let date = LabelConfiguration(
+                numberOfLines: 1,
+                font: .systemFont(ofSize: 11.0, weight: .semibold)
+            )
+            static let brand = LabelConfiguration(
+                numberOfLines: 0,
+                font: .systemFont(ofSize: 13.0, weight: .semibold)
+            )
         }
         /// The components that represent the appropriate UI in a feed item view
         /// or container to hold said UI
@@ -258,18 +286,23 @@ extension FeedItemView {
             case title(_ labelConfiguration: LabelConfiguration)
             case date(_ labelConfiguration: LabelConfiguration = .date)
             case description(_ labelConfiguration: LabelConfiguration = .description)
-            case brand(viewingMode: BrandContainerView.ViewingMode = .automatic, labelConfiguration: LabelConfiguration = .brand)
+            case brand(
+                viewingMode: BrandContainerView.ViewingMode = .automatic,
+                labelConfiguration: LabelConfiguration = .brand
+            )
             case promotedButton
         }
         /// The root stack for a given layout
         var root: Stack
-        
+
         /// The estimated height of the given layout
         func estimatedHeight(for width: CGFloat) -> CGFloat {
             func _height(for component: Component) -> CGFloat {
                 switch component {
                 case .stack(let stack):
-                    return stack.children.reduce(0.0, { return $0 + _height(for: $1) }) + stack.padding.top + stack.padding.bottom
+                    return stack.children.reduce(0.0, { return $0 + _height(for: $1) })
+                        + stack.padding.top
+                        + stack.padding.bottom
                 case .customSpace(let space):
                     return space
                 case .flexibleSpace(let minHeight):
@@ -281,14 +314,19 @@ extension FeedItemView {
                     case .aspectRatio(let ratio):
                         return width / ratio
                     }
-                case .title(let configuration), .date(let configuration), .description(let configuration):
-                    return configuration.font.pointSize * (configuration.numberOfLines == 0 ? 3 : CGFloat(configuration.numberOfLines))
+                case .title(let configuration), .date(let configuration),
+                    .description(let configuration):
+                    return configuration.font.pointSize
+                        * (configuration.numberOfLines == 0
+                            ? 3 : CGFloat(configuration.numberOfLines))
                 case .brand(let viewingMode, let configuration):
                     switch viewingMode {
                     case .automatic, .alwaysLogo:
                         return 20.0
                     case .alwaysText:
-                        return configuration.font.pointSize * (configuration.numberOfLines == 0 ? 1 : CGFloat(configuration.numberOfLines))
+                        return configuration.font.pointSize
+                            * (configuration.numberOfLines == 0
+                                ? 1 : CGFloat(configuration.numberOfLines))
                     }
                 case .promotedButton:
                     return 22.0
@@ -296,7 +334,7 @@ extension FeedItemView {
             }
             return _height(for: .stack(root))
         }
-        
+
         /// Defines a feed item layout where the thumbnail resides on top taking up
         /// the full-width then underneath is a padded label stack with the title,
         /// date, and finally the item's brand
@@ -324,17 +362,22 @@ extension FeedItemView {
                             spacing: 4,
                             padding: UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12),
                             children: [
-                                .title(.init(numberOfLines: 5, font: .systemFont(ofSize: 18.0, weight: .semibold))),
+                                .title(
+                                    .init(
+                                        numberOfLines: 5,
+                                        font: .systemFont(ofSize: 18.0, weight: .semibold)
+                                    )
+                                ),
                                 .date(),
                                 .flexibleSpace(minHeight: 12),
-                                .brand()
+                                .brand(),
                             ]
                         )
-                    )
+                    ),
                 ]
             )
         )
-        
+
         /// Uses the same layout as a `brandedHeadline` but includes a promoted button
         static let partner = Layout(
             root: .init(
@@ -347,7 +390,12 @@ extension FeedItemView {
                             spacing: 4,
                             padding: UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12),
                             children: [
-                                .title(.init(numberOfLines: 5, font: .systemFont(ofSize: 18.0, weight: .semibold))),
+                                .title(
+                                    .init(
+                                        numberOfLines: 5,
+                                        font: .systemFont(ofSize: 18.0, weight: .semibold)
+                                    )
+                                ),
                                 .date(),
                                 .flexibleSpace(minHeight: 12),
                                 .stack(
@@ -357,13 +405,13 @@ extension FeedItemView {
                                         alignment: .bottom,
                                         children: [
                                             .brand(),
-                                            .promotedButton
+                                            .promotedButton,
                                         ]
                                     )
-                                )
+                                ),
                             ]
                         )
-                    )
+                    ),
                 ]
             )
         )
@@ -391,7 +439,7 @@ extension FeedItemView {
                     .thumbnail(.aspectRatio(1)),
                     .title(LabelConfiguration.title.withNumberOfLines(4)),
                     .customSpace(4),
-                    .date()
+                    .date(),
                 ]
             )
         )
@@ -420,7 +468,7 @@ extension FeedItemView {
                     .thumbnail(.aspectRatio(1)),
                     .title(LabelConfiguration.title.withNumberOfLines(4)),
                     .customSpace(4),
-                    .description()
+                    .description(),
                 ]
             )
         )
@@ -441,7 +489,7 @@ extension FeedItemView {
                 spacing: 6,
                 children: [
                     .title(LabelConfiguration.title.withNumberOfLines(4)),
-                    .date()
+                    .date(),
                 ]
             )
         )
@@ -471,11 +519,11 @@ extension FeedItemView {
                             children: [
                                 .brand(viewingMode: .alwaysText),
                                 .title(LabelConfiguration.title.withNumberOfLines(4)),
-                                .date()
+                                .date(),
                             ]
                         )
                     ),
-                    .thumbnail(.fixedSize(CGSize(width: 98, height: 98)))
+                    .thumbnail(.fixedSize(CGSize(width: 98, height: 98))),
                 ]
             )
         )
@@ -543,27 +591,28 @@ extension FeedItemView {
                 }
             }
         }
-        
+
         private var imageObservervation: NSKeyValueObservation?
-        
+
         override init(frame: CGRect) {
             super.init(frame: frame)
-            
+
             updateVisibleViewForViewingMode()
-            
-            imageObservervation = logoImageView.observe(\.image, options: [.new]) { [weak self] _, _ in
+
+            imageObservervation = logoImageView.observe(\.image, options: [.new]) {
+                [weak self] _, _ in
                 guard let self = self else { return }
                 if self.viewingMode == .automatic {
                     self.updateAutomaticVisibleView()
                 }
             }
         }
-        
+
         @available(*, unavailable)
         required init(coder: NSCoder) {
             fatalError()
         }
-        
+
         private func updateAutomaticVisibleView() {
             if logoImageView.image != nil {
                 visibleView = logoImageView
@@ -571,7 +620,7 @@ extension FeedItemView {
                 visibleView = textLabel
             }
         }
-        
+
         private func updateVisibleViewForViewingMode() {
             switch viewingMode {
             case .automatic:
@@ -582,6 +631,6 @@ extension FeedItemView {
                 visibleView = logoImageView
             }
         }
-        
+
     }
 }

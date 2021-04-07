@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import Storage
 import Shared
+import Storage
 import SwiftKeychainWrapper
 
 enum InfoItem: Int {
@@ -64,8 +64,13 @@ class LoginDetailViewController: UIViewController {
         self.login = login
         self.profile = profile
         super.init(nibName: nil, bundle: nil)
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(dismissAlertController), name: UIApplication.didEnterBackgroundNotification, object: nil)
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(dismissAlertController),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -75,11 +80,18 @@ class LoginDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(edit))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .edit,
+            target: self,
+            action: #selector(edit)
+        )
 
         tableView.register(LoginTableViewCell.self, forCellReuseIdentifier: LoginCellIdentifier)
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: DefaultCellIdentifier)
-        tableView.register(SettingsTableSectionHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: SeparatorIdentifier)
+        tableView.register(
+            SettingsTableSectionHeaderFooterView.self,
+            forHeaderFooterViewReuseIdentifier: SeparatorIdentifier
+        )
 
         view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
@@ -124,7 +136,12 @@ class LoginDetailViewController: UIViewController {
         let itemsToHideSeperators: [InfoItem] = [.passwordItem, .lastModifiedSeparator]
         itemsToHideSeperators.forEach { item in
             let cell = tableView.cellForRow(at: IndexPath(row: item.rawValue, section: 0))
-            cell?.separatorInset = UIEdgeInsets(top: 0, left: cell?.bounds.width ?? 0, bottom: 0, right: 0)
+            cell?.separatorInset = UIEdgeInsets(
+                top: 0,
+                left: cell?.bounds.width ?? 0,
+                bottom: 0,
+                right: 0
+            )
         }
 
         // Rows to display full width seperator
@@ -178,16 +195,24 @@ extension LoginDetailViewController: UITableViewDataSource {
 
         case .lastModifiedSeparator:
             // swiftlint:disable:next force_cast
-            let footer = tableView.dequeueReusableHeaderFooterView(withIdentifier: SeparatorIdentifier) as! SettingsTableSectionHeaderFooterView
+            let footer =
+                tableView.dequeueReusableHeaderFooterView(withIdentifier: SeparatorIdentifier)
+                as! SettingsTableSectionHeaderFooterView
             footer.titleAlignment = .top
             let lastModified = Strings.loginDetailLastModifiedCellFormatTitle
-            let formattedLabel = String(format: lastModified, Date.fromMicrosecondTimestamp(login.timePasswordChanged).toRelativeTimeString())
+            let formattedLabel = String(
+                format: lastModified,
+                Date.fromMicrosecondTimestamp(login.timePasswordChanged).toRelativeTimeString()
+            )
             footer.titleLabel.text = formattedLabel
             let cell = wrapFooter(footer, withCellFromTableView: tableView, atIndexPath: indexPath)
             return cell
 
         case .deleteItem:
-            let deleteCell = tableView.dequeueReusableCell(withIdentifier: DefaultCellIdentifier, for: indexPath)
+            let deleteCell = tableView.dequeueReusableCell(
+                withIdentifier: DefaultCellIdentifier,
+                for: indexPath
+            )
             deleteCell.textLabel?.text = Strings.deleteLoginButtonTitle
             deleteCell.textLabel?.textAlignment = .center
             deleteCell.textLabel?.textColor = UIConstants.destructiveRed
@@ -198,14 +223,23 @@ extension LoginDetailViewController: UITableViewDataSource {
 
     fileprivate func dequeueLoginCellForIndexPath(_ indexPath: IndexPath) -> LoginTableViewCell {
         // swiftlint:disable:next force_cast
-        let loginCell = tableView.dequeueReusableCell(withIdentifier: LoginCellIdentifier, for: indexPath) as! LoginTableViewCell
+        let loginCell =
+            tableView.dequeueReusableCell(withIdentifier: LoginCellIdentifier, for: indexPath)
+            as! LoginTableViewCell
         loginCell.selectionStyle = .none
         loginCell.delegate = self
         return loginCell
     }
 
-    fileprivate func wrapFooter(_ footer: UITableViewHeaderFooterView, withCellFromTableView tableView: UITableView, atIndexPath indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: DefaultCellIdentifier, for: indexPath)
+    fileprivate func wrapFooter(
+        _ footer: UITableViewHeaderFooterView,
+        withCellFromTableView tableView: UITableView,
+        atIndexPath indexPath: IndexPath
+    ) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: DefaultCellIdentifier,
+            for: indexPath
+        )
         cell.selectionStyle = .none
         cell.addSubview(footer)
         footer.snp.makeConstraints { make in
@@ -226,11 +260,11 @@ extension LoginDetailViewController: UITableViewDelegate {
         if ![InfoItem.passwordItem, InfoItem.websiteItem, InfoItem.usernameItem].contains(item) {
             return
         }
-        
+
         guard let cell = tableView.cellForRow(at: indexPath) as? LoginTableViewCell else { return }
-        
+
         cell.becomeFirstResponder()
-        
+
         let menu = UIMenuController.shared
         menu.setTargetRect(cell.frame, in: self.tableView)
         menu.setMenuVisible(true, animated: true)
@@ -260,12 +294,18 @@ extension LoginDetailViewController: UITableViewDelegate {
 // MARK: - KeyboardHelperDelegate
 extension LoginDetailViewController: KeyboardHelperDelegate {
 
-    func keyboardHelper(_ keyboardHelper: KeyboardHelper, keyboardWillShowWithState state: KeyboardState) {
+    func keyboardHelper(
+        _ keyboardHelper: KeyboardHelper,
+        keyboardWillShowWithState state: KeyboardState
+    ) {
         let coveredHeight = state.intersectionHeightForView(tableView)
         tableView.contentInset.bottom = coveredHeight
     }
 
-    func keyboardHelper(_ keyboardHelper: KeyboardHelper, keyboardWillHideWithState state: KeyboardState) {
+    func keyboardHelper(
+        _ keyboardHelper: KeyboardHelper,
+        keyboardWillHideWithState state: KeyboardState
+    ) {
         tableView.contentInset.bottom = 0
     }
 }
@@ -279,11 +319,14 @@ extension LoginDetailViewController {
 
     func deleteLogin() {
         profile.logins.hasSyncedLogins().uponQueue(.main) { yes in
-            self.deleteAlert = UIAlertController.deleteLoginAlertWithDeleteCallback({ [unowned self] _ in
-                self.profile.logins.removeLoginByGUID(self.login.guid).uponQueue(.main) { _ in
-                    _ = self.navigationController?.popViewController(animated: true)
-                }
-            }, hasSyncedLogins: yes.successValue ?? true)
+            self.deleteAlert = UIAlertController.deleteLoginAlertWithDeleteCallback(
+                { [unowned self] _ in
+                    self.profile.logins.removeLoginByGUID(self.login.guid).uponQueue(.main) { _ in
+                        _ = self.navigationController?.popViewController(animated: true)
+                    }
+                },
+                hasSyncedLogins: yes.successValue ?? true
+            )
 
             self.present(self.deleteAlert!, animated: true, completion: nil)
         }
@@ -304,21 +347,31 @@ extension LoginDetailViewController {
         let cell = tableView.cellForRow(at: InfoItem.usernameItem.indexPath) as! LoginTableViewCell
         cell.descriptionLabel.becomeFirstResponder()
 
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneEditing))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(doneEditing)
+        )
     }
 
     @objc func doneEditing() {
         editingInfo = false
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(edit))
-        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .edit,
+            target: self,
+            action: #selector(edit)
+        )
+
         defer {
             // Required to get UI to reload with changed state
             tableView.reloadData()
         }
-        
+
         // We only care to update if we changed something
         guard let username = usernameField?.text,
-                  let password = passwordField?.text, username != login.username || password != login.password else {
+            let password = passwordField?.text,
+            username != login.username || password != login.password
+        else {
             return
         }
 
@@ -347,9 +400,12 @@ extension LoginDetailViewController: LoginTableViewCellDelegate {
             return
         }
 
-        navigationController?.dismiss(animated: true, completion: {
-            self.settingsDelegate?.settingsOpenURLInNewTab(url)
-        })
+        navigationController?.dismiss(
+            animated: true,
+            completion: {
+                self.settingsDelegate?.settingsOpenURLInNewTab(url)
+            }
+        )
     }
 
     func shouldReturnAfterEditingDescription(_ cell: LoginTableViewCell) -> Bool {
@@ -362,10 +418,11 @@ extension LoginDetailViewController: LoginTableViewCellDelegate {
 
         return false
     }
-    
+
     func infoItemForCell(_ cell: LoginTableViewCell) -> InfoItem? {
         if let index = tableView.indexPath(for: cell),
-            let item = InfoItem(rawValue: index.row) {
+            let item = InfoItem(rawValue: index.row)
+        {
             return item
         }
         return nil

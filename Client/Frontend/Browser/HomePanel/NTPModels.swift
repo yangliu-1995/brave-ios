@@ -25,19 +25,19 @@ struct NTPSponsor: Codable, NTPBackgroundProtocol, NTPThemeable {
 ///     observers being called again, since the struct instance will have been mutated.
 class NTPBackground: Codable {
     let imageUrl: String
-    
+
     /// Required instead of `CGPoint` due to x/y being optionals
     let focalPoint: FocalPoint?
-    
+
     // Only available for sponsored images, not normal wallpapers
     let creativeInstanceId: String?
 
     /// Only available for normal wallpapers, not for sponsored images
     let credit: Credit?
-    
+
     /// Whether the background is a packaged resource or a remote one, impacts how it should be loaded
     let packaged: Bool?
-    
+
     init(imageUrl: String, focalPoint: FocalPoint?, creativeInstanceId: String?) {
         self.imageUrl = imageUrl
         self.focalPoint = focalPoint
@@ -45,17 +45,17 @@ class NTPBackground: Codable {
         self.credit = nil
         self.packaged = nil
     }
-    
+
     struct Credit: Codable {
         let name: String
         let url: String?
     }
-    
+
     struct FocalPoint: Codable {
         let x: CGFloat?
         let y: CGFloat?
     }
-    
+
     lazy var image: UIImage? = {
         // Remote resources are downloaded files, so must be loaded differently
         packaged == true ? UIImage(named: imageUrl) : UIImage(contentsOfFile: imageUrl)
@@ -68,14 +68,14 @@ class NTPLogo: Codable {
     let companyName: String
     /// Url to take the user to after the logo is tapped.
     let destinationUrl: String
-    
+
     init(imageUrl: String, alt: String, companyName: String, destinationUrl: String) {
         self.imageUrl = imageUrl
         self.alt = alt
         self.companyName = companyName
         self.destinationUrl = destinationUrl
     }
-    
+
     lazy var image: UIImage? = {
         UIImage(contentsOfFile: imageUrl)
     }()

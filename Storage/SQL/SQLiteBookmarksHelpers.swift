@@ -23,8 +23,36 @@ public func titleForSpecialGUID(_ guid: GUID) -> String? {
 }
 
 extension Strings {
-    public static let bookmarksFolderTitleMobile = NSLocalizedString("BookmarksFolderTitleMobile", tableName: "Storage", bundle: Bundle.storage, value: "Mobile Bookmarks", comment: "The title of the folder that contains mobile bookmarks. This should match bookmarks.folder.mobile.label on Android.")
-    public static let bookmarksFolderTitleMenu = NSLocalizedString("BookmarksFolderTitleMenu", tableName: "Storage", bundle: Bundle.storage, value: "Bookmarks Menu", comment: "The name of the folder that contains desktop bookmarks in the menu. This should match bookmarks.folder.menu.label on Android.")
-    public static let bookmarksFolderTitleToolbar = NSLocalizedString("BookmarksFolderTitleToolbar", tableName: "Storage", bundle: Bundle.storage, value: "Bookmarks Toolbar", comment: "The name of the folder that contains desktop bookmarks in the toolbar. This should match bookmarks.folder.toolbar.label on Android.")
-    public static let bookmarksFolderTitleUnsorted = NSLocalizedString("BookmarksFolderTitleUnsorted", tableName: "Storage", bundle: Bundle.storage, value: "Unsorted Bookmarks", comment: "The name of the folder that contains unsorted desktop bookmarks. This should match bookmarks.folder.unfiled.label on Android.")
+    public static let bookmarksFolderTitleMobile = NSLocalizedString(
+        "BookmarksFolderTitleMobile",
+        tableName: "Storage",
+        bundle: Bundle.storage,
+        value: "Mobile Bookmarks",
+        comment:
+            "The title of the folder that contains mobile bookmarks. This should match bookmarks.folder.mobile.label on Android."
+    )
+    public static let bookmarksFolderTitleMenu = NSLocalizedString(
+        "BookmarksFolderTitleMenu",
+        tableName: "Storage",
+        bundle: Bundle.storage,
+        value: "Bookmarks Menu",
+        comment:
+            "The name of the folder that contains desktop bookmarks in the menu. This should match bookmarks.folder.menu.label on Android."
+    )
+    public static let bookmarksFolderTitleToolbar = NSLocalizedString(
+        "BookmarksFolderTitleToolbar",
+        tableName: "Storage",
+        bundle: Bundle.storage,
+        value: "Bookmarks Toolbar",
+        comment:
+            "The name of the folder that contains desktop bookmarks in the toolbar. This should match bookmarks.folder.toolbar.label on Android."
+    )
+    public static let bookmarksFolderTitleUnsorted = NSLocalizedString(
+        "BookmarksFolderTitleUnsorted",
+        tableName: "Storage",
+        bundle: Bundle.storage,
+        value: "Unsorted Bookmarks",
+        comment:
+            "The name of the folder that contains unsorted desktop bookmarks. This should match bookmarks.folder.unfiled.label on Android."
+    )
 }

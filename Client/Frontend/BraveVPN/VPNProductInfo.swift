@@ -4,8 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import Foundation
-import StoreKit
 import Shared
+import StoreKit
 
 private let log = Logger.browserLogger
 
@@ -14,7 +14,7 @@ class VPNProductInfo: NSObject {
     // If the prices could not be fetched, we retry after user tries to go to buy-vpn screen.
     static var monthlySubProduct: SKProduct?
     static var yearlySubProduct: SKProduct?
-    
+
     /// Whether we have enough product info to present to the user.
     /// If the user has bought the vpn already, it returns `true` since we do not need price details anymore.
     static var isComplete: Bool {
@@ -25,29 +25,31 @@ class VPNProductInfo: NSObject {
             guard let monthlyPlan = monthlySubProduct, let yearlyPlan = yearlySubProduct else {
                 return false
             }
-            
+
             // Make sure the price can be displayed correctly.
-            return monthlyPlan.price.frontSymbolCurrencyFormatted(with: monthlyPlan.priceLocale) != nil
-                && yearlyPlan.price.frontSymbolCurrencyFormatted(with: yearlyPlan.priceLocale) != nil
+            return monthlyPlan.price.frontSymbolCurrencyFormatted(with: monthlyPlan.priceLocale)
+                != nil
+                && yearlyPlan.price.frontSymbolCurrencyFormatted(with: yearlyPlan.priceLocale)
+                    != nil
         }
     }
-    
+
     private let productRequest: SKProductsRequest
-    
+
     /// These product ids work only on release channel.
     struct ProductIdentifiers {
         static let monthlySub = "bravevpn.monthly"
         static let yearlySub = "bravevpn.yearly"
-        
+
         static let all = Set<String>(arrayLiteral: monthlySub, yearlySub)
     }
-    
+
     override init() {
         productRequest = SKProductsRequest(productIdentifiers: ProductIdentifiers.all)
         super.init()
         productRequest.delegate = self
     }
-    
+
     func load() {
         productRequest.start()
     }
@@ -66,9 +68,8 @@ extension VPNProductInfo: SKProductsRequestDelegate {
             }
         }
     }
-    
+
     func request(_ request: SKRequest, didFailWithError error: Error) {
-        log.error("SKProductsRequestDelegate error: \(error)" )
+        log.error("SKProductsRequestDelegate error: \(error)")
     }
 }
-

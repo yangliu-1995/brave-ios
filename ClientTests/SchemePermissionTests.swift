@@ -4,22 +4,22 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import Foundation
-import XCTest
 import Storage
+import XCTest
 
 @testable import Client
 
 // MARK: SchemePermissionTests
 
 class SchemePermissionTests: XCTestCase {
-    
+
     enum SchemeTestType: String {
         case http
         case https
         case about
         case javascript
         case whatsapp
-        
+
         var description: String {
             switch self {
             case .http:
@@ -34,7 +34,7 @@ class SchemePermissionTests: XCTestCase {
                 return "WhatsApp URL Scheme in new tab"
             }
         }
-        
+
         var url: String {
             switch self {
             case .http:
@@ -52,23 +52,28 @@ class SchemePermissionTests: XCTestCase {
     }
 
     // MARK: Lifecycle
-    
+
     override func setUp() {
         profile = BrowserProfile(localName: "mockProfile")
 
-        imageStore = try! DiskImageStore(files: MockFiles(), namespace: "MockTabManagerScreenshots", quality: 1)
+        imageStore = try! DiskImageStore(
+            files: MockFiles(),
+            namespace: "MockTabManagerScreenshots",
+            quality: 1
+        )
         tabManager = TabManager(prefs: profile.prefs, imageStore: imageStore)
-        
+
         subject = BrowserViewController(
             profile: profile,
             tabManager: tabManager,
-            crashedLastSession: false)
+            crashedLastSession: false
+        )
     }
-    
+
     override func tearDown() {
         subject = nil
         profile = nil
-        
+
         imageStore.clearExcluding(Set())
         imageStore = nil
         tabManager = nil
@@ -77,34 +82,51 @@ class SchemePermissionTests: XCTestCase {
     }
 
     // MARK: Internal
-    
+
     func testShouldRequestOpenPopup() {
         let urlRequestHttp = urlRequestForScheme(.http)
         let urlRequestHttps = urlRequestForScheme(.https)
         let urlRequestJavascript = urlRequestForScheme(.javascript)
         let urlRequestAbout = urlRequestForScheme(.about)
         let urlRequestWhatsApp = urlRequestForScheme(.whatsapp)
-        
+
         // Test Http URL Scheme
-        XCTAssertTrue(subject.shouldRequestBeOpenedAsPopup(urlRequestHttp.request), urlRequestHttp.comment)
-        
+        XCTAssertTrue(
+            subject.shouldRequestBeOpenedAsPopup(urlRequestHttp.request),
+            urlRequestHttp.comment
+        )
+
         // Test Https URL Scheme
-        XCTAssertTrue(subject.shouldRequestBeOpenedAsPopup(urlRequestHttps.request), urlRequestHttps.comment)
-        
+        XCTAssertTrue(
+            subject.shouldRequestBeOpenedAsPopup(urlRequestHttps.request),
+            urlRequestHttps.comment
+        )
+
         // Test Javascript URL Scheme
-        XCTAssertTrue(subject.shouldRequestBeOpenedAsPopup(urlRequestJavascript.request), urlRequestJavascript.comment)
+        XCTAssertTrue(
+            subject.shouldRequestBeOpenedAsPopup(urlRequestJavascript.request),
+            urlRequestJavascript.comment
+        )
 
         // Test About URL Scheme
-        XCTAssertTrue(subject.shouldRequestBeOpenedAsPopup(urlRequestAbout.request), urlRequestAbout.comment)
+        XCTAssertTrue(
+            subject.shouldRequestBeOpenedAsPopup(urlRequestAbout.request),
+            urlRequestAbout.comment
+        )
 
         // Test Whatapp URL Scheme
-        XCTAssertTrue(subject.shouldRequestBeOpenedAsPopup(urlRequestWhatsApp.request), urlRequestWhatsApp.comment)
+        XCTAssertTrue(
+            subject.shouldRequestBeOpenedAsPopup(urlRequestWhatsApp.request),
+            urlRequestWhatsApp.comment
+        )
     }
-    
-    private func urlRequestForScheme(_ type: SchemeTestType) -> (request: URLRequest, comment: String) {
+
+    private func urlRequestForScheme(_ type: SchemeTestType) -> (
+        request: URLRequest, comment: String
+    ) {
         (request: URLRequest(url: URL(string: type.url)!), comment: type.description)
     }
-    
+
     private var subject: BrowserViewController!
     private var profile: Profile!
     private var tabManager: TabManager!

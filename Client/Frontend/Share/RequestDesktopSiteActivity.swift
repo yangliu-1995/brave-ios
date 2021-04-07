@@ -13,14 +13,16 @@ class RequestDesktopSiteActivity: UIActivity {
         self.tab = tab
         self.callback = callback
     }
-    
+
     override var activityTitle: String? {
-        tab?.isDesktopSite == true ?
-            Strings.appMenuViewMobileSiteTitleString : Strings.appMenuViewDesktopSiteTitleString
+        tab?.isDesktopSite == true
+            ? Strings.appMenuViewMobileSiteTitleString : Strings.appMenuViewDesktopSiteTitleString
     }
 
     override var activityImage: UIImage? {
-        tab?.isDesktopSite == true ? #imageLiteral(resourceName: "shareRequestMobileSite") : #imageLiteral(resourceName: "shareRequestDesktopSite")
+        tab?.isDesktopSite == true
+            ? #imageLiteral(resourceName: "shareRequestMobileSite")
+            : #imageLiteral(resourceName: "shareRequestDesktopSite")
     }
 
     override func perform() {

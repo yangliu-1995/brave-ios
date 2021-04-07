@@ -9,14 +9,20 @@ public let KeychainKeyAuthenticationInfo = "authenticationInfo"
 public let AllowedPasscodeFailedAttempts = 3
 
 // MARK: - Helper methods for accessing Authentication information from the Keychain
-public extension KeychainWrapper {
-    func authenticationInfo() -> AuthenticationKeychainInfo? {
-        NSKeyedUnarchiver.setClass(AuthenticationKeychainInfo.self, forClassName: "AuthenticationKeychainInfo")
+extension KeychainWrapper {
+    public func authenticationInfo() -> AuthenticationKeychainInfo? {
+        NSKeyedUnarchiver.setClass(
+            AuthenticationKeychainInfo.self,
+            forClassName: "AuthenticationKeychainInfo"
+        )
         return object(forKey: KeychainKeyAuthenticationInfo) as? AuthenticationKeychainInfo
     }
 
-    func setAuthenticationInfo(_ info: AuthenticationKeychainInfo?) {
-        NSKeyedArchiver.setClassName("AuthenticationKeychainInfo", for: AuthenticationKeychainInfo.self)
+    public func setAuthenticationInfo(_ info: AuthenticationKeychainInfo?) {
+        NSKeyedArchiver.setClassName(
+            "AuthenticationKeychainInfo",
+            for: AuthenticationKeychainInfo.self
+        )
         if let info = info {
             set(info, forKey: KeychainKeyAuthenticationInfo)
         } else {
@@ -55,15 +61,22 @@ open class AuthenticationKeychainInfo: NSObject, NSSecureCoding {
     }
 
     public required init?(coder aDecoder: NSCoder) {
-        if let lockOutInterval = aDecoder.decodeObject(of: NSNumber.self, forKey: "lockOutInterval") as NSNumber? {
+        if let lockOutInterval = aDecoder.decodeObject(of: NSNumber.self, forKey: "lockOutInterval")
+            as NSNumber?
+        {
             self.lockOutInterval = lockOutInterval.doubleValue
         }
         self.passcode = aDecoder.decodeObject(of: NSString.self, forKey: "passcode") as String?
         self.failedAttempts = aDecoder.decodeInteger(forKey: "failedAttempts")
         self.useTouchID = aDecoder.decodeBool(forKey: "useTouchID")
         if aDecoder.containsValue(forKey: "isPasscodeRequiredImmediately") {
-            self.isPasscodeRequiredImmediately = aDecoder.decodeBool(forKey: "isPasscodeRequiredImmediately")
-        } else if let interval = aDecoder.decodeObject(of: NSNumber.self, forKey: "requiredPasscodeInterval") as NSNumber? {
+            self.isPasscodeRequiredImmediately = aDecoder.decodeBool(
+                forKey: "isPasscodeRequiredImmediately"
+            )
+        } else if let interval = aDecoder.decodeObject(
+            of: NSNumber.self,
+            forKey: "requiredPasscodeInterval"
+        ) as NSNumber? {
             // This is solely used for 1.6.6 -> 1.7 migration
             //  `requiredPasscodeInterval` is not re-encoded on this object
             self.isPasscodeRequiredImmediately = (interval == 2)
@@ -71,32 +84,32 @@ open class AuthenticationKeychainInfo: NSObject, NSSecureCoding {
             self.isPasscodeRequiredImmediately = true
         }
     }
-    
+
     public static var supportsSecureCoding: Bool {
         return true
     }
 }
 
 // MARK: - API
-public extension AuthenticationKeychainInfo {
+extension AuthenticationKeychainInfo {
     private func resetLockoutState() {
         self.failedAttempts = 0
         self.lockOutInterval = nil
     }
 
-    func updatePasscode(_ passcode: String) {
+    public func updatePasscode(_ passcode: String) {
         self.passcode = passcode
     }
 
-    func recordValidation() {
+    public func recordValidation() {
         resetLockoutState()
     }
 
-    func lockOutUser() {
+    public func lockOutUser() {
         self.lockOutInterval = SystemUtils.systemUptime()
     }
 
-    func recordFailedAttempt() {
+    public func recordFailedAttempt() {
         if self.failedAttempts >= AllowedPasscodeFailedAttempts {
             // This is a failed attempt after a lockout period. Reset the lockout state
             // This prevents failedAttemps from being higher than 3
@@ -105,11 +118,11 @@ public extension AuthenticationKeychainInfo {
         self.failedAttempts += 1
     }
 
-    func isLocked() -> Bool {
+    public func isLocked() -> Bool {
         guard let lockOutInterval = self.lockOutInterval else {
             return false
         }
-        
+
         if SystemUtils.systemUptime() < lockOutInterval {
             // Unlock and require passcode input
             resetLockoutState()
@@ -117,10 +130,10 @@ public extension AuthenticationKeychainInfo {
         }
         return (SystemUtils.systemUptime() - (self.lockOutInterval ?? 0)) < lockTimeInterval
     }
-    
-    var lockoutTimeLeft: TimeInterval? {
+
+    public var lockoutTimeLeft: TimeInterval? {
         guard let lockOutInterval = lockOutInterval else { return nil }
-        
+
         let timeLeft = (lockOutInterval + lockTimeInterval) - SystemUtils.systemUptime()
         return timeLeft > 0 ? timeLeft : nil
     }

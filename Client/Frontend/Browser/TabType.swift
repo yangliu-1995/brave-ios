@@ -5,13 +5,13 @@
 import Foundation
 
 enum TabType: Int, CustomDebugStringConvertible {
-    
+
     /// Regular browsing.
     case regular
-    
+
     /// Private browsing.
     case `private`
-    
+
     /// Textual representation suitable for debugging.
     var debugDescription: String {
         switch self {
@@ -21,7 +21,7 @@ enum TabType: Int, CustomDebugStringConvertible {
             return "Private Tab"
         }
     }
-    
+
     /// Returns whether the tab is private or not.
     var isPrivate: Bool {
         switch self {
@@ -31,7 +31,7 @@ enum TabType: Int, CustomDebugStringConvertible {
             return true
         }
     }
-    
+
     /// Returns the type of the given Tab, if the tab is nil returns a regular tab type.
     ///
     /// - parameter tab: An object representing a Tab.
@@ -39,5 +39,5 @@ enum TabType: Int, CustomDebugStringConvertible {
     static func of(_ tab: Tab?) -> TabType {
         return tab?.type ?? .regular
     }
-    
+
 }

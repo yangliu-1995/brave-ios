@@ -19,9 +19,11 @@ struct ReaderModeHandlers {
         // Register a handler that simply lets us know if a document is in the cache or not. This is called from the
         // reader view interstitial page to find out when it can stop showing the 'Loading...' page and instead load
         // the readerized content.
-        webServer.registerHandlerForMethod("GET", module: "reader-mode", resource: "page-exists") { (request: GCDWebServerRequest?) -> GCDWebServerResponse? in
+        webServer.registerHandlerForMethod("GET", module: "reader-mode", resource: "page-exists") {
+            (request: GCDWebServerRequest?) -> GCDWebServerResponse? in
             guard let query = request?.query, let stringURL = query["url"],
-                  let url = URL(string: stringURL) else {
+                let url = URL(string: stringURL)
+            else {
                 return GCDWebServerResponse(statusCode: 500)
             }
 
@@ -30,7 +32,8 @@ struct ReaderModeHandlers {
         }
 
         // Register the handler that accepts /reader-mode/page?url=http://www.example.com requests.
-        webServer.registerHandlerForMethod("GET", module: "reader-mode", resource: "page") { (request: GCDWebServerRequest?) -> GCDWebServerResponse? in
+        webServer.registerHandlerForMethod("GET", module: "reader-mode", resource: "page") {
+            (request: GCDWebServerRequest?) -> GCDWebServerResponse? in
             if let query = request?.query, let url = query["url"] {
                 if let url = URL(string: url), url.isWebPage() {
                     do {
@@ -43,10 +46,17 @@ struct ReaderModeHandlers {
                                 readerModeStyle = style
                             }
                         }
-                        if let html = ReaderModeUtils.generateReaderContent(readabilityResult, initialStyle: readerModeStyle),
-                            let response = GCDWebServerDataResponse(html: html) {
+                        if let html = ReaderModeUtils.generateReaderContent(
+                            readabilityResult,
+                            initialStyle: readerModeStyle
+                        ),
+                            let response = GCDWebServerDataResponse(html: html)
+                        {
                             // Apply a Content Security Policy that disallows everything except images from anywhere and fonts and css from our internal server
-                            response.setValue("default-src 'none'; img-src *; style-src http://localhost:* '\(readerModeStyleHash)'; font-src http://localhost:*", forAdditionalHeader: "Content-Security-Policy")
+                            response.setValue(
+                                "default-src 'none'; img-src *; style-src http://localhost:* '\(readerModeStyleHash)'; font-src http://localhost:*",
+                                forAdditionalHeader: "Content-Security-Policy"
+                            )
                             return response
                         }
                     } catch _ {
@@ -58,17 +68,39 @@ struct ReaderModeHandlers {
                         // screen, which will periodically call page-exists to see if the readerized content has
                         // become available.
                         ReadabilityService.sharedInstance.process(url, cache: readerModeCache)
-                        if let readerViewLoadingPath = Bundle.main.path(forResource: "ReaderViewLoading", ofType: "html") {
+                        if let readerViewLoadingPath = Bundle.main.path(
+                            forResource: "ReaderViewLoading",
+                            ofType: "html"
+                        ) {
                             do {
-                                let readerViewLoading = try NSMutableString(contentsOfFile: readerViewLoadingPath, encoding: String.Encoding.utf8.rawValue)
-                                readerViewLoading.replaceOccurrences(of: "%ORIGINAL-URL%", with: url.absoluteString, 
-                                    options: .literal, range: NSRange(location: 0, length: readerViewLoading.length))
-                                readerViewLoading.replaceOccurrences(of: "%LOADING-TEXT%", with: Strings.readerModeLoadingContentDisplayText,
-                                    options: .literal, range: NSRange(location: 0, length: readerViewLoading.length))
-                                readerViewLoading.replaceOccurrences(of: "%LOADING-FAILED-TEXT%", with: Strings.readerModePageCantShowDisplayText,
-                                    options: .literal, range: NSRange(location: 0, length: readerViewLoading.length))
-                                readerViewLoading.replaceOccurrences(of: "%LOAD-ORIGINAL-TEXT%", with: Strings.readerModeLoadOriginalLinkText,
-                                    options: .literal, range: NSRange(location: 0, length: readerViewLoading.length))
+                                let readerViewLoading = try NSMutableString(
+                                    contentsOfFile: readerViewLoadingPath,
+                                    encoding: String.Encoding.utf8.rawValue
+                                )
+                                readerViewLoading.replaceOccurrences(
+                                    of: "%ORIGINAL-URL%",
+                                    with: url.absoluteString,
+                                    options: .literal,
+                                    range: NSRange(location: 0, length: readerViewLoading.length)
+                                )
+                                readerViewLoading.replaceOccurrences(
+                                    of: "%LOADING-TEXT%",
+                                    with: Strings.readerModeLoadingContentDisplayText,
+                                    options: .literal,
+                                    range: NSRange(location: 0, length: readerViewLoading.length)
+                                )
+                                readerViewLoading.replaceOccurrences(
+                                    of: "%LOADING-FAILED-TEXT%",
+                                    with: Strings.readerModePageCantShowDisplayText,
+                                    options: .literal,
+                                    range: NSRange(location: 0, length: readerViewLoading.length)
+                                )
+                                readerViewLoading.replaceOccurrences(
+                                    of: "%LOAD-ORIGINAL-TEXT%",
+                                    with: Strings.readerModeLoadOriginalLinkText,
+                                    options: .literal,
+                                    range: NSRange(location: 0, length: readerViewLoading.length)
+                                )
                                 return GCDWebServerDataResponse(html: readerViewLoading as String)
                             } catch _ {
                             }
@@ -77,7 +109,7 @@ struct ReaderModeHandlers {
                 }
             }
 
-            return GCDWebServerDataResponse(html: Strings.readerModeErrorConvertDisplayText) // TODO Needs a proper error page
+            return GCDWebServerDataResponse(html: Strings.readerModeErrorConvertDisplayText)  // TODO Needs a proper error page
         }
     }
 }

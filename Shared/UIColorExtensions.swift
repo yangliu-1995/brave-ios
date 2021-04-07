@@ -17,25 +17,26 @@ extension UIColor {
     public convenience init(rgb: Int) {
         self.init(
             red: CGFloat((rgb & 0xFF0000) >> 16) / 255.0,
-            green: CGFloat((rgb & 0x00FF00) >> 8)  / 255.0,
-            blue: CGFloat((rgb & 0x0000FF) >> 0)  / 255.0,
-            alpha: 1)
+            green: CGFloat((rgb & 0x00FF00) >> 8) / 255.0,
+            blue: CGFloat((rgb & 0x0000FF) >> 0) / 255.0,
+            alpha: 1
+        )
     }
 
     public convenience init(rgba: UInt32) {
         self.init(
-            red: CGFloat((rgba & 0xFF000000) >> 24) / 255.0,
-            green: CGFloat((rgba & 0x00FF0000) >> 16)  / 255.0,
-            blue: CGFloat((rgba & 0x0000FF00) >> 8)  / 255.0,
-            alpha: CGFloat((rgba & 0x000000FF) >> 0) / 255.0
+            red: CGFloat((rgba & 0xFF00_0000) >> 24) / 255.0,
+            green: CGFloat((rgba & 0x00FF_0000) >> 16) / 255.0,
+            blue: CGFloat((rgba & 0x0000_FF00) >> 8) / 255.0,
+            alpha: CGFloat((rgba & 0x0000_00FF) >> 0) / 255.0
         )
     }
 
     public convenience init(colorString: String) {
         let string = colorString.replacingOccurrences(of: "#", with: "")
-        
+
         var colorInt: UInt32 = 0
         Scanner(string: string).scanHexInt32(&colorInt)
-        self.init(rgb: (Int) (colorInt))
+        self.init(rgb: (Int)(colorInt))
     }
 }

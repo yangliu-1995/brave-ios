@@ -22,7 +22,9 @@ class DownloadToast: Toast {
         didSet {
             UIView.animate(withDuration: 0.05) {
                 self.descriptionLabel.text = self.descriptionText
-                self.progressWidthConstraint?.update(offset: self.toastView.frame.width * self.percent)
+                self.progressWidthConstraint?.update(
+                    offset: self.toastView.frame.width * self.percent
+                )
                 self.layoutIfNeeded()
             }
         }
@@ -41,17 +43,40 @@ class DownloadToast: Toast {
     }
 
     var descriptionText: String {
-        let downloadedSize = ByteCountFormatter.string(fromByteCount: combinedBytesDownloaded, countStyle: .file)
-        let expectedSize = combinedTotalBytesExpected != nil ? ByteCountFormatter.string(fromByteCount: combinedTotalBytesExpected!, countStyle: .file) : nil
-        let descriptionText = expectedSize != nil ? String(format: Strings.downloadProgressToastDescriptionText, downloadedSize, expectedSize!) : downloadedSize
+        let downloadedSize = ByteCountFormatter.string(
+            fromByteCount: combinedBytesDownloaded,
+            countStyle: .file
+        )
+        let expectedSize =
+            combinedTotalBytesExpected != nil
+            ? ByteCountFormatter.string(
+                fromByteCount: combinedTotalBytesExpected!,
+                countStyle: .file
+            )
+            : nil
+        let descriptionText =
+            expectedSize != nil
+            ? String(
+                format: Strings.downloadProgressToastDescriptionText,
+                downloadedSize,
+                expectedSize!
+            )
+            : downloadedSize
 
         guard downloads.count > 1 else {
             return descriptionText
         }
 
-        let fileCountDescription = String(format: Strings.downloadMultipleFilesToastDescriptionText, downloads.count)
+        let fileCountDescription = String(
+            format: Strings.downloadMultipleFilesToastDescriptionText,
+            downloads.count
+        )
 
-        return String(format: Strings.downloadMultipleFilesAndProgressToastDescriptionText, fileCountDescription, descriptionText)
+        return String(
+            format: Strings.downloadMultipleFilesAndProgressToastDescriptionText,
+            fileCountDescription,
+            descriptionText
+        )
     }
 
     var downloads: [Download] = []
@@ -73,7 +98,8 @@ class DownloadToast: Toast {
 
         self.toastView.snp.makeConstraints { make in
             make.left.right.height.equalTo(self)
-            self.animationConstraint = make.top.equalTo(self).offset(ButtonToastUX.toastHeight).constraint
+            self.animationConstraint =
+                make.top.equalTo(self).offset(ButtonToastUX.toastHeight).constraint
         }
 
         self.snp.makeConstraints { make in
@@ -104,7 +130,8 @@ class DownloadToast: Toast {
                 return
             }
 
-            self.percent = CGFloat(self.combinedBytesDownloaded) / CGFloat(combinedTotalBytesExpected)
+            self.percent =
+                CGFloat(self.combinedBytesDownloaded) / CGFloat(combinedTotalBytesExpected)
         }
     }
 
@@ -142,7 +169,9 @@ class DownloadToast: Toast {
         let cancel = UIImageView(image: #imageLiteral(resourceName: "close-medium").template)
         cancel.tintColor = UIColor.Photon.white100
         cancel.isUserInteractionEnabled = true
-        cancel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(buttonPressed)))
+        cancel.addGestureRecognizer(
+            UITapGestureRecognizer(target: self, action: #selector(buttonPressed))
+        )
         horizontalStackView.addArrangedSubview(cancel)
 
         toastView.backgroundColor = DownloadToastUX.toastBackgroundColor
@@ -167,12 +196,26 @@ class DownloadToast: Toast {
     }
 
     @objc func buttonPressed(_ gestureRecognizer: UIGestureRecognizer) {
-        let alert = AlertController(title: Strings.cancelDownloadDialogTitle, message: Strings.cancelDownloadDialogMessage, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: Strings.cancelDownloadDialogResume, style: .cancel, handler: nil), accessibilityIdentifier: "cancelDownloadAlert.resume")
-        alert.addAction(UIAlertAction(title: Strings.cancelDownloadDialogCancel, style: .default, handler: { action in
-            self.completionHandler?(true)
-            self.dismiss(true)
-        }), accessibilityIdentifier: "cancelDownloadAlert.cancel")
+        let alert = AlertController(
+            title: Strings.cancelDownloadDialogTitle,
+            message: Strings.cancelDownloadDialogMessage,
+            preferredStyle: .alert
+        )
+        alert.addAction(
+            UIAlertAction(title: Strings.cancelDownloadDialogResume, style: .cancel, handler: nil),
+            accessibilityIdentifier: "cancelDownloadAlert.resume"
+        )
+        alert.addAction(
+            UIAlertAction(
+                title: Strings.cancelDownloadDialogCancel,
+                style: .default,
+                handler: { action in
+                    self.completionHandler?(true)
+                    self.dismiss(true)
+                }
+            ),
+            accessibilityIdentifier: "cancelDownloadAlert.cancel"
+        )
 
         viewController?.present(alert, animated: true, completion: nil)
     }

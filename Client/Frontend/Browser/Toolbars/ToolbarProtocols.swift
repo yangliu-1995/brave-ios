@@ -5,7 +5,7 @@
 import Foundation
 
 protocol ToolbarProtocol: class {
-    
+
     var tabToolbarDelegate: ToolbarDelegate? { get set }
     var tabsButton: TabsButton { get }
     var backButton: ToolbarButton { get }
@@ -15,7 +15,7 @@ protocol ToolbarProtocol: class {
     var searchButton: ToolbarButton { get }
     var menuButton: ToolbarButton { get }
     var actionButtons: [Themeable & UIButton] { get }
-    
+
     func updateBackStatus(_ canGoBack: Bool)
     func updatePageStatus(_ isWebPage: Bool)
     func updateTabCount(_ count: Int)
@@ -25,15 +25,15 @@ extension ToolbarProtocol {
     func updatePageStatus(_ isWebPage: Bool) {
         shareButton.isEnabled = isWebPage
     }
-    
+
     func updateBackStatus(_ canGoBack: Bool) {
         backButton.isEnabled = canGoBack
     }
-    
+
     func updateForwardStatus(_ canGoForward: Bool) {
         forwardButton.isEnabled = canGoForward
     }
-    
+
     func updateTabCount(_ count: Int) {
         tabsButton.updateTabCount(count)
     }
@@ -51,5 +51,8 @@ protocol ToolbarDelegate: class {
     func tabToolbarDidPressAddTab(_ tabToolbar: ToolbarProtocol, button: UIButton)
     func tabToolbarDidPressSearch(_ tabToolbar: ToolbarProtocol, button: UIButton)
     func tabToolbarDidLongPressAddTab(_ tabToolbar: ToolbarProtocol, button: UIButton)
-    func tabToolbarDidSwipeToChangeTabs(_ tabToolbar: ToolbarProtocol, direction: UISwipeGestureRecognizer.Direction)
+    func tabToolbarDidSwipeToChangeTabs(
+        _ tabToolbar: ToolbarProtocol,
+        direction: UISwipeGestureRecognizer.Direction
+    )
 }

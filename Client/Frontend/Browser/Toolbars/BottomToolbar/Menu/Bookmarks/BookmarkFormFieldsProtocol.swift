@@ -8,16 +8,19 @@ import Shared
 protocol BookmarkFormFieldsProtocol: UIView {
     var titleTextField: UITextField { get }
     var urlTextField: UITextField? { get }
-    
+
     var delegate: BookmarkDetailsViewDelegate? { get set }
-    
+
     func validateFields() -> Bool
 }
 
 extension BookmarkFormFieldsProtocol {
     var urlTextField: UITextField? { return nil }
-    
+
     func validateFields() -> Bool {
-        return BookmarkValidation.validateBookmark(title: titleTextField.text, url: urlTextField?.text)
+        return BookmarkValidation.validateBookmark(
+            title: titleTextField.text,
+            url: urlTextField?.text
+        )
     }
 }

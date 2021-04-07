@@ -2,24 +2,24 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
 import Shared
+import UIKit
 
 public protocol Identifiable: Equatable {
     var id: Int? { get set }
 }
 
-public func ==<T>(lhs: T, rhs: T) -> Bool where T: Identifiable {
+public func == <T>(lhs: T, rhs: T) -> Bool where T: Identifiable {
     return lhs.id == rhs.id
 }
 
 public enum IconType: Int {
     case icon, appleIcon, appleIconPrecomposed, guess, local, noneFound
-    
-    public func isPreferredTo (_ other: IconType) -> Bool {
+
+    public func isPreferredTo(_ other: IconType) -> Bool {
         return rank > other.rank
     }
-    
+
     fileprivate var rank: Int {
         switch self {
         case .appleIconPrecomposed:
@@ -68,7 +68,7 @@ open class Site: Identifiable, Hashable {
     public let url: String
     public let title: String
     open var metadata: PageMetadata?
-     // Sites may have multiple favicons. We'll return the largest.
+    // Sites may have multiple favicons. We'll return the largest.
     open var icon: Favicon?
     open var latestVisit: Visit?
     open fileprivate(set) var bookmarked: Bool?

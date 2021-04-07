@@ -3,16 +3,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import WebKit
 import GCDWebServers
 import Shared
+import WebKit
 
 /// Handles requests to /about/sessionrestore to restore session history.
 struct SessionRestoreHandler {
     static func register(_ webServer: WebServer) {
         // Register the handler that accepts /about/sessionrestore?history=...&currentpage=... requests.
-        webServer.registerHandlerForMethod("GET", module: "about", resource: "sessionrestore") { _ in
-            if let sessionRestorePath = Bundle.main.path(forResource: "SessionRestore", ofType: "html") {
+        webServer.registerHandlerForMethod("GET", module: "about", resource: "sessionrestore") {
+            _ in
+            if let sessionRestorePath = Bundle.main.path(
+                forResource: "SessionRestore",
+                ofType: "html"
+            ) {
                 do {
                     var sessionRestoreString = try String(contentsOfFile: sessionRestorePath)
 
@@ -21,7 +25,11 @@ struct SessionRestoreHandler {
                     }
 
                     let securityToken = UserScriptManager.messageHandlerToken.uuidString
-                    sessionRestoreString = sessionRestoreString.replacingOccurrences(of: "%SECURITY_TOKEN%", with: securityToken, options: .literal)
+                    sessionRestoreString = sessionRestoreString.replacingOccurrences(
+                        of: "%SECURITY_TOKEN%",
+                        with: securityToken,
+                        options: .literal
+                    )
 
                     return GCDWebServerDataResponse(html: sessionRestoreString)
                 } catch _ {}

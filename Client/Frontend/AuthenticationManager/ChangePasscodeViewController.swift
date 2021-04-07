@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import SwiftKeychainWrapper
 import Shared
+import SwiftKeychainWrapper
 
 /// Displayed to the user when changing an existing passcode.
 class ChangePasscodeViewController: PagingPasscodeViewController, PasscodeInputViewDelegate {
@@ -15,12 +15,15 @@ class ChangePasscodeViewController: PagingPasscodeViewController, PasscodeInputV
         super.init()
         self.title = Strings.authenticationChangePasscode
         self.panes = [
-            PasscodePane(title: Strings.authenticationEnterPasscode, passcodeSize: authenticationInfo?.passcode?.count ?? 6),
+            PasscodePane(
+                title: Strings.authenticationEnterPasscode,
+                passcodeSize: authenticationInfo?.passcode?.count ?? 6
+            ),
             PasscodePane(title: Strings.authenticationEnterNewPasscode, passcodeSize: 6),
             PasscodePane(title: Strings.authenticationReenterPasscode, passcodeSize: 6),
         ]
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

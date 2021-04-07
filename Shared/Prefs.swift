@@ -100,7 +100,7 @@ open class MockProfilePrefs: Prefs {
     open func objectForKey<T: Any>(_ defaultName: String) -> T? {
         return things[name(defaultName)] as? T
     }
-    
+
     open func timestampForKey(_ defaultName: String) -> Timestamp? {
         return unsignedLongForKey(defaultName)
     }
@@ -146,7 +146,7 @@ open class MockProfilePrefs: Prefs {
     }
 
     open func clearAll() {
-        let dictionary = things as! [String: Any] // swiftlint:disable:this force_cast
+        let dictionary = things as! [String: Any]  // swiftlint:disable:this force_cast
         let keysToDelete: [String] = dictionary.keys.filter { $0.hasPrefix(self.prefix) }
         things.removeObjects(forKeys: keysToDelete)
     }

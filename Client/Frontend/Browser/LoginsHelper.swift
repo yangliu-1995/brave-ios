@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import BraveShared
 import Foundation
 import Shared
-import BraveShared
 import Storage
-import XCGLogger
-import WebKit
 import SwiftyJSON
+import WebKit
+import XCGLogger
 
 private let log = Logger.browserLogger
 
@@ -35,11 +35,14 @@ class LoginsHelper: TabContentScript {
         return "loginsManagerMessageHandler"
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceiveScriptMessage message: WKScriptMessage
+    ) {
         guard let body = message.body as? [String: AnyObject] else {
             return
         }
-        
+
         if UserScriptManager.isMessageHandlerTokenMissing(in: body) {
             log.debug("Missing required security token.")
             return
@@ -54,7 +57,7 @@ class LoginsHelper: TabContentScript {
         //
         // See https://bugzilla.mozilla.org/show_bug.cgi?id=1307822 for details.
         guard UIApplication.shared.applicationState == .active && !profile.isShutdown else {
-            return 
+            return
         }
 
         // We don't use the WKWebView's URL since the page can spoof the URL by using document.location
@@ -66,7 +69,8 @@ class LoginsHelper: TabContentScript {
                 res["username"] = "" as AnyObject?
                 res["password"] = "" as AnyObject?
                 if let login = Login.fromScript(url, script: res),
-                   let requestId = res["requestId"] as? String {
+                    let requestId = res["requestId"] as? String
+                {
                     requestLogins(login, requestId: requestId)
                 }
             } else if type == "submit" {
@@ -79,23 +83,32 @@ class LoginsHelper: TabContentScript {
         }
     }
 
-    class func replace(_ base: String, keys: [String], replacements: [String]) -> NSMutableAttributedString {
+    class func replace(_ base: String, keys: [String], replacements: [String])
+        -> NSMutableAttributedString
+    {
         var ranges = [NSRange]()
         var string = base
         for (index, key) in keys.enumerated() {
             let replace = replacements[index]
-            let range = string.range(of: key,
+            let range = string.range(
+                of: key,
                 options: .literal,
                 range: nil,
-                locale: nil)!
+                locale: nil
+            )!
             string.replaceSubrange(range, with: replace)
-            let nsRange = NSRange(location: string.distance(from: string.startIndex, to: range.lowerBound),
-                                  length: replace.count)
+            let nsRange = NSRange(
+                location: string.distance(from: string.startIndex, to: range.lowerBound),
+                length: replace.count
+            )
             ranges.append(nsRange)
         }
 
         var attributes = [NSAttributedString.Key: AnyObject]()
-        attributes[NSAttributedString.Key.font] = UIFont.systemFont(ofSize: 13, weight: UIFont.Weight.regular)
+        attributes[NSAttributedString.Key.font] = UIFont.systemFont(
+            ofSize: 13,
+            weight: UIFont.Weight.regular
+        )
         attributes[NSAttributedString.Key.foregroundColor] = UIColor.Photon.grey60
         let attr = NSMutableAttributedString(string: string, attributes: attributes)
         let font: UIFont = UIFont.systemFont(ofSize: 13, weight: UIFont.Weight.medium)
@@ -105,7 +118,9 @@ class LoginsHelper: TabContentScript {
         return attr
     }
 
-    func getLoginsForProtectionSpace(_ protectionSpace: URLProtectionSpace) -> Deferred<Maybe<Cursor<LoginData>>> {
+    func getLoginsForProtectionSpace(_ protectionSpace: URLProtectionSpace) -> Deferred<
+        Maybe<Cursor<LoginData>>
+    > {
         return profile.logins.getLoginsForProtectionSpace(protectionSpace)
     }
 
@@ -120,25 +135,25 @@ class LoginsHelper: TabContentScript {
         }
 
         profile.logins
-               .getLoginsForProtectionSpace(login.protectionSpace, withUsername: login.username)
-               .uponQueue(.main) { res in
-            if let data = res.successValue {
-                log.debug("Found \(data.count) logins.")
-                for saved in data {
-                    if let saved = saved {
-                        if saved.password == login.password {
-                            self.profile.logins.addUseOfLoginByGUID(saved.guid)
+            .getLoginsForProtectionSpace(login.protectionSpace, withUsername: login.username)
+            .uponQueue(.main) { res in
+                if let data = res.successValue {
+                    log.debug("Found \(data.count) logins.")
+                    for saved in data {
+                        if let saved = saved {
+                            if saved.password == login.password {
+                                self.profile.logins.addUseOfLoginByGUID(saved.guid)
+                                return
+                            }
+
+                            self.promptUpdateFromLogin(login: saved, toLogin: login)
                             return
                         }
-
-                        self.promptUpdateFromLogin(login: saved, toLogin: login)
-                        return
                     }
                 }
-            }
 
-            self.promptSave(login)
-        }
+                self.promptSave(login)
+            }
     }
 
     fileprivate func promptSave(_ login: LoginData) {
@@ -148,7 +163,11 @@ class LoginsHelper: TabContentScript {
 
         let promptMessage: String
         if let username = login.username {
-            promptMessage = String(format: Strings.saveLoginUsernamePrompt, username, login.hostname)
+            promptMessage = String(
+                format: Strings.saveLoginUsernamePrompt,
+                username,
+                login.hostname
+            )
         } else {
             promptMessage = String(format: Strings.saveLoginPrompt, login.hostname)
         }
@@ -157,13 +176,22 @@ class LoginsHelper: TabContentScript {
             tab?.removeSnackbar(existingPrompt)
         }
 
-        snackBar = TimerSnackBar(text: promptMessage, img: #imageLiteral(resourceName: "shields-menu-icon"))
-        let dontSave = SnackButton(title: Strings.loginsHelperDontSaveButtonTitle, accessibilityIdentifier: "SaveLoginPrompt.dontSaveButton") { bar in
+        snackBar = TimerSnackBar(
+            text: promptMessage,
+            img: #imageLiteral(resourceName: "shields-menu-icon")
+        )
+        let dontSave = SnackButton(
+            title: Strings.loginsHelperDontSaveButtonTitle,
+            accessibilityIdentifier: "SaveLoginPrompt.dontSaveButton"
+        ) { bar in
             self.tab?.removeSnackbar(bar)
             self.snackBar = nil
             return
         }
-        let save = SnackButton(title: Strings.loginsHelperSaveLoginButtonTitle, accessibilityIdentifier: "SaveLoginPrompt.saveLoginButton") { bar in
+        let save = SnackButton(
+            title: Strings.loginsHelperSaveLoginButtonTitle,
+            accessibilityIdentifier: "SaveLoginPrompt.saveLoginButton"
+        ) { bar in
             self.tab?.removeSnackbar(bar)
             self.snackBar = nil
             self.profile.logins.addLogin(login)
@@ -192,15 +220,25 @@ class LoginsHelper: TabContentScript {
         }
 
         snackBar = TimerSnackBar(text: formatted, img: #imageLiteral(resourceName: "key"))
-        let dontSave = SnackButton(title: Strings.loginsHelperDontUpdateButtonTitle, accessibilityIdentifier: "UpdateLoginPrompt.donttUpdateButton") { bar in
+        let dontSave = SnackButton(
+            title: Strings.loginsHelperDontUpdateButtonTitle,
+            accessibilityIdentifier: "UpdateLoginPrompt.donttUpdateButton"
+        ) { bar in
             self.tab?.removeSnackbar(bar)
             self.snackBar = nil
             return
         }
-        let update = SnackButton(title: Strings.loginsHelperUpdateButtonTitle, accessibilityIdentifier: "UpdateLoginPrompt.updateButton") { bar in
+        let update = SnackButton(
+            title: Strings.loginsHelperUpdateButtonTitle,
+            accessibilityIdentifier: "UpdateLoginPrompt.updateButton"
+        ) { bar in
             self.tab?.removeSnackbar(bar)
             self.snackBar = nil
-            self.profile.logins.updateLoginByGUID(guid, new: new, significant: new.isSignificantlyDifferentFrom(old))
+            self.profile.logins.updateLoginByGUID(
+                guid,
+                new: new,
+                significant: new.isSignificantlyDifferentFrom(old)
+            )
         }
         snackBar?.addButton(dontSave)
         snackBar?.addButton(update)
@@ -221,8 +259,13 @@ class LoginsHelper: TabContentScript {
             guard let jsonString = json.stringValue() else {
                 return
             }
-            
-            self.tab?.webView?.evaluateSafeJavaScript(functionName: "window.__firefox__.logins.inject", args: [jsonString], sandboxed: false, escapeArgs: false) { (obj, err) -> Void in
+
+            self.tab?.webView?.evaluateSafeJavaScript(
+                functionName: "window.__firefox__.logins.inject",
+                args: [jsonString],
+                sandboxed: false,
+                escapeArgs: false
+            ) { (obj, err) -> Void in
                 if err != nil {
                     log.debug(err)
                 }

@@ -10,8 +10,8 @@ struct SimpleToastUX {
     static let toastAnimationDuration = 0.5
     static let toastDefaultColor = UIColor.Photon.blue50
     static let toastFont = UIFont.systemFont(ofSize: 15)
-    static let toastDismissAfter = DispatchTimeInterval.milliseconds(4500) // 4.5 seconds.
-    static let toastDelayBefore = DispatchTimeInterval.milliseconds(0) // 0 seconds
+    static let toastDismissAfter = DispatchTimeInterval.milliseconds(4500)  // 4.5 seconds.
+    static let toastDelayBefore = DispatchTimeInterval.milliseconds(0)  // 0 seconds
     static let bottomToolbarHeight = CGFloat(45)
 }
 
@@ -39,7 +39,8 @@ struct SimpleToast {
     }
 
     fileprivate func dismiss(_ toast: UIView) {
-        UIView.animate(withDuration: SimpleToastUX.toastAnimationDuration,
+        UIView.animate(
+            withDuration: SimpleToastUX.toastAnimationDuration,
             animations: {
                 var frame = toast.frame
                 frame.origin.y = frame.origin.y + SimpleToastUX.toastHeight
@@ -53,7 +54,8 @@ struct SimpleToast {
     }
 
     fileprivate func animate(_ toast: UIView) {
-        UIView.animate(withDuration: SimpleToastUX.toastAnimationDuration,
+        UIView.animate(
+            withDuration: SimpleToastUX.toastAnimationDuration,
             animations: {
                 var frame = toast.frame
                 frame.origin.y = frame.origin.y - SimpleToastUX.toastHeight
@@ -63,9 +65,12 @@ struct SimpleToast {
             completion: { finished in
                 let dispatchTime = DispatchTime.now() + SimpleToastUX.toastDismissAfter
 
-                DispatchQueue.main.asyncAfter(deadline: dispatchTime, execute: {
-                    self.dismiss(toast)
-                })
+                DispatchQueue.main.asyncAfter(
+                    deadline: dispatchTime,
+                    execute: {
+                        self.dismiss(toast)
+                    }
+                )
             }
         )
     }

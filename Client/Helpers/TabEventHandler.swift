@@ -5,51 +5,48 @@
 import Foundation
 import Storage
 
-/**
- * A handler can be a plain old swift object. It does not need to extend any
- * other object, but can.
- *
- * Handlers should register for tab events with the `registerFor` method, and
- * cleanup with the `unregister` method.
- *
- * ```
- * class HandoffHandler {
- *     var tabObservers: TabObservers!
- *
- *     init() {
- *         tabObservers = registerFor(.didLoadFavicon, .didLoadPageMetadata)
- *     }
- *
- *     deinit {
- *         unregister(tabObservers)
- *     }
- * }
- * ```
- *
- * Handlers can implement any or all `TabEventHandler` methods. If you
- * implement a method, you should probably `registerFor` the event above.
- *
- * ```
- * extension HandoffHandler: TabEventHandler {
- *     func tab(_ tab: Tab, didLoadPageMetadata metadata: PageMetadata) {
- *         print("\(tab) has \(pageMetadata)")
- *     }
- *
- *     func tab(_ tab: Tab, didLoadFavicon favicon: Favicon) {
- *         print("\(tab) has \(favicon)")
- *     }
- * }
- * ```
- *
- * Tab events should probably be only posted from one place, to avoid cycles.
- *
- * ```
- * TabEvent.post(.didLoadPageMetadata(aPageMetadata), for: tab)
- * ```
- *
- * In this manner, we are able to use the notification center and have type safety.
- *
- */
+/// A handler can be a plain old swift object. It does not need to extend any
+/// other object, but can.
+///
+/// Handlers should register for tab events with the `registerFor` method, and
+/// cleanup with the `unregister` method.
+///
+/// ```
+/// class HandoffHandler {
+///     var tabObservers: TabObservers!
+///
+///     init() {
+///         tabObservers = registerFor(.didLoadFavicon, .didLoadPageMetadata)
+///     }
+///
+///     deinit {
+///         unregister(tabObservers)
+///     }
+/// }
+/// ```
+///
+/// Handlers can implement any or all `TabEventHandler` methods. If you
+/// implement a method, you should probably `registerFor` the event above.
+///
+/// ```
+/// extension HandoffHandler: TabEventHandler {
+///     func tab(_ tab: Tab, didLoadPageMetadata metadata: PageMetadata) {
+///         print("\(tab) has \(pageMetadata)")
+///     }
+///
+///     func tab(_ tab: Tab, didLoadFavicon favicon: Favicon) {
+///         print("\(tab) has \(favicon)")
+///     }
+/// }
+/// ```
+///
+/// Tab events should probably be only posted from one place, to avoid cycles.
+///
+/// ```
+/// TabEvent.post(.didLoadPageMetadata(aPageMetadata), for: tab)
+/// ```
+///
+/// In this manner, we are able to use the notification center and have type safety.
 // As we want more events we add more here.
 // Each event needs:
 // 1. a method in the TabEventHandler.
@@ -117,7 +114,7 @@ enum TabEvent {
             return .didChangeContentBlocking
         }
     }
-    
+
     func handle(_ tab: Tab, with handler: TabEventHandler) {
         switch self {
         case .didChangeURL(let url):
@@ -170,14 +167,15 @@ extension TabEventHandler {
         return tabEvents.map { eventType in
             center.addObserver(forName: eventType.name, object: nil, queue: queue) { notification in
                 guard let tab = notification.object as? Tab,
-                    let event = notification.userInfo?["payload"] as? TabEvent else {
-                        return
+                    let event = notification.userInfo?["payload"] as? TabEvent
+                else {
+                    return
                 }
                 event.handle(tab, with: self)
             }
         }
     }
-    
+
     func unregister(_ observers: TabObservers) {
         observers.forEach { observer in
             center.removeObserver(observer)

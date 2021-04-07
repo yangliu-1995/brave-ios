@@ -37,11 +37,15 @@ class InnerStrokedView: UIView {
     override func draw(_ rect: CGRect) {
         let halfWidth = strokeWidth / 2 as CGFloat
 
-        let path = UIBezierPath(roundedRect: CGRect(x: halfWidth,
-            y: halfWidth,
-            width: rect.width - strokeWidth,
-            height: rect.height - strokeWidth),
-            cornerRadius: cornerRadius)
+        let path = UIBezierPath(
+            roundedRect: CGRect(
+                x: halfWidth,
+                y: halfWidth,
+                width: rect.width - strokeWidth,
+                height: rect.height - strokeWidth
+            ),
+            cornerRadius: cornerRadius
+        )
         color.setStroke()
         path.lineWidth = strokeWidth
         path.stroke()

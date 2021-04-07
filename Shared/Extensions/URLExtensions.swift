@@ -25,7 +25,13 @@ private struct ETLDEntry: CustomStringConvertible {
 private typealias TLDEntryMap = [String: ETLDEntry]
 
 private func loadEntriesFromDisk() -> TLDEntryMap? {
-    if let data = String.contentsOfFileWithResourceName("effective_tld_names", ofType: "dat", fromBundle: Bundle(identifier: "com.brave.Shared")!, encoding: .utf8, error: nil) {
+    if let data = String.contentsOfFileWithResourceName(
+        "effective_tld_names",
+        ofType: "dat",
+        fromBundle: Bundle(identifier: "com.brave.Shared")!,
+        encoding: .utf8,
+        error: nil
+    ) {
         let lines = data.components(separatedBy: "\n")
         let trimmedLines = lines.filter { !$0.hasPrefix("//") && $0 != "\n" && $0 != "" }
 
@@ -59,7 +65,7 @@ extension URL {
         static let localhost = "localhost"
         static let localhostIp = "127.0.0.1"
         static let http = "http"
-        
+
     }
 
     public func allocatedFileSize() -> Int64 {
@@ -82,7 +88,7 @@ extension URL {
         }
         return val
     }
-    
+
     mutating public func append(pathComponents: String...) {
         pathComponents.forEach {
             self.appendPathComponent($0)
@@ -106,8 +112,21 @@ extension URL {
     }
 }
 
-// The list of permanent URI schemes has been taken from http://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml 
-private let permanentURISchemes = ["aaa", "aaas", "about", "acap", "acct", "cap", "cid", "coap", "coaps", "crid", "data", "dav", "dict", "dns", "example", "file", "ftp", "geo", "go", "gopher", "h323", "http", "https", "iax", "icap", "im", "imap", "info", "ipp", "ipps", "iris", "iris.beep", "iris.lwz", "iris.xpc", "iris.xpcs", "jabber", "javascript", "ldap", "mailto", "mid", "msrp", "msrps", "mtqp", "mupdate", "news", "nfs", "ni", "nih", "nntp", "opaquelocktoken", "pkcs11", "pop", "pres", "reload", "rtsp", "rtsps", "rtspu", "service", "session", "shttp", "sieve", "sip", "sips", "sms", "snmp", "soap.beep", "soap.beeps", "stun", "stuns", "tag", "tel", "telnet", "tftp", "thismessage", "tip", "tn3270", "turn", "turns", "tv", "urn", "vemmi", "vnc", "ws", "wss", "xcon", "xcon-userid", "xmlrpc.beep", "xmlrpc.beeps", "xmpp", "z39.50r", "z39.50s"]
+// The list of permanent URI schemes has been taken from http://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml
+private let permanentURISchemes = [
+    "aaa", "aaas", "about", "acap", "acct", "cap", "cid", "coap", "coaps", "crid", "data", "dav",
+    "dict", "dns", "example", "file", "ftp", "geo", "go", "gopher", "h323", "http", "https", "iax",
+    "icap", "im", "imap", "info", "ipp", "ipps", "iris", "iris.beep", "iris.lwz", "iris.xpc",
+    "iris.xpcs", "jabber", "javascript", "ldap", "mailto", "mid", "msrp", "msrps", "mtqp",
+    "mupdate",
+    "news", "nfs", "ni", "nih", "nntp", "opaquelocktoken", "pkcs11", "pop", "pres", "reload",
+    "rtsp",
+    "rtsps", "rtspu", "service", "session", "shttp", "sieve", "sip", "sips", "sms", "snmp",
+    "soap.beep", "soap.beeps", "stun", "stuns", "tag", "tel", "telnet", "tftp", "thismessage",
+    "tip",
+    "tn3270", "turn", "turns", "tv", "urn", "vemmi", "vnc", "ws", "wss", "xcon", "xcon-userid",
+    "xmlrpc.beep", "xmlrpc.beeps", "xmpp", "z39.50r", "z39.50s",
+]
 
 private let ignoredSchemes = ["data"]
 private let supportedSchemes = permanentURISchemes.filter { !ignoredSchemes.contains($0) }
@@ -157,7 +176,8 @@ extension URL {
     }
 
     public var origin: String? {
-        guard isWebPage(includeDataURIs: false), let hostPort = self.hostPort, let scheme = scheme else {
+        guard isWebPage(includeDataURIs: false), let hostPort = self.hostPort, let scheme = scheme
+        else {
             return nil
         }
         return "\(scheme)://\(hostPort)"
@@ -182,7 +202,9 @@ extension URL {
     public var absoluteDisplayString: String {
         var urlString = self.absoluteString
         // For http URLs, get rid of the trailing slash if the path is empty or '/'
-        if (self.scheme == "http" || self.scheme == "https") && (self.path == "/") && urlString.hasSuffix("/") {
+        if (self.scheme == "http" || self.scheme == "https") && (self.path == "/")
+            && urlString.hasSuffix("/")
+        {
             urlString = String(urlString[..<urlString.index(urlString.endIndex, offsetBy: -1)])
         }
         // If it's basic http, strip out the string but leave anything else in
@@ -218,7 +240,7 @@ extension URL {
 
         return nil
     }
-    
+
     // Obtain a schemeless absolute string
     public var schemelessAbsoluteString: String {
         guard let scheme = self.scheme else { return absoluteString }
@@ -263,10 +285,11 @@ extension URL {
 
         return self
     }
-    
+
     public var withoutWWW: URL {
         if let normalized = self.normalizedHost(stripWWWSubdomainOnly: true),
-            var components = URLComponents(url: self, resolvingAgainstBaseURL: false) {
+            var components = URLComponents(url: self, resolvingAgainstBaseURL: false)
+        {
             components.scheme = self.scheme
             components.port = self.port
             components.host = normalized
@@ -279,7 +302,9 @@ extension URL {
     public func normalizedHost(stripWWWSubdomainOnly: Bool = false) -> String? {
         // Use components.host instead of self.host since the former correctly preserves
         // brackets for IPv6 hosts, whereas the latter strips them.
-        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false), var host = components.host, host != "" else {
+        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
+            var host = components.host, host != ""
+        else {
             return nil
         }
 
@@ -293,7 +318,7 @@ extension URL {
     }
 
     /**
-    Returns the public portion of the host name determined by the public suffix list found here: https://publicsuffix.org/list/. 
+    Returns the public portion of the host name determined by the public suffix list found here: https://publicsuffix.org/list/.
     For example for the url www.bbc.co.uk, based on the entries in the TLD list, the public suffix would return co.uk.
 
     :returns: The public suffix for within the given hostname.
@@ -306,7 +331,7 @@ extension URL {
         let schemes = includeDataURIs ? ["http", "https", "data"] : ["http", "https"]
         return scheme.map { schemes.contains($0) } ?? false
     }
-    
+
     public func isSecureWebPage() -> Bool {
         return scheme?.contains("https") ?? false
     }
@@ -336,7 +361,7 @@ extension URL {
     public var isIPv6: Bool {
         return host?.contains(":") ?? false
     }
-    
+
     /**
      Returns whether the URL's scheme is one of those listed on the official list of URI schemes.
      This only accepts permanent schemes: historical and provisional schemes are not accepted.
@@ -363,13 +388,17 @@ extension URL {
 
 extension URL {
     public var isReaderModeURL: Bool {
-        let scheme = self.scheme, host = self.host, path = self.path
+        let scheme = self.scheme
+        let host = self.host
+        let path = self.path
         return scheme == "http" && host == "localhost" && path == "/reader-mode/page"
     }
 
     public var decodeReaderModeURL: URL? {
         if self.isReaderModeURL {
-            if let components = URLComponents(url: self, resolvingAgainstBaseURL: false), let queryItems = components.queryItems, queryItems.count == 1 {
+            if let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
+                let queryItems = components.queryItems, queryItems.count == 1
+            {
                 if let queryItem = queryItems.first, let value = queryItem.value {
                     return URL(string: value)
                 }
@@ -379,7 +408,9 @@ extension URL {
     }
 
     public func encodeReaderModeURL(_ baseReaderModeURL: String) -> URL? {
-        if let encodedURL = absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics) {
+        if let encodedURL = absoluteString.addingPercentEncoding(
+            withAllowedCharacters: .alphanumerics
+        ) {
             if let aboutReaderURL = URL(string: "\(baseReaderModeURL)?url=\(encodedURL)") {
                 return aboutReaderURL
             }
@@ -394,27 +425,29 @@ extension URL {
     private var isLocalhost: Bool {
         return scheme == "http" && host == "localhost"
     }
-    
+
     public var isErrorPageURL: Bool {
         return isLocalhost && path.contains("/errors/")
     }
-    
+
     public var safeBrowsingErrorURL: Bool {
         return isLocalhost && path.contains("/errors/SafeBrowsingError.html")
     }
-    
+
     public var isSessionRestoreURL: Bool {
         return isLocalhost && path.contains("/about/sessionrestore")
     }
 
     public var originalURLFromErrorURL: URL? {
         let components = URLComponents(url: self, resolvingAgainstBaseURL: false)
-        if self.isErrorPageURL, let queryURL = components?.queryItems?.find({ $0.name == "url" })?.value {
+        if self.isErrorPageURL,
+            let queryURL = components?.queryItems?.find({ $0.name == "url" })?.value
+        {
             return URL(string: queryURL)
         }
         return nil
     }
-    
+
     // This is a helper function for determining wetherr the url is a Media URL
     // as handled in Rewards lib.
     public var isMediaSiteURL: Bool {
@@ -424,20 +457,20 @@ extension URL {
         }
         return ["youtube", "vimeo", "twitch", "twitter", "reddit"].contains(where: domain.contains)
     }
-    
+
     // Check if the website is a video streaming content site used inside product notifications
     public var isVideoSteamingSiteURL: Bool {
         guard let domain = self.baseDomain else {
             return false
         }
-        
+
         var siteList = ["youtube", "vimeo", "twitch"]
-        
+
         /// Additional sites for Japanese locale
         if Locale.current.regionCode == "JP" {
             siteList.append(contentsOf: ["nicovideo", "tiktok", "instagram"])
         }
-        
+
         return siteList.contains(where: domain.contains)
     }
 }
@@ -476,46 +509,52 @@ extension URL {
 extension URL {
     public var eligibleForPeekAndPop: Bool {
         let ignoredSchemes = ["about"]
-        
+
         guard let scheme = self.scheme else { return false }
-        
+
         if let _ = ignoredSchemes.firstIndex(of: scheme) {
             return false
         }
-        
+
         if self.host == "localhost" {
             return false
         }
-        
+
         return true
     }
-    
+
     public var isImageResource: Bool {
         return ["jpg", "jpeg", "png", "gif"].contains(pathExtension)
     }
-    
+
     public var imageSize: CGSize? {
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let imageSource = CGImageSourceCreateWithURL(self as CFURL, imageSourceOptions),
-            let imageProperties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, imageSourceOptions) as? [AnyHashable: Any],
+            let imageProperties = CGImageSourceCopyPropertiesAtIndex(
+                imageSource,
+                0,
+                imageSourceOptions
+            )
+                as? [AnyHashable: Any],
             let pixelWidth = imageProperties[kCGImagePropertyPixelWidth as String],
-            let pixelHeight = imageProperties[kCGImagePropertyPixelHeight as String] else {
-                return nil
+            let pixelHeight = imageProperties[kCGImagePropertyPixelHeight as String]
+        else {
+            return nil
         }
-        
+
         var width: CGFloat = 0
         var height: CGFloat = 0
-        
+
         // swiftlint:disable force_cast
         CFNumberGetValue((pixelWidth as! CFNumber), .cgFloatType, &width)
-        
+
         // swiftlint:disable force_cast
         CFNumberGetValue((pixelHeight as! CFNumber), .cgFloatType, &height)
-        
+
         guard width > 0, height > 0 else {
             return nil
         }
-        
+
         return CGSize(width: width, height: height)
     }
 }
@@ -526,7 +565,7 @@ extension URL {
     public var isBookmarklet: Bool {
         return self.absoluteString.isBookmarklet
     }
-    
+
     public var bookmarkletCodeComponent: String? {
         return self.absoluteString.bookmarkletCodeComponent
     }
@@ -543,10 +582,9 @@ extension URL {
 extension String {
     public var isBookmarklet: Bool {
         let url = self.lowercased()
-        return url.hasPrefix("javascript:") &&
-            !url.hasPrefix("javascript:/")
+        return url.hasPrefix("javascript:") && !url.hasPrefix("javascript:/")
     }
-    
+
     public var bookmarkletCodeComponent: String? {
         if self.isBookmarklet {
             if let result = String(self.dropFirst("javascript:".count)).removingPercentEncoding {
@@ -555,9 +593,11 @@ extension String {
         }
         return nil
     }
-    
+
     public var bookmarkletURL: URL? {
-        if self.isBookmarklet, let escaped = self.addingPercentEncoding(withAllowedCharacters: .URLAllowed) {
+        if self.isBookmarklet,
+            let escaped = self.addingPercentEncoding(withAllowedCharacters: .URLAllowed)
+        {
             return URL(string: escaped)
         }
         return nil
@@ -565,8 +605,11 @@ extension String {
 }
 
 // MARK: Private Helpers
-private extension URL {
-    func publicSuffixFromHost( _ host: String, withAdditionalParts additionalPartCount: Int) -> String? {
+extension URL {
+    fileprivate func publicSuffixFromHost(
+        _ host: String,
+        withAdditionalParts additionalPartCount: Int
+    ) -> String? {
         if host.isEmpty {
             return nil
         }
@@ -600,7 +643,7 @@ private extension URL {
         *
         *  On the next run through the loop, we set the new domain to check as the part after the next dot,
         *  update the next dot reference to be the string after the new next dot, and check the TLD entries again.
-        *  If we reach the end of the host (nextDot = nil) and we haven't found anything, then we've hit the 
+        *  If we reach the end of the host (nextDot = nil) and we haven't found anything, then we've hit the
         *  top domain level so we use it by default.
         */
 
@@ -612,7 +655,9 @@ private extension URL {
 
         for offset in 0..<tokenCount {
             // Store the offset for use outside of this scope so we can add additional parts if needed
-            let nextDot: String? = offset + 1 < tokenCount ? tokens[offset + 1..<tokenCount].joined(separator: ".") : nil
+            let nextDot: String? =
+                offset + 1 < tokenCount
+                ? tokens[offset + 1..<tokenCount].joined(separator: ".") : nil
 
             if let entry = etldEntries?[currentDomain] {
                 if entry.isWild && (previousDomain != nil) {
@@ -639,11 +684,20 @@ private extension URL {
         if additionalPartCount > 0 {
             if let suffix = suffix {
                 // Take out the public suffixed and add in the additional parts we want.
-                let literalFromEnd: NSString.CompareOptions = [.literal,        // Match the string exactly.
-                                     .backwards,      // Search from the end.
-                                     .anchored]         // Stick to the end.
-                let suffixlessHost = currentHost.replacingOccurrences(of: suffix, with: "", options: literalFromEnd, range: nil)
-                let suffixlessTokens = suffixlessHost.components(separatedBy: ".").filter { $0 != "" }
+                let literalFromEnd: NSString.CompareOptions = [
+                    .literal,  // Match the string exactly.
+                    .backwards,  // Search from the end.
+                    .anchored,
+                ]  // Stick to the end.
+                let suffixlessHost = currentHost.replacingOccurrences(
+                    of: suffix,
+                    with: "",
+                    options: literalFromEnd,
+                    range: nil
+                )
+                let suffixlessTokens = suffixlessHost.components(separatedBy: ".").filter {
+                    $0 != ""
+                }
                 let maxAdditionalCount = max(0, suffixlessTokens.count - additionalPartCount)
                 let additionalParts = suffixlessTokens[maxAdditionalCount..<suffixlessTokens.count]
                 let partsString = additionalParts.joined(separator: ".")

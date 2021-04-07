@@ -2,14 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
 import Storage
+import UIKit
 
 struct SiteTableViewControllerUX {
     static let headerHeight = CGFloat(32)
     static let rowHeight = CGFloat(44)
     static let headerBorderColor = UIColor.Photon.grey30.withAlphaComponent(0.8)
-    static let headerTextColor = UIAccessibility.isDarkerSystemColorsEnabled ? UIColor.black : UIColor.Photon.grey80
+    static let headerTextColor =
+        UIAccessibility.isDarkerSystemColorsEnabled ? UIColor.black : UIColor.Photon.grey80
     static let headerBackgroundColor = UIColor.Photon.grey10
     static let headerFont = UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium)
     static let headerTextMargin = CGFloat(16)
@@ -54,10 +55,16 @@ class SiteTableViewHeader: UITableViewHeaderFooterView {
         // A table view will initialize the header with CGSizeZero before applying the actual size. Hence, the label's constraints
         // must not impose a minimum width on the content view.
         titleLabel.snp.makeConstraints { make in
-            make.left.equalTo(contentView).offset(SiteTableViewControllerUX.headerTextMargin).priority(999)
-            make.right.equalTo(contentView).offset(-SiteTableViewControllerUX.headerTextMargin).priority(999)
-            make.left.greaterThanOrEqualTo(contentView) // Fallback for when the left space constraint breaks
-            make.right.lessThanOrEqualTo(contentView) // Fallback for when the right space constraint breaks
+            make.left.equalTo(contentView).offset(SiteTableViewControllerUX.headerTextMargin)
+                .priority(
+                    999
+                )
+            make.right.equalTo(contentView).offset(-SiteTableViewControllerUX.headerTextMargin)
+                .priority(
+                    999
+                )
+            make.left.greaterThanOrEqualTo(contentView)  // Fallback for when the left space constraint breaks
+            make.right.lessThanOrEqualTo(contentView)  // Fallback for when the right space constraint breaks
             make.centerY.equalTo(contentView)
         }
     }
@@ -67,9 +74,7 @@ class SiteTableViewHeader: UITableViewHeaderFooterView {
     }
 }
 
-/**
- * Provides base shared functionality for site rows and headers.
- */
+/// Provides base shared functionality for site rows and headers.
 @objcMembers
 class SiteTableViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     fileprivate let CellIdentifier = "CellIdentifier"
@@ -95,7 +100,10 @@ class SiteTableViewController: UIViewController, UITableViewDelegate, UITableVie
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(SiteTableViewCell.self, forCellReuseIdentifier: CellIdentifier)
-        tableView.register(SiteTableViewHeader.self, forHeaderFooterViewReuseIdentifier: HeaderIdentifier)
+        tableView.register(
+            SiteTableViewHeader.self,
+            forHeaderFooterViewReuseIdentifier: HeaderIdentifier
+        )
         tableView.layoutMargins = .zero
         tableView.keyboardDismissMode = .onDrag
         tableView.backgroundColor = UIConstants.panelBackgroundColor
@@ -142,10 +150,13 @@ class SiteTableViewController: UIViewController, UITableViewDelegate, UITableVie
         return SiteTableViewControllerUX.rowHeight
     }
 
-    func tableView(_ tableView: UITableView, hasFullWidthSeparatorForRowAtIndexPath indexPath: IndexPath) -> Bool {
+    func tableView(
+        _ tableView: UITableView,
+        hasFullWidthSeparatorForRowAtIndexPath indexPath: IndexPath
+    ) -> Bool {
         return false
     }
-    
+
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         true
     }

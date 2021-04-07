@@ -6,12 +6,16 @@
 
 import Foundation
 import Shared
-@testable import Storage
 import XCTest
+
+@testable import Storage
 
 extension BrowserDB {
     func assertQueryReturns(_ query: String, int: Int) {
-        XCTAssertEqual(int, self.runQuery(query, args: nil, factory: intFactory).value.successValue![0])
+        XCTAssertEqual(
+            int,
+            self.runQuery(query, args: nil, factory: intFactory).value.successValue![0]
+        )
     }
 }
 
@@ -32,7 +36,8 @@ extension BrowserDB {
             """
 
         // Copy its mirror structure.
-        let structureSQL = "INSERT INTO bookmarksMirrorStructure SELECT * FROM bookmarksLocalStructure"
+        let structureSQL =
+            "INSERT INTO bookmarksMirrorStructure SELECT * FROM bookmarksLocalStructure"
 
         // Throw away the old.
         let deleteLocalStructureSQL = "DELETE FROM bookmarksLocalStructure"
@@ -57,7 +62,8 @@ extension BrowserDB {
             FROM bookmarksBuffer
             """
 
-        let structureSQL = "INSERT INTO bookmarksMirrorStructure SELECT * FROM bookmarksBufferStructure"
+        let structureSQL =
+            "INSERT INTO bookmarksMirrorStructure SELECT * FROM bookmarksBufferStructure"
         let deleteBufferStructureSQL = "DELETE FROM bookmarksBufferStructure"
         let deleteBufferSQL = "DELETE FROM bookmarksBuffer"
 
@@ -76,7 +82,8 @@ extension BrowserDB {
             return row[0] as! GUID
         }
 
-        guard let cursor = self.runQuery(sql, args: nil, factory: guidFactory).value.successValue else {
+        guard let cursor = self.runQuery(sql, args: nil, factory: guidFactory).value.successValue
+        else {
             XCTFail("Unable to get cursor.")
             return []
         }
@@ -88,31 +95,50 @@ extension BrowserDB {
         let factory: (SDRow) -> (GUID, Int) = {
             return ($0["child"] as! GUID, $0["idx"] as! Int)
         }
-        let cursor = self.runQuery("SELECT child, idx FROM \(table) WHERE parent = ?", args: args, factory: factory).value.successValue!
-        return cursor.reduce([:], { (dict, pair) in
-            var dict = dict
-            if let (k, v) = pair {
-                dict[k] = v
+        let cursor = self.runQuery(
+            "SELECT child, idx FROM \(table) WHERE parent = ?",
+            args: args,
+            factory: factory
+        ).value.successValue!
+        return cursor.reduce(
+            [:],
+            { (dict, pair) in
+                var dict = dict
+                if let (k, v) = pair {
+                    dict[k] = v
+                }
+                return dict
             }
-            return dict
-        })
+        )
     }
 
     func isLocallyDeleted(_ guid: GUID) -> Bool? {
         let args: Args = [guid]
-        let cursor = self.runQuery("SELECT is_deleted FROM bookmarksLocal WHERE guid = ?", args: args, factory: { $0.getBoolean("is_deleted") }).value.successValue!
+        let cursor = self.runQuery(
+            "SELECT is_deleted FROM bookmarksLocal WHERE guid = ?",
+            args: args,
+            factory: { $0.getBoolean("is_deleted") }
+        ).value.successValue!
         return cursor[0]
     }
 
     func isOverridden(_ guid: GUID) -> Bool? {
         let args: Args = [guid]
-        let cursor = self.runQuery("SELECT is_overridden FROM bookmarksMirror WHERE guid = ?", args: args, factory: { $0.getBoolean("is_overridden") }).value.successValue!
+        let cursor = self.runQuery(
+            "SELECT is_overridden FROM bookmarksMirror WHERE guid = ?",
+            args: args,
+            factory: { $0.getBoolean("is_overridden") }
+        ).value.successValue!
         return cursor[0]
     }
 
     func getSyncStatusForGUID(_ guid: GUID) -> SyncStatus? {
         let args: Args = [guid]
-        let cursor = self.runQuery("SELECT sync_status FROM bookmarksLocal WHERE guid = ?", args: args, factory: { $0[0] as! Int }).value.successValue!
+        let cursor = self.runQuery(
+            "SELECT sync_status FROM bookmarksLocal WHERE guid = ?",
+            args: args,
+            factory: { $0[0] as! Int }
+        ).value.successValue!
         if let raw = cursor[0] {
             return SyncStatus(rawValue: raw)
         }
@@ -128,6 +154,7 @@ extension BrowserDB {
             ORDER BY idx ASC
             """
 
-        return self.runQuery(sql, args: args, factory: { $0[0] as! GUID }).value.successValue!.asArray()
+        return self.runQuery(sql, args: args, factory: { $0[0] as! GUID }).value.successValue!
+            .asArray()
     }
 }

@@ -22,20 +22,37 @@ class TestAppDelegate: AppDelegate {
         launchArguments.forEach { arg in
             if arg.starts(with: LaunchArguments.loadDatabasePrefix) {
                 if launchArguments.contains(LaunchArguments.clearProfile) {
-                    fatalError("Clearing profile and loading a test database is not a supported combination.")
+                    fatalError(
+                        "Clearing profile and loading a test database is not a supported combination."
+                    )
                 }
 
                 // Grab the name of file in the bundle's test-fixtures dir, and copy it to the runtime app dir.
-                let filename = arg.replacingOccurrences(of: LaunchArguments.loadDatabasePrefix, with: "")
-                let input = URL(fileURLWithPath: Bundle(for: TestAppDelegate.self).path(forResource: filename, ofType: nil, inDirectory: "test-fixtures")!)
+                let filename = arg.replacingOccurrences(
+                    of: LaunchArguments.loadDatabasePrefix,
+                    with: ""
+                )
+                let input = URL(
+                    fileURLWithPath: Bundle(for: TestAppDelegate.self).path(
+                        forResource: filename,
+                        ofType: nil,
+                        inDirectory: "test-fixtures"
+                    )!
+                )
                 let profileDir = "\(appRootDir())/profile.testProfile"
-                try? FileManager.default.createDirectory(atPath: profileDir, withIntermediateDirectories: false, attributes: nil)
+                try? FileManager.default.createDirectory(
+                    atPath: profileDir,
+                    withIntermediateDirectories: false,
+                    attributes: nil
+                )
                 let output = URL(fileURLWithPath: "\(profileDir)/browser.db")
 
                 let enumerator = FileManager.default.enumerator(atPath: profileDir)
                 let filePaths = enumerator?.allObjects as! [String]
                 filePaths.filter { $0.contains(".db") }.forEach { item in
-                    try! FileManager.default.removeItem(at: URL(fileURLWithPath: "\(profileDir)/\(item)"))
+                    try! FileManager.default.removeItem(
+                        at: URL(fileURLWithPath: "\(profileDir)/\(item)")
+                    )
                 }
 
                 try! FileManager.default.copyItem(at: input, to: output)
@@ -59,7 +76,10 @@ class TestAppDelegate: AppDelegate {
         return profile
     }
 
-    override func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    override func application(
+        _ application: UIApplication,
+        willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
         // If the app is running from a XCUITest reset all settings in the app
         if ProcessInfo.processInfo.arguments.contains(LaunchArguments.clearProfile) {
             resetApplication()
@@ -77,7 +97,7 @@ class TestAppDelegate: AppDelegate {
         // Clear image cache
         WebImageCacheManager.shared.clearMemoryCache()
         WebImageCacheManager.shared.clearDiskCache()
-        
+
         WebImageCacheWithNoPrivacyProtectionManager.shared.clearMemoryCache()
         WebImageCacheWithNoPrivacyProtectionManager.shared.clearDiskCache()
 
@@ -104,7 +124,10 @@ class TestAppDelegate: AppDelegate {
         }
     }
 
-    override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
         // Speed up the animations to 100 times as fast.
         defer { application.keyWindow?.layer.speed = 100.0 }
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -113,10 +136,13 @@ class TestAppDelegate: AppDelegate {
     func appRootDir() -> String {
         var rootPath = ""
         let sharedContainerIdentifier = AppInfo.sharedContainerIdentifier
-        if let url = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: sharedContainerIdentifier) {
+        if let url = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: sharedContainerIdentifier
+        ) {
             rootPath = url.path
         } else {
-            rootPath = (NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])
+            rootPath =
+                (NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])
         }
         return rootPath
     }

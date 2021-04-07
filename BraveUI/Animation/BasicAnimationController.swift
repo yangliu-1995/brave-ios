@@ -6,16 +6,16 @@ import Foundation
 import UIKit
 
 public protocol BasicAnimationControllerDelegate: class {
-  
-  /// Animate the presentation of a controller
-  ///
-  /// - parameter context: The transitioning context
-  func animatePresentation(context: UIViewControllerContextTransitioning)
-  
-  /// Animate the dismissal of a controller
-  ///
-  /// - parameter context: The transitioning context
-  func animateDismissal(context: UIViewControllerContextTransitioning)
+
+    /// Animate the presentation of a controller
+    ///
+    /// - parameter context: The transitioning context
+    func animatePresentation(context: UIViewControllerContextTransitioning)
+
+    /// Animate the dismissal of a controller
+    ///
+    /// - parameter context: The transitioning context
+    func animateDismissal(context: UIViewControllerContextTransitioning)
 }
 
 /// Defines an animation controller which simply redirects presentation/dismissal animations to its delegate.
@@ -25,41 +25,42 @@ public protocol BasicAnimationControllerDelegate: class {
 ///
 /// It also allows us to access private variables/properties without having to expose them to the animation controller.
 public class BasicAnimationController: NSObject {
-  
-  /// The animation direction
-  public enum Direction {
-    /// The controller is being presented
-    case presenting
-    /// The controller is being dismissed
-    case dismissing
-  }
 
-  /// Whether or not this animation controller is being used for presentation or dismissal
-  public let direction: Direction
-  
-  /// The controller to handle animating
-  private(set) weak var delegate: BasicAnimationControllerDelegate?
-  
-  public init(delegate: BasicAnimationControllerDelegate, direction: Direction) {
-    self.direction = direction
-    self.delegate = delegate
-  }
+    /// The animation direction
+    public enum Direction {
+        /// The controller is being presented
+        case presenting
+        /// The controller is being dismissed
+        case dismissing
+    }
+
+    /// Whether or not this animation controller is being used for presentation or dismissal
+    public let direction: Direction
+
+    /// The controller to handle animating
+    private(set) weak var delegate: BasicAnimationControllerDelegate?
+
+    public init(delegate: BasicAnimationControllerDelegate, direction: Direction) {
+        self.direction = direction
+        self.delegate = delegate
+    }
 }
 
 extension BasicAnimationController: UIViewControllerAnimatedTransitioning {
-  
-  public func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-    // This value doesn't really matter... We could have it assignable as a property if we need it really...
-    return 0.2
-  }
-  
-  public func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-    switch direction {
-    case .presenting:
-      delegate?.animatePresentation(context: transitionContext)
-    case .dismissing:
-      delegate?.animateDismissal(context: transitionContext)
-    }
-  }
-}
 
+    public func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?)
+        -> TimeInterval
+    {
+        // This value doesn't really matter... We could have it assignable as a property if we need it really...
+        return 0.2
+    }
+
+    public func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        switch direction {
+        case .presenting:
+            delegate?.animatePresentation(context: transitionContext)
+        case .dismissing:
+            delegate?.animateDismissal(context: transitionContext)
+        }
+    }
+}

@@ -13,25 +13,22 @@ public protocol PerhapsNoOp {
 }
 
 open class LocalOverrideCompletionOp: PerhapsNoOp {
-    open var processedLocalChanges: Set<GUID> = Set()                // These can be deleted when we're run. Mark mirror as non-overridden, too.
+    open var processedLocalChanges: Set<GUID> = Set()  // These can be deleted when we're run. Mark mirror as non-overridden, too.
 
-    open var mirrorItemsToDelete: Set<GUID> = Set()                  // These were locally or remotely deleted.
-    open var mirrorItemsToInsert: [GUID: BookmarkMirrorItem] = [:]   // These were locally or remotely added.
-    open var mirrorItemsToUpdate: [GUID: BookmarkMirrorItem] = [:]   // These were already in the mirror, but changed.
-    open var mirrorStructures: [GUID: [GUID]] = [:]                  // New or changed structure.
+    open var mirrorItemsToDelete: Set<GUID> = Set()  // These were locally or remotely deleted.
+    open var mirrorItemsToInsert: [GUID: BookmarkMirrorItem] = [:]  // These were locally or remotely added.
+    open var mirrorItemsToUpdate: [GUID: BookmarkMirrorItem] = [:]  // These were already in the mirror, but changed.
+    open var mirrorStructures: [GUID: [GUID]] = [:]  // New or changed structure.
 
-    open var mirrorValuesToCopyFromBuffer: Set<GUID> = Set()         // No need to synthesize BookmarkMirrorItem instances in memory.
+    open var mirrorValuesToCopyFromBuffer: Set<GUID> = Set()  // No need to synthesize BookmarkMirrorItem instances in memory.
     open var mirrorValuesToCopyFromLocal: Set<GUID> = Set()
-    open var modifiedTimes: [Timestamp: [GUID]] = [:]                // Only for copy.
+    open var modifiedTimes: [Timestamp: [GUID]] = [:]  // Only for copy.
 
     open var isNoOp: Bool {
-        return processedLocalChanges.isEmpty &&
-               mirrorValuesToCopyFromBuffer.isEmpty &&
-               mirrorValuesToCopyFromLocal.isEmpty &&
-               mirrorItemsToDelete.isEmpty &&
-               mirrorItemsToInsert.isEmpty &&
-               mirrorItemsToUpdate.isEmpty &&
-               mirrorStructures.isEmpty
+        return processedLocalChanges.isEmpty && mirrorValuesToCopyFromBuffer.isEmpty
+            && mirrorValuesToCopyFromLocal.isEmpty && mirrorItemsToDelete.isEmpty
+            && mirrorItemsToInsert.isEmpty && mirrorItemsToUpdate.isEmpty
+            && mirrorStructures.isEmpty
     }
 
     open func setModifiedTime(_ time: Timestamp, guids: [GUID]) {
@@ -57,7 +54,7 @@ open class LocalOverrideCompletionOp: PerhapsNoOp {
 }
 
 open class BufferCompletionOp: PerhapsNoOp {
-    open var processedBufferChanges: Set<GUID> = Set()    // These can be deleted when we're run.
+    open var processedBufferChanges: Set<GUID> = Set()  // These can be deleted when we're run.
 
     open var isNoOp: Bool {
         return self.processedBufferChanges.isEmpty
@@ -80,7 +77,12 @@ open class BufferUpdatedCompletionOp: PerhapsNoOp {
         return false
     }
 
-    public init(bufferValuesToMoveFromLocal: Set<GUID>, deletedValues: Set<GUID>, mobileRoot: BookmarkMirrorItem, modifiedTime: Timestamp) {
+    public init(
+        bufferValuesToMoveFromLocal: Set<GUID>,
+        deletedValues: Set<GUID>,
+        mobileRoot: BookmarkMirrorItem,
+        modifiedTime: Timestamp
+    ) {
         self.bufferValuesToMoveFromLocal = bufferValuesToMoveFromLocal
         self.deletedValues = deletedValues
         self.mobileRoot = mobileRoot

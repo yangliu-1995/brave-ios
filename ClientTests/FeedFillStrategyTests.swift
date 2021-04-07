@@ -5,6 +5,7 @@
 
 import Foundation
 import XCTest
+
 @testable import Client
 
 // Tests things that all fill strategies should do the same
@@ -15,20 +16,20 @@ class CommonFillStrategyTests: XCTestCase {
         CategoryFillStrategy(
             categories: Set<String>(arrayLiteral: FeedDataSource.topNewsCategory),
             category: \.source.category
-        )
+        ),
     ]
-    
+
     func testFillFromEmptyList() {
         var list: [FeedItem] = []
         for strategy in strategies {
             XCTAssertNil(strategy.next(3, from: &list))
         }
     }
-    
+
     func testInsufficientListCount() {
         var list: [FeedItem] = [
             .init(score: 0, content: .mockArticle, source: .mock),
-            .init(score: 0, content: .mockArticle, source: .mock)
+            .init(score: 0, content: .mockArticle, source: .mock),
         ]
         // We shouldn't fill any items if the length we want is more than whats available
         for strategy in strategies {
@@ -41,30 +42,30 @@ class CommonFillStrategyTests: XCTestCase {
 
 class DefaultFillStrategyTests: XCTestCase {
     let strategy = DefaultFillStrategy()
-    
+
     func testFillSingleItem() {
         let item = FeedItem(score: 0, content: .mockArticle, source: .mock)
         var list: [FeedItem] = [
             item,
             .init(score: 0, content: .mockArticle, source: .mock),
-            .init(score: 0, content: .mockArticle, source: .mock)
+            .init(score: 0, content: .mockArticle, source: .mock),
         ]
         let listCopy = list
         XCTAssertEqual(strategy.next(from: &list), item)
         XCTAssertEqual(list.count, listCopy.count - 1)
     }
-    
+
     func testFillSuccessfully() {
         var list: [FeedItem] = [
             .init(score: 0, content: .mockArticle, source: .mock),
             .init(score: 0, content: .mockArticle, source: .mock),
-            .init(score: 0, content: .mockArticle, source: .mock)
+            .init(score: 0, content: .mockArticle, source: .mock),
         ]
         let listCopy = list
         XCTAssertEqual(strategy.next(3, from: &list), listCopy)
         XCTAssert(list.isEmpty)
     }
-    
+
     func testFillWithPredicate() {
         let adjustedScoresList: [FeedItem] = (0..<3).map { _ in
             var article: FeedItem.Content = .mockArticle
@@ -72,8 +73,8 @@ class DefaultFillStrategyTests: XCTestCase {
             return .init(score: 0, content: article, source: .mock)
         }
         var list: [FeedItem] =
-            (0..<3).map { _ in .init(score: 0, content: .mockArticle, source: .mock) } +
-            adjustedScoresList
+            (0..<3).map { _ in .init(score: 0, content: .mockArticle, source: .mock) }
+            + adjustedScoresList
         let listCopy = list
         let items = strategy.next(3, from: &list, where: { $0.content.baseScore >= 10 })
         XCTAssertEqual(items, adjustedScoresList)
@@ -88,14 +89,14 @@ class FilteredFillStrategyTests: XCTestCase {
         var list: [FeedItem] = [
             .init(score: 0, content: .mockArticle, source: .mock),
             .init(score: 0, content: .mockArticle, source: .mock),
-            .init(score: 0, content: .mockArticle, source: .mock)
+            .init(score: 0, content: .mockArticle, source: .mock),
         ]
         // No items have title == Special Title, so should return nil
         XCTAssertNil(strategy.next(3, from: &list))
         // No items should be removed from items
         XCTAssertEqual(list.count, 3)
     }
-    
+
     func testFillSuccessfully() {
         var list: [FeedItem] = (0..<3).map { _ in
             var article: FeedItem.Content = .mockArticle
@@ -106,7 +107,7 @@ class FilteredFillStrategyTests: XCTestCase {
         XCTAssertEqual(strategy.next(3, from: &list), listCopy)
         XCTAssert(list.isEmpty)
     }
-    
+
     func testFillWithAdditionalPredicate() {
         let adjustedScoresList: [FeedItem] = (0..<3).map { _ in
             var article: FeedItem.Content = .mockArticle
@@ -115,8 +116,8 @@ class FilteredFillStrategyTests: XCTestCase {
             return .init(score: 0, content: article, source: .mock)
         }
         var list: [FeedItem] =
-            (0..<3).map { _ in .init(score: 0, content: .mockArticle, source: .mock) } +
-        adjustedScoresList
+            (0..<3).map { _ in .init(score: 0, content: .mockArticle, source: .mock) }
+            + adjustedScoresList
         let listCopy = list
         let items = strategy.next(3, from: &list, where: { $0.content.baseScore >= 10 })
         XCTAssertEqual(items, adjustedScoresList)
@@ -159,7 +160,7 @@ private let mockCategories = [
     "Travel",
     "Entertainment",
     "Home",
-    "Tech"
+    "Tech",
 ]
 
 extension FeedItem.Source {

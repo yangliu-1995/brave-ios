@@ -10,7 +10,7 @@ import Foundation
 /// TODO: Replace usages of this with Combine/@Published when minimum deployment target is iOS 13
 @propertyWrapper struct Observable<ValueType> {
     typealias Handler = (_ oldValue: ValueType, _ newValue: ValueType) -> Void
-    
+
     private class Observer {
         let closure: Handler
         let queue: DispatchQueue
@@ -20,7 +20,7 @@ import Foundation
         }
     }
     private var observers = NSMapTable<AnyObject, Observer>.weakToStrongObjects()
-    
+
     mutating func observe(
         from object: AnyObject,
         on queue: DispatchQueue = .main,
@@ -28,11 +28,11 @@ import Foundation
     ) {
         observers.setObject(Observer(queue, handler), forKey: object)
     }
-    
+
     init(wrappedValue: ValueType) {
         self.wrappedValue = wrappedValue
     }
-    
+
     var wrappedValue: ValueType {
         didSet {
             guard let iterator = observers.objectEnumerator() else { return }

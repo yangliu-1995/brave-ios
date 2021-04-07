@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import XCTest
+
 @testable import Client
 
 class NTPDownloaderTests: XCTestCase {
@@ -12,18 +13,18 @@ class NTPDownloaderTests: XCTestCase {
         XCTAssert(NTPDownloader.isCampaignEnded(data: emptyJson.asData))
         XCTAssert(NTPDownloader.isCampaignEnded(data: schemaKeyJson.asData))
         XCTAssert(NTPDownloader.isCampaignEnded(data: noWallpapersJson.asData))
-        
+
         XCTAssertFalse(NTPDownloader.isCampaignEnded(data: validJson.asData))
     }
 
     // MARK: - Json input
-    
+
     private let emptyJson =
         """
         {
         }
         """
-    
+
     // Regression test:
     // Adding schemakey to empty json caused regression on campaign invalidation logic.
     private let schemaKeyJson =
@@ -32,7 +33,7 @@ class NTPDownloaderTests: XCTestCase {
             "schemaVersion": 1
         }
         """
-    
+
     private let noWallpapersJson =
         """
         {
@@ -46,7 +47,7 @@ class NTPDownloaderTests: XCTestCase {
             "wallpapers": []
         }
         """
-    
+
     // Taken from an old campaign, brand replaced with Brave.
     private let validJson =
         """
@@ -88,8 +89,8 @@ class NTPDownloaderTests: XCTestCase {
         """
 }
 
-private extension String {
-    var asData: Data {
+extension String {
+    fileprivate var asData: Data {
         Data(self.utf8)
     }
 }

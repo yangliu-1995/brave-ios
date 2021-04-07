@@ -3,8 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import Foundation
 import BraveRewards
+import Foundation
 import Shared
 
 /// A set of helpers for `RewardsInternalsFileGenerator` to use to generate data to share with support
@@ -45,62 +45,62 @@ struct RewardsInternalsSharable: Equatable {
     /// The file path will be a temporary directory and will be removed after the user dismisses
     /// the share sheet.
     var generator: RewardsInternalsFileGenerator
-    
+
     static func == (lhs: RewardsInternalsSharable, rhs: RewardsInternalsSharable) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
     static let basic = RewardsInternalsSharable(
         id: "basic",
         title: Strings.RewardsInternals.sharableBasicTitle,
         description: Strings.RewardsInternals.sharableBasicDescription,
         generator: RewardsInternalsBasicInfoGenerator()
     )
-    
+
     static let logs = RewardsInternalsSharable(
         id: "logs",
         title: Strings.RewardsInternals.logsTitle,
         description: Strings.RewardsInternals.sharableLogsDescription,
         generator: RewardsInternalsLogsGenerator()
     )
-    
+
     static let promotions = RewardsInternalsSharable(
         id: "promotions",
         title: Strings.RewardsInternals.promotionsTitle,
         description: Strings.RewardsInternals.sharablePromotionsDescription,
         generator: RewardsInternalsPromotionsGenerator()
     )
-    
+
     static let contributions = RewardsInternalsSharable(
         id: "contributions",
         title: Strings.RewardsInternals.contributionsTitle,
         description: Strings.RewardsInternals.sharableContributionsDescription,
         generator: RewardsInternalsContributionsGenerator()
     )
-    
+
     static let database = RewardsInternalsSharable(
         id: "database",
         title: Strings.RewardsInternals.sharableDatabaseTitle,
         description: Strings.RewardsInternals.sharableDatabaseDescription,
         generator: RewardsInternalsDatabaseGenerator()
     )
-    
+
     /// The default set of sharables when sharing from the main Rewards Internals screen
     static let `default`: [RewardsInternalsSharable] = [
         .basic
     ]
-    
+
     /// A set of all the available sharables
     static let all: [RewardsInternalsSharable] = [
         .basic
     ]
-    
+
     /// A set of sharables for QA
     static let qa: [RewardsInternalsSharable] = [
         .basic,
         .promotions,
         .contributions,
-        .database
+        .database,
     ]
 }
 
@@ -110,11 +110,17 @@ enum RewardsInternalsSharableError: Error {
 
 /// A file generator that copies the Rewards ledger database into the sharable path
 private struct RewardsInternalsDatabaseGenerator: RewardsInternalsFileGenerator {
-    func generateFiles(at path: String, using builder: RewardsInternalsSharableBuilder, completion: @escaping (Error?) -> Void) {
+    func generateFiles(
+        at path: String,
+        using builder: RewardsInternalsSharableBuilder,
+        completion: @escaping (Error?) -> Void
+    ) {
         // Move Rewards database to path
         do {
             let dbPath = URL(fileURLWithPath: builder.ledger.rewardsDatabasePath)
-            let newPath = URL(fileURLWithPath: path).appendingPathComponent(dbPath.lastPathComponent)
+            let newPath = URL(fileURLWithPath: path).appendingPathComponent(
+                dbPath.lastPathComponent
+            )
             try FileManager.default.copyItem(atPath: dbPath.path, toPath: newPath.path)
             completion(nil)
         } catch {

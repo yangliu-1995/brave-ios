@@ -11,10 +11,12 @@ extension UIPasteboard {
         let isGIF = data.isGIF
 
         // Setting pasteboard.items allows us to set multiple representations for the same item.
-        items = [[
-            kUTTypeURL as String: url,
-            imageTypeKey(isGIF): data
-        ]]
+        items = [
+            [
+                kUTTypeURL as String: url,
+                imageTypeKey(isGIF): data,
+            ]
+        ]
     }
 
     fileprivate func imageTypeKey(_ isGIF: Bool) -> String {
@@ -32,7 +34,7 @@ extension UIPasteboard {
     /// When iCloud pasteboards are enabled, the usually fast, synchronous calls
     /// become slow and synchronous causing very slow start up times.
     func asyncString() -> Deferred<Maybe<String?>> {
-        return fetchAsync() {
+        return fetchAsync {
             return UIPasteboard.general.string
         }
     }
@@ -42,7 +44,7 @@ extension UIPasteboard {
     /// we already use; but use optionals instead of errorTypes, because not having a URL
     /// on the clipboard isn't an error.
     func asyncURL() -> Deferred<Maybe<URL?>> {
-        return fetchAsync() {
+        return fetchAsync {
             return self.syncURL
         }
     }
@@ -56,13 +58,18 @@ extension UIPasteboard {
         }
         return deferred
     }
-    
+
     /// Clears clipboard after certain amount of seconds and returns its timer.
     @discardableResult func clear(after seconds: TimeInterval = 0) -> Timer {
-        return Timer.scheduledTimer(timeInterval: seconds, target: self, selector: #selector(clearPasteboard),
-                                    userInfo: nil, repeats: false)
+        return Timer.scheduledTimer(
+            timeInterval: seconds,
+            target: self,
+            selector: #selector(clearPasteboard),
+            userInfo: nil,
+            repeats: false
+        )
     }
-    
+
     @objc func clearPasteboard() {
         UIPasteboard.general.string = ""
     }

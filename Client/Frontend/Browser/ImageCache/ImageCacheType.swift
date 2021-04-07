@@ -19,10 +19,10 @@ enum ImageCacheType: Int, CustomDebugStringConvertible {
         switch self {
         case .none:
             return "Image was not available in the cache, but was downloaded from the web"
-            
+
         case .memory:
             return "Image was obtained from the memory cache"
-            
+
         case .disk:
             return "Image was obtained from the disk cache"
         }

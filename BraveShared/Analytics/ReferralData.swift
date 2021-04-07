@@ -18,7 +18,12 @@ struct ReferralData {
         return offerPage != nil
     }
 
-    init(downloadId: String, code: String, offerPage: String? = nil, customHeaders: [CustomHeaderData]? = nil) {
+    init(
+        downloadId: String,
+        code: String,
+        offerPage: String? = nil,
+        customHeaders: [CustomHeaderData]? = nil
+    ) {
         self.downloadId = downloadId
         self.referralCode = code
 
@@ -27,7 +32,8 @@ struct ReferralData {
     }
 
     init?(json: JSON) {
-        guard let downloadId = json["download_id"].string, let code = json["referral_code"].string else {
+        guard let downloadId = json["download_id"].string, let code = json["referral_code"].string
+        else {
             log.error("Failed to unwrap json to Referral struct.")
             UrpLog.log("Failed to unwrap json to Referral struct. \(json)")
             return nil

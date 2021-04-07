@@ -1,8 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import BraveShared
 import Foundation
 import Shared
-import BraveShared
 
 private let log = Logger.browserLogger
 
@@ -13,27 +13,27 @@ struct PreloadedFavorites {
     static func getList() -> [FavoriteSite] {
         func appendPopularEnglishWebsites() -> [FavoriteSite] {
             var list = [FavoriteSite]()
-            
+
             if let url = URL(string: "https://m.youtube.com") {
                 list.append(FavoriteSite(url: url, title: "YouTube"))
             }
-            
+
             if let url = URL(string: "https://www.amazon.com/") {
                 list.append(FavoriteSite(url: url, title: "Amazon"))
             }
-            
+
             if let url = URL(string: "https://www.wikipedia.org/") {
                 list.append(FavoriteSite(url: url, title: "Wikipedia"))
             }
-            
+
             if let url = URL(string: "https://mobile.twitter.com/") {
                 list.append(FavoriteSite(url: url, title: "Twitter"))
             }
-            
+
             if let url = URL(string: "https://reddit.com/") {
                 list.append(FavoriteSite(url: url, title: "Reddit"))
             }
-            
+
             if let url = URL(string: "https://brave.com/msupport/") {
                 list.append(FavoriteSite(url: url, title: Strings.NTP.braveSupportFavoriteTitle))
             }
@@ -44,7 +44,7 @@ struct PreloadedFavorites {
         var preloadedFavorites = [FavoriteSite]()
 
         // Locale consists of language and region, region makes more sense when it comes to setting preloaded websites imo.
-        let region = Locale.current.regionCode ?? "" // Empty string will go to the default switch case
+        let region = Locale.current.regionCode ?? ""  // Empty string will go to the default switch case
         log.debug("Preloading favorites, current region: \(region)")
 
         switch region {

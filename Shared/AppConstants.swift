@@ -10,7 +10,7 @@ public enum AppBuildChannel: String {
     case dev
     case enterprise
     case debug
-    
+
     /// Whether this release channel is used/seen by external users (app store or testers)
     public var isPublic: Bool {
         // Using switch to force a return definition for each enum value
@@ -23,15 +23,15 @@ public enum AppBuildChannel: String {
             return false
         }
     }
-    
+
     public var serverChannelParam: String {
         switch self {
         case .release:
             return "release"
         case .beta:
             return "beta"
-         case .dev:
-             // This is designed to follow desktop platform
+        case .dev:
+            // This is designed to follow desktop platform
             return "developer"
         case .debug, .enterprise:
             return "invalid"
@@ -52,7 +52,9 @@ public enum KVOConstants: String {
 }
 
 public struct AppConstants {
-    public static let isRunningTest = NSClassFromString("XCTestCase") != nil || ProcessInfo.processInfo.arguments.contains(LaunchArguments.test)
+    public static let isRunningTest =
+        NSClassFromString("XCTestCase") != nil
+        || ProcessInfo.processInfo.arguments.contains(LaunchArguments.test)
 
     /// Build Channel.
     public static let buildChannel: AppBuildChannel = {
@@ -68,7 +70,7 @@ public struct AppConstants {
             return AppBuildChannel.debug
         #endif
     }()
-    
+
     public static func iOSVersionGreaterThanOrEqual(to version: Int) -> Bool {
         ProcessInfo().operatingSystemVersion.majorVersion >= version
     }

@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import SnapKit
 import Shared
+import SnapKit
 
 private struct TabsButtonUX {
     static let cornerRadius: CGFloat = 2
@@ -16,7 +16,7 @@ class TabsButton: UIButton {
 
     private var textColor = UIColor.Photon.white100
     private var highlightTextColor: UIColor?
-    
+
     private var currentCount: Int?
     private var top: Bool
 
@@ -25,7 +25,7 @@ class TabsButton: UIButton {
             updateButtonVisuals()
         }
     }
-    
+
     private func updateButtonVisuals() {
         let highlightedTextColor = highlightTextColor ?? textColor
         let foregroundColor = isHighlighted ? highlightedTextColor : textColor
@@ -64,7 +64,7 @@ class TabsButton: UIButton {
         border.isUserInteractionEnabled = false
         return border
     }()
-    
+
     required init(top: Bool) {
         self.top = top
         super.init(frame: .zero)
@@ -74,7 +74,7 @@ class TabsButton: UIButton {
         accessibilityTraits.insert(.button)
         self.accessibilityLabel = Strings.showTabs
     }
-    
+
     override init(frame: CGRect) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -95,7 +95,7 @@ class TabsButton: UIButton {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     func updateTabCount(_ count: Int) {
         let count = max(count, 1)
         // Sometimes tabs count state is held in the cloned tabs button.
@@ -110,10 +110,9 @@ class TabsButton: UIButton {
 extension TabsButton: Themeable {
     func applyTheme(_ theme: Theme) {
         styleChildren(theme: theme)
-        
+
         textColor = top ? theme.colors.tints.header : theme.colors.tints.footer
         highlightTextColor = theme.colors.accent
         updateButtonVisuals()
     }
 }
-

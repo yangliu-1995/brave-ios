@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import Storage
 import Shared
+import Storage
 
 /*
  * A class that adheres to all the requirements for a profile's history property
@@ -21,7 +21,7 @@ class MockableHistory: BrowserHistory, SyncableHistory, ResettableSyncStorage {
     func removeHostFromTopSites(_ host: String) -> Success { fatalError() }
     func clearTopSitesCache() -> Success { fatalError() }
     func removeFromPinnedTopSites(_ site: Site) -> Success { fatalError() }
-    func isPinnedTopSite(_ url: String) -> Deferred<Maybe<Bool>> { fatalError()}
+    func isPinnedTopSite(_ url: String) -> Deferred<Maybe<Bool>> { fatalError() }
     func addPinnedTopSite(_ site: Site) -> Success { fatalError() }
     func getPinnedTopSites() -> Deferred<Maybe<Cursor<Site>>> { fatalError() }
     func getSitesByLastVisit(_ limit: Int) -> Deferred<Maybe<Cursor<Site>>> { fatalError() }
@@ -32,14 +32,17 @@ class MockableHistory: BrowserHistory, SyncableHistory, ResettableSyncStorage {
     func ensurePlaceWithURL(_ url: String, hasGUID guid: GUID) -> Success { fatalError() }
     func deleteByGUID(_ guid: GUID, deletedAt: Timestamp) -> Success { fatalError() }
     func storeRemoteVisits(_ visits: [Visit], forGUID guid: GUID) -> Success { fatalError() }
-    func insertOrUpdatePlace(_ place: Place, modified: Timestamp) -> Deferred<Maybe<GUID>> { fatalError() }
+    func insertOrUpdatePlace(_ place: Place, modified: Timestamp) -> Deferred<Maybe<GUID>> {
+        fatalError()
+    }
     func getModifiedHistoryToUpload() -> Deferred<Maybe<[(Place, [Visit])]>> { fatalError() }
     func getDeletedHistoryToUpload() -> Deferred<Maybe<[GUID]>> { fatalError() }
-    func markAsSynchronized(_: [GUID], modified: Timestamp) -> Deferred<Maybe<Timestamp>> { fatalError() }
+    func markAsSynchronized(_: [GUID], modified: Timestamp) -> Deferred<Maybe<Timestamp>> {
+        fatalError()
+    }
     func markAsDeleted(_ guids: [GUID]) -> Success { fatalError() }
     func doneApplyingRecordsAfterDownload() -> Success { fatalError() }
     func doneUpdatingMetadataAfterUpload() -> Success { fatalError() }
     func hasSyncedHistory() -> Deferred<Maybe<Bool>> { fatalError() }
     func resetClient() -> Success { fatalError() }
 }
-

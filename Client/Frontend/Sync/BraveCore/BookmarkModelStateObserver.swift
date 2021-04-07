@@ -3,12 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import Foundation
 import BraveRewards
+import Foundation
 
 class BookmarkModelStateObserver: NSObject, BookmarkModelObserver {
     private let listener: (StateChange) -> Void
-    
+
     enum StateChange {
         case modelLoaded
         case nodeChanged(BookmarkNode)
@@ -18,35 +18,39 @@ class BookmarkModelStateObserver: NSObject, BookmarkModelObserver {
         case nodeDeleted(_ node: BookmarkNode, _ from: BookmarkNode)
         case allRemoved
     }
-    
+
     init(_ listener: @escaping (StateChange) -> Void) {
         self.listener = listener
     }
-    
+
     func bookmarkModelLoaded() {
         self.listener(.modelLoaded)
     }
-    
+
     func bookmarkNodeChanged(_ bookmarkNode: BookmarkNode) {
         self.listener(.nodeChanged(bookmarkNode))
     }
-    
+
     func bookmarkNodeFaviconChanged(_ bookmarkNode: BookmarkNode) {
         self.listener(.favIconChanged(bookmarkNode))
     }
-    
+
     func bookmarkNodeChildrenChanged(_ bookmarkNode: BookmarkNode) {
         self.listener(.childrenChanged(bookmarkNode))
     }
-    
-    func bookmarkNode(_ bookmarkNode: BookmarkNode, movedFromParent oldParent: BookmarkNode, toParent newParent: BookmarkNode) {
+
+    func bookmarkNode(
+        _ bookmarkNode: BookmarkNode,
+        movedFromParent oldParent: BookmarkNode,
+        toParent newParent: BookmarkNode
+    ) {
         self.listener(.nodeMoved(bookmarkNode, oldParent, newParent))
     }
-    
+
     func bookmarkNodeDeleted(_ node: BookmarkNode, fromFolder folder: BookmarkNode) {
         self.listener(.nodeDeleted(node, folder))
     }
-    
+
     func bookmarkModelRemovedAllNodes() {
         self.listener(.allRemoved)
     }

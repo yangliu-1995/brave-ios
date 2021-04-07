@@ -4,24 +4,25 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import XCTest
+
 @testable import Client
 
 class UserScriptManagerTest: XCTestCase {
     func testisMessageHandlerTokenMissing() {
         var body: [String: Any] = [
             "data": 1,
-            "securitytoken": UserScriptManager.messageHandlerToken.uuidString
+            "securitytoken": UserScriptManager.messageHandlerToken.uuidString,
         ]
         XCTAssertFalse(UserScriptManager.isMessageHandlerTokenMissing(in: body))
 
         body = [
             "data": 1,
-            "securitytoken": "test"
+            "securitytoken": "test",
         ]
         XCTAssertTrue(UserScriptManager.isMessageHandlerTokenMissing(in: body))
 
         body = [
-            "data": 1,
+            "data": 1
         ]
         XCTAssertTrue(UserScriptManager.isMessageHandlerTokenMissing(in: body))
     }

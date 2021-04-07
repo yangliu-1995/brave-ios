@@ -46,7 +46,10 @@ class ToggleButton: UIButton {
             startPath.addEllipse(in: CGRect(origin: maskShapeLayer.position, size: .zero))
 
             let largerPath = CGMutablePath()
-            let largerBounds = endFrame.insetBy(dx: -WidgetUX.expandDelta, dy: -WidgetUX.expandDelta)
+            let largerBounds = endFrame.insetBy(
+                dx: -WidgetUX.expandDelta,
+                dy: -WidgetUX.expandDelta
+            )
             largerPath.addEllipse(in: largerBounds)
 
             let endPath = CGMutablePath()
@@ -56,7 +59,7 @@ class ToggleButton: UIButton {
             animation.values = [
                 startPath,
                 largerPath,
-                endPath
+                endPath,
             ]
             animation.duration = WidgetUX.showDuration
             self.maskShapeLayer.path = endPath
@@ -111,7 +114,10 @@ class ToggleButton: UIButton {
 
         // Make the gradient larger than normal to allow the mask transition to show when it blows up
         // a little larger than the resting size
-        backgroundLayer.bounds = backgroundView.frame.insetBy(dx: -WidgetUX.expandDelta, dy: -WidgetUX.expandDelta)
+        backgroundLayer.bounds = backgroundView.frame.insetBy(
+            dx: -WidgetUX.expandDelta,
+            dy: -WidgetUX.expandDelta
+        )
         maskShapeLayer.bounds = backgroundView.frame
         backgroundLayer.position = CGPoint(x: zeroFrame.midX, y: zeroFrame.midY)
         maskShapeLayer.position = CGPoint(x: zeroFrame.midX, y: zeroFrame.midY)

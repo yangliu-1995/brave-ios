@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import BraveShared
 import Foundation
 import Shared
-import BraveShared
 
 public struct ClipboardBarToastUX {
     static let toastDelay = DispatchTimeInterval.milliseconds(4000)
@@ -24,29 +24,54 @@ class ClipboardBarDisplayHandler: NSObject, URLChangeDelegate {
     private var lastDisplayedURL: String?
     private weak var firstTab: Tab?
     var clipboardToast: ButtonToast?
-    
+
     init(tabManager: TabManager) {
         self.tabManager = tabManager
 
         super.init()
 
-        NotificationCenter.default.addObserver(self, selector: #selector(UIPasteboardChanged), name: UIPasteboard.changedNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForegroundNotification), name: UIApplication.willEnterForegroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(didRestoreSession), name: .didRestoreSession, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(UIPasteboardChanged),
+            name: UIPasteboard.changedNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForegroundNotification),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(didRestoreSession),
+            name: .didRestoreSession,
+            object: nil
+        )
     }
-    
+
     @objc private func UIPasteboardChanged() {
         // UIPasteboardChanged gets triggered when calling UIPasteboard.general.
-         NotificationCenter.default.removeObserver(self, name: UIPasteboard.changedNotification, object: nil)
+        NotificationCenter.default.removeObserver(
+            self,
+            name: UIPasteboard.changedNotification,
+            object: nil
+        )
 
         UIPasteboard.general.asyncURL().uponQueue(.main) { res in
             defer {
-                NotificationCenter.default.addObserver(self, selector: #selector(self.UIPasteboardChanged), name: UIPasteboard.changedNotification, object: nil)
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(self.UIPasteboardChanged),
+                    name: UIPasteboard.changedNotification,
+                    object: nil
+                )
             }
 
             guard let copiedURL: URL? = res.successValue,
-                let url = copiedURL else {
-                    return
+                let url = copiedURL
+            else {
+                return
             }
             self.lastDisplayedURL = url.absoluteString
         }
@@ -70,7 +95,8 @@ class ClipboardBarDisplayHandler: NSObject, URLChangeDelegate {
     @objc private func didRestoreSession() {
         DispatchQueue.main.sync {
             if let tabManager = self.tabManager,
-                let firstTab = tabManager.selectedTab {
+                let firstTab = tabManager.selectedTab
+            {
                 self.observeURLForFirstTab(firstTab: firstTab)
             } else {
                 firstTabLoaded = true
@@ -87,7 +113,10 @@ class ClipboardBarDisplayHandler: NSObject, URLChangeDelegate {
         // Ugly hack to ensure we wait until we're finished restoring the session on the first tab
         // before checking if we should display the clipboard bar.
         guard sessionRestored,
-            !url.absoluteString.hasPrefix("\(WebServer.sharedInstance.base)/about/sessionrestore?history=") else {
+            !url.absoluteString.hasPrefix(
+                "\(WebServer.sharedInstance.base)/about/sessionrestore?history="
+            )
+        else {
             return
         }
 
@@ -97,16 +126,15 @@ class ClipboardBarDisplayHandler: NSObject, URLChangeDelegate {
     }
 
     private func shouldDisplayBar(_ copiedURL: String) -> Bool {
-        if !sessionStarted ||
-            !sessionRestored ||
-            !firstTabLoaded ||
-            isClipboardURLAlreadyDisplayed(copiedURL) {
+        if !sessionStarted || !sessionRestored || !firstTabLoaded
+            || isClipboardURLAlreadyDisplayed(copiedURL)
+        {
             return false
         }
         sessionStarted = false
         return true
     }
-    
+
     // If we already displayed this URL on the previous session, or in an already open
     // tab, we shouldn't display it again
     private func isClipboardURLAlreadyDisplayed(_ clipboardURL: String) -> Bool {
@@ -115,12 +143,13 @@ class ClipboardBarDisplayHandler: NSObject, URLChangeDelegate {
         }
 
         if let url = URL(string: clipboardURL),
-            let _ = tabManager?.getTabFor(url) {
+            let _ = tabManager?.getTabFor(url)
+        {
             return true
         }
         return false
     }
-    
+
     func checkIfShouldDisplayBar() {
         guard Preferences.General.showClipboardBar.value else {
             // There's no point in doing any of this work unless the
@@ -129,7 +158,8 @@ class ClipboardBarDisplayHandler: NSObject, URLChangeDelegate {
         }
         UIPasteboard.general.asyncURL().uponQueue(.main) { res in
             guard let copiedURL: URL? = res.successValue,
-                let url = copiedURL else {
+                let url = copiedURL
+            else {
                 return
             }
 
@@ -150,7 +180,8 @@ class ClipboardBarDisplayHandler: NSObject, URLChangeDelegate {
                         if buttonPressed {
                             self.delegate?.settingsOpenURLInNewTab(url)
                         }
-            })
+                    }
+                )
 
             if let toast = self.clipboardToast {
                 self.delegate?.shouldDisplay(clipboardBar: toast)

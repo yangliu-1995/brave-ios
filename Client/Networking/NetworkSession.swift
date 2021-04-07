@@ -16,15 +16,15 @@ extension URLSession: NetworkSession {
         let task = dataTask(with: url) { data, response, error in
             completion(data, response, error)
         }
-        
+
         task.resume()
     }
-    
+
     func dataRequest(with urlRequest: URLRequest, completion: @escaping NetworkSessionDataResponse) {
         let task = dataTask(with: urlRequest) { data, response, error in
             completion(data, response, error)
         }
-        
+
         task.resume()
     }
 }

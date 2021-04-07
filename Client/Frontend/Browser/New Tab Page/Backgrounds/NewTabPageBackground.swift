@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import Foundation
 import BraveShared
 import BraveUI
+import Foundation
 
 /// The current background for a given New Tab Page.
 ///
@@ -17,7 +17,8 @@ class NewTabPageBackground: PreferencesObserver {
     /// The source of new tab page backgrounds
     private let dataSource: NTPDataSource
     /// The current background image & possibly sponsor
-    private(set) var currentBackground: (wallpaper: NTPBackground, type: NTPDataSource.BackgroundType)? {
+    private(set) var currentBackground: (wallpaper: NTPBackground, type: NTPDataSource.BackgroundType)?
+    {
         didSet {
             wallpaperId = UUID()
             changed?()
@@ -43,25 +44,29 @@ class NewTabPageBackground: PreferencesObserver {
     init(dataSource: NTPDataSource) {
         self.dataSource = dataSource
         self.currentBackground = dataSource.newBackground()
-        
+
         Preferences.NewTabPage.backgroundImages.observe(from: self)
         Preferences.NewTabPage.backgroundSponsoredImages.observe(from: self)
         Preferences.NewTabPage.selectedCustomTheme.observe(from: self)
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    
+
     private var timer: Timer?
-    
+
     func preferencesDidChange(for key: String) {
         // Debounce multiple changes to preferences, since toggling bg images
         // cause sponsored images to also be toggled at the same time
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false, block: { [weak self] _ in
-            guard let self = self else { return }
-            self.currentBackground = self.dataSource.newBackground()
-        })
+        timer = Timer.scheduledTimer(
+            withTimeInterval: 0.25,
+            repeats: false,
+            block: { [weak self] _ in
+                guard let self = self else { return }
+                self.currentBackground = self.dataSource.newBackground()
+            }
+        )
     }
 }

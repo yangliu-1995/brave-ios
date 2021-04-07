@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
 import Shared
+import UIKit
 
 private struct ReaderModeStyleViewControllerUX {
     // TODO Erica can't find this to visually test
@@ -39,7 +39,10 @@ private struct ReaderModeStyleViewControllerUX {
 // MARK: -
 
 protocol ReaderModeStyleViewControllerDelegate {
-    func readerModeStyleViewController(_ readerModeStyleViewController: ReaderModeStyleViewController, didConfigureStyle style: ReaderModeStyle)
+    func readerModeStyleViewController(
+        _ readerModeStyleViewController: ReaderModeStyleViewController,
+        didConfigureStyle style: ReaderModeStyle
+    )
 }
 
 // MARK: -
@@ -56,9 +59,13 @@ class ReaderModeStyleViewController: UIViewController {
     override func viewDidLoad() {
         // Our preferred content size has a fixed width and height based on the rows + padding
 
-        preferredContentSize = CGSize(width: ReaderModeStyleViewControllerUX.width, height: ReaderModeStyleViewControllerUX.height)
+        preferredContentSize = CGSize(
+            width: ReaderModeStyleViewControllerUX.width,
+            height: ReaderModeStyleViewControllerUX.height
+        )
 
-        popoverPresentationController?.backgroundColor = ReaderModeStyleViewControllerUX.fontTypeRowBackground
+        popoverPresentationController?.backgroundColor =
+            ReaderModeStyleViewControllerUX.fontTypeRowBackground
 
         // Font type row
 
@@ -74,7 +81,7 @@ class ReaderModeStyleViewController: UIViewController {
 
         fontTypeButtons = [
             FontTypeButton(fontType: ReaderModeFontType.sansSerif),
-            FontTypeButton(fontType: ReaderModeFontType.serif)
+            FontTypeButton(fontType: ReaderModeFontType.serif),
         ]
 
         setupButtons(fontTypeButtons, inRow: fontTypeRow, action: #selector(changeFontType))
@@ -102,7 +109,7 @@ class ReaderModeStyleViewController: UIViewController {
         fontSizeButtons = [
             FontSizeButton(fontSizeAction: FontSizeAction.smaller),
             FontSizeButton(fontSizeAction: FontSizeAction.reset),
-            FontSizeButton(fontSizeAction: FontSizeAction.bigger)
+            FontSizeButton(fontSizeAction: FontSizeAction.bigger),
         ]
 
         setupButtons(fontSizeButtons, inRow: fontSizeRow, action: #selector(changeFontSize))
@@ -121,7 +128,7 @@ class ReaderModeStyleViewController: UIViewController {
         themeButtons = [
             ThemeButton(theme: ReaderModeTheme.light),
             ThemeButton(theme: ReaderModeTheme.dark),
-            ThemeButton(theme: ReaderModeTheme.sepia)
+            ThemeButton(theme: ReaderModeTheme.sepia),
         ]
 
         setupButtons(themeButtons, inRow: themeRow, action: #selector(changeTheme))
@@ -149,20 +156,28 @@ class ReaderModeStyleViewController: UIViewController {
             make.width.equalTo(ReaderModeStyleViewControllerUX.brightnessSliderWidth)
         }
 
-        let brightnessMinImageView = UIImageView(image: #imageLiteral(resourceName: "brightnessMin"))
+        let brightnessMinImageView = UIImageView(
+            image: #imageLiteral(resourceName: "brightnessMin")
+        )
         brightnessRow.addSubview(brightnessMinImageView)
 
         brightnessMinImageView.snp.makeConstraints { (make) -> Void in
             make.centerY.equalTo(slider)
-            make.right.equalTo(slider.snp.left).offset(-ReaderModeStyleViewControllerUX.brightnessIconOffset)
+            make.right.equalTo(slider.snp.left).offset(
+                -ReaderModeStyleViewControllerUX.brightnessIconOffset
+            )
         }
 
-        let brightnessMaxImageView = UIImageView(image: #imageLiteral(resourceName: "brightnessMax"))
+        let brightnessMaxImageView = UIImageView(
+            image: #imageLiteral(resourceName: "brightnessMax")
+        )
         brightnessRow.addSubview(brightnessMaxImageView)
 
         brightnessMaxImageView.snp.makeConstraints { (make) -> Void in
             make.centerY.equalTo(slider)
-            make.left.equalTo(slider.snp.right).offset(ReaderModeStyleViewControllerUX.brightnessIconOffset)
+            make.left.equalTo(slider.snp.right).offset(
+                ReaderModeStyleViewControllerUX.brightnessIconOffset
+            )
         }
 
         selectFontType(readerModeStyle.fontType)
@@ -262,11 +277,17 @@ class FontTypeButton: UIButton {
         switch fontType {
         case .sansSerif:
             setTitle(Strings.readerModeFontButtonSansSerifTitle, for: [])
-            let f = UIFont(name: "FiraSans-Book", size: DynamicFontHelper.defaultHelper.ReaderStandardFontSize)
+            let f = UIFont(
+                name: "FiraSans-Book",
+                size: DynamicFontHelper.defaultHelper.ReaderStandardFontSize
+            )
             titleLabel?.font = f
         case .serif:
             setTitle(Strings.readerModeFontButtonSerifTitle, for: [])
-            let f = UIFont(name: "Charis SIL", size: DynamicFontHelper.defaultHelper.ReaderStandardFontSize)
+            let f = UIFont(
+                name: "Charis SIL",
+                size: DynamicFontHelper.defaultHelper.ReaderStandardFontSize
+            )
             titleLabel?.font = f
         }
     }
@@ -288,7 +309,10 @@ class FontSizeButton: UIButton {
         self.fontSizeAction = fontSizeAction
 
         setTitleColor(ReaderModeStyleViewControllerUX.fontSizeButtonTextColorEnabled, for: .normal)
-        setTitleColor(ReaderModeStyleViewControllerUX.fontSizeButtonTextColorDisabled, for: .disabled)
+        setTitleColor(
+            ReaderModeStyleViewControllerUX.fontSizeButtonTextColorDisabled,
+            for: .disabled
+        )
 
         switch fontSizeAction {
         case .smaller:
@@ -302,7 +326,10 @@ class FontSizeButton: UIButton {
         }
 
         // TODO Does this need to change with the selected font type? Not sure if makes sense for just +/-
-        titleLabel?.font = UIFont(name: "FiraSans-Light", size: DynamicFontHelper.defaultHelper.ReaderBigFontSize)
+        titleLabel?.font = UIFont(
+            name: "FiraSans-Light",
+            size: DynamicFontHelper.defaultHelper.ReaderBigFontSize
+        )
     }
 }
 
@@ -324,9 +351,15 @@ class FontSizeLabel: UILabel {
         didSet {
             switch fontType {
             case .sansSerif:
-                font = UIFont(name: "FiraSans-Book", size: DynamicFontHelper.defaultHelper.ReaderBigFontSize)
+                font = UIFont(
+                    name: "FiraSans-Book",
+                    size: DynamicFontHelper.defaultHelper.ReaderBigFontSize
+                )
             case .serif:
-                font = UIFont(name: "Charis SIL", size: DynamicFontHelper.defaultHelper.ReaderBigFontSize)
+                font = UIFont(
+                    name: "Charis SIL",
+                    size: DynamicFontHelper.defaultHelper.ReaderBigFontSize
+                )
             }
         }
     }
@@ -365,9 +398,15 @@ class ThemeButton: UIButton {
         didSet {
             switch fontType {
             case .sansSerif:
-                titleLabel?.font = UIFont(name: "FiraSans-Book", size: DynamicFontHelper.defaultHelper.ReaderStandardFontSize)
+                titleLabel?.font = UIFont(
+                    name: "FiraSans-Book",
+                    size: DynamicFontHelper.defaultHelper.ReaderStandardFontSize
+                )
             case .serif:
-                titleLabel?.font = UIFont(name: "Charis SIL", size: DynamicFontHelper.defaultHelper.ReaderStandardFontSize)
+                titleLabel?.font = UIFont(
+                    name: "Charis SIL",
+                    size: DynamicFontHelper.defaultHelper.ReaderStandardFontSize
+                )
             }
         }
     }

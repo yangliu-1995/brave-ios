@@ -29,4 +29,3 @@ class AddToFavoritesActivity: UIActivity {
         return true
     }
 }
-

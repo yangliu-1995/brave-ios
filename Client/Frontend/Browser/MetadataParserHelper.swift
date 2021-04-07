@@ -5,8 +5,8 @@
 import Foundation
 import Shared
 import Storage
-import XCGLogger
 import WebKit
+import XCGLogger
 
 private let log = Logger.browserLogger
 
@@ -16,7 +16,8 @@ class MetadataParserHelper: TabEventHandler {
     init() {
         self.tabObservers = registerFor(
             .didChangeURL,
-            queue: .main)
+            queue: .main
+        )
     }
 
     deinit {
@@ -27,18 +28,24 @@ class MetadataParserHelper: TabEventHandler {
         // Get the metadata out of the page-metadata-parser, and into a type safe struct as soon
         // as possible.
         guard let webView = tab.webView,
-            let url = webView.url, url.isWebPage(includeDataURIs: false), !url.isLocal else {
+            let url = webView.url, url.isWebPage(includeDataURIs: false), !url.isLocal
+        else {
             return
         }
 
-        webView.evaluateSafeJavaScript(functionName: "__firefox__.metadata && __firefox__.metadata.getMetadata()", sandboxed: false, asFunction: false) { (result, error) in
+        webView.evaluateSafeJavaScript(
+            functionName: "__firefox__.metadata && __firefox__.metadata.getMetadata()",
+            sandboxed: false,
+            asFunction: false
+        ) { (result, error) in
             guard error == nil else {
                 return
             }
-            
+
             guard let dict = result as? [String: Any],
-                  let data = try? JSONSerialization.data(withJSONObject: dict, options: []),
-                  let pageMetadata = try? JSONDecoder().decode(PageMetadata.self, from: data) else {
+                let data = try? JSONSerialization.data(withJSONObject: dict, options: []),
+                let pageMetadata = try? JSONDecoder().decode(PageMetadata.self, from: data)
+            else {
                 log.debug("Page contains no metadata!")
                 return
             }
@@ -57,7 +64,8 @@ class MediaImageLoader: TabEventHandler {
         self.prefs = prefs
         self.tabObservers = registerFor(
             .didLoadPageMetadata,
-            queue: .main)
+            queue: .main
+        )
     }
 
     deinit {

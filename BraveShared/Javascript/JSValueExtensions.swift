@@ -13,20 +13,20 @@ extension JSValue {
         guard let result = call(withArguments: arguments) else {
             throw JSValue.unknownError
         }
-        
+
         if let exception = context.exception {
             throw exception.toString()
         }
-        
+
         // In JavaScript, if a function does not explicitly return a value,
         // it implicitly returns the value undefined.
         if expectReturnValue && result.isUndefined {
             throw JSValue.unknownError
         }
-        
+
         return result
     }
-    
+
     /// Throw this error if undefined behavior happens or you don't care about error type/message.
     public static let unknownError = "Unknown error"
 }

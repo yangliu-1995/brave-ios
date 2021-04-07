@@ -17,5 +17,5 @@ final class WebImageCacheManager {
         let webImageCache = WebImageCache(isPrivate: isPrivate)
         self.webImageCache = webImageCache
     }
-    
+
 }

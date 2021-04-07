@@ -18,27 +18,31 @@ class FocusHelper: TabContentScript {
     static func name() -> String {
         return "FocusHelper"
     }
-    
+
     func scriptMessageHandlerName() -> String? {
         return "focusHelper"
     }
-    
-    func userContentController(_ userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
+
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceiveScriptMessage message: WKScriptMessage
+    ) {
         guard let body = message.body as? [String: AnyObject] else {
             return log.error("FocusHelper.js sent wrong type of message")
         }
-        
+
         if UserScriptManager.isMessageHandlerTokenMissing(in: body) {
             log.debug("Missing required security token.")
             return
         }
-        
+
         guard let data = body["data"] as? [String: String] else {
             return log.error("FocusHelper.js sent wrong type of message")
         }
 
         guard let _ = data["elementType"],
-            let eventType = data["eventType"] else {
+            let eventType = data["eventType"]
+        else {
             return log.error("FocusHelper.js sent wrong keys for message")
         }
 

@@ -5,19 +5,29 @@
 import Foundation
 
 struct UX {
-    static let barsBackgroundSolidColor = UIColor(red: 234/255.0, green: 234/255.0, blue: 234/255.0, alpha: 1.0)
-    static let barsDarkBackgroundSolidColor = UIColor(red: 63/255.0, green: 63/255.0, blue: 63/255.0, alpha: 1.0)
-    
+    static let barsBackgroundSolidColor = UIColor(
+        red: 234 / 255.0,
+        green: 234 / 255.0,
+        blue: 234 / 255.0,
+        alpha: 1.0
+    )
+    static let barsDarkBackgroundSolidColor = UIColor(
+        red: 63 / 255.0,
+        green: 63 / 255.0,
+        blue: 63 / 255.0,
+        alpha: 1.0
+    )
+
     struct TabsBar {
         static let buttonWidth = UIDevice.current.userInterfaceIdiom == .pad ? 40 : 0
         static let height: CGFloat = 29
-        static let minimumWidth: CGFloat =  UIDevice.current.userInterfaceIdiom == .pad ? 180 : 160
+        static let minimumWidth: CGFloat = UIDevice.current.userInterfaceIdiom == .pad ? 180 : 160
     }
-    
+
     struct UrlBar {
         static let height: CGFloat = UIConstants.topToolbarHeight
     }
-    
+
     struct HomePanel {
         static let backgroundColorPBM = greyJ
         static let backgroundColor = UIColor.white
@@ -25,16 +35,16 @@ struct UX {
     }
 
     static let braveOrange = UIColor(rgb: 0xfb542b)
-    
+
     static let blue = UIColor(rgb: 0x424acb)
     static let lightBlue = UIColor(rgb: 0x4A90E2)
     static let purple = UIColor(rgb: 0x8236b9)
     static let green = UIColor(rgb: 0x1bc760)
     static let red = UIColor(rgb: 0xE2052A)
-    
+
     static let white = UIColor.white
     static let black = UIColor.black
-    
+
     static let greyA = UIColor(rgb: 0xF7F8F9)
     static let greyB = UIColor(rgb: 0xE7EBEE)
     static let greyC = UIColor(rgb: 0xDBDFE3)

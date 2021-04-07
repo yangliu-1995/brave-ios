@@ -2,25 +2,25 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import UIKit
 import BraveUI
 import Shared
+import UIKit
 
 /// Displays a group of feed items under a title, and optionally a brand under
 /// the feeds.
 class FeedGroupView: UIView {
     /// The user has tapped the feed that exists at a specific index
     var actionHandler: ((Int, FeedItemAction) -> Void)?
-    
+
     var contextMenu: FeedItemMenu?
-    
+
     /// The containing stack view that can be used to prepend or append views to the group card
     let containerStackView = UIStackView().then {
         $0.axis = .vertical
         $0.spacing = 0
         $0.shouldGroupAccessibilityChildren = true
     }
-    
+
     /// The title label appearing above the list of feeds
     let titleLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 21, weight: .bold)
@@ -43,10 +43,12 @@ class FeedGroupView: UIView {
     ///     - numberOfFeeds: The number of feeds views to create and to the list
     ///     - transformItems: A block to transform the group item views to
     ///       another view in case it needs to be altered, padded, etc.
-    init(axis: NSLayoutConstraint.Axis,
-         feedLayout: FeedItemView.Layout,
-         numberOfFeeds: Int = 3,
-         transformItems: (([UIView]) -> [UIView])? = nil) {
+    init(
+        axis: NSLayoutConstraint.Axis,
+        feedLayout: FeedItemView.Layout,
+        numberOfFeeds: Int = 3,
+        transformItems: (([UIView]) -> [UIView])? = nil
+    ) {
         feedViews = (0..<numberOfFeeds).map { _ in
             FeedItemView(layout: feedLayout).then {
                 $0.thumbnailImageView.layer.cornerRadius = 4
@@ -55,9 +57,9 @@ class FeedGroupView: UIView {
             }
         }
         buttons = feedViews.map(FeedSpringButton.init)
-        
+
         super.init(frame: .zero)
-        
+
         zip(buttons.indices, buttons).forEach { (index, button) in
             button.addTarget(self, action: #selector(tappedButton(_:)), for: .touchUpInside)
             let contextMenuDelegate = FeedContextMenuDelegate(
@@ -80,39 +82,41 @@ class FeedGroupView: UIView {
         }
         stackView.addStackViewItems(
             .view(titleLabel),
-            .view(UIStackView().then {
-                $0.spacing = 16
-                $0.axis = axis
-                if axis == .horizontal {
-                    $0.distribution = .fillEqually
-                    $0.alignment = .top
+            .view(
+                UIStackView().then {
+                    $0.spacing = 16
+                    $0.axis = axis
+                    if axis == .horizontal {
+                        $0.distribution = .fillEqually
+                        $0.alignment = .top
+                    }
+                    let transform: ([UIView]) -> [UIView] = transformItems ?? { views in views }
+                    let groupViews = transform(buttons)
+                    groupViews.forEach($0.addArrangedSubview)
                 }
-                let transform: ([UIView]) -> [UIView] = transformItems ?? { views in views }
-                let groupViews = transform(buttons)
-                groupViews.forEach($0.addArrangedSubview)
-            })
+            )
         )
-        
+
         addSubview(backgroundView)
         addSubview(containerStackView)
         containerStackView.addArrangedSubview(stackView)
-        
+
         backgroundView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         containerStackView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
+
         layer.cornerRadius = backgroundView.layer.cornerRadius
         layer.masksToBounds = true
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()
     }
-    
+
     @objc private func tappedButton(_ sender: SpringButton) {
         if let index = buttons.firstIndex(where: { sender === $0 }) {
             actionHandler?(index, .opened())
@@ -130,26 +134,30 @@ class HorizontalFeedGroupView: FeedGroupView, FeedCardContent {
 /// A group of deal feed items placed horizontally in a card
 class DealsFeedGroupView: FeedGroupView, FeedCardContent {
     var moreOffersButtonTapped: (() -> Void)?
-    
+
     required init() {
         super.init(axis: .horizontal, feedLayout: .offer)
-        
+
         containerStackView.addStackViewItems(
-            .view(UIView().then {
-                $0.backgroundColor = UIColor(white: 1.0, alpha: 0.15)
-                $0.snp.makeConstraints {
-                    $0.height.equalTo(1.0 / UIScreen.main.scale)
+            .view(
+                UIView().then {
+                    $0.backgroundColor = UIColor(white: 1.0, alpha: 0.15)
+                    $0.snp.makeConstraints {
+                        $0.height.equalTo(1.0 / UIScreen.main.scale)
+                    }
+                    $0.isUserInteractionEnabled = false
+                    $0.isAccessibilityElement = false
                 }
-                $0.isUserInteractionEnabled = false
-                $0.isAccessibilityElement = false
-            }),
-            .view(FeedCardFooterButton().then {
-                $0.label.text = Strings.BraveToday.moreBraveOffers
-                $0.addTarget(self, action: #selector(tappedMoreOffers), for: .touchUpInside)
-            })
+            ),
+            .view(
+                FeedCardFooterButton().then {
+                    $0.label.text = Strings.BraveToday.moreBraveOffers
+                    $0.addTarget(self, action: #selector(tappedMoreOffers), for: .touchUpInside)
+                }
+            )
         )
     }
-    
+
     @objc private func tappedMoreOffers() {
         moreOffersButtonTapped?()
     }
@@ -165,44 +173,54 @@ class VerticalFeedGroupView: FeedGroupView, FeedCardContent {
 /// A group of feed items numbered and placed vertically in a card
 class NumberedFeedGroupView: FeedGroupView, FeedCardContent {
     required init() {
-        super.init(axis: .vertical, feedLayout: .basic, transformItems: { views in
-            // Turn the usual feed group item into a numbered item
-            views.enumerated().map { view in
-                UIStackView().then {
-                    $0.spacing = 16
-                    $0.alignment = .center
-                    $0.addStackViewItems(
-                        .view(UILabel().then {
-                            $0.text = "\(view.offset + 1)"
-                            $0.font = .systemFont(ofSize: 16, weight: .bold)
-                            $0.appearanceTextColor = UIColor(white: 1.0, alpha: 0.4)
-                            $0.setContentHuggingPriority(.required, for: .horizontal)
-                            $0.isAccessibilityElement = false
-                        }),
-                        .view(view.element)
-                    )
+        super.init(
+            axis: .vertical,
+            feedLayout: .basic,
+            transformItems: { views in
+                // Turn the usual feed group item into a numbered item
+                views.enumerated().map { view in
+                    UIStackView().then {
+                        $0.spacing = 16
+                        $0.alignment = .center
+                        $0.addStackViewItems(
+                            .view(
+                                UILabel().then {
+                                    $0.text = "\(view.offset + 1)"
+                                    $0.font = .systemFont(ofSize: 16, weight: .bold)
+                                    $0.appearanceTextColor = UIColor(white: 1.0, alpha: 0.4)
+                                    $0.setContentHuggingPriority(.required, for: .horizontal)
+                                    $0.isAccessibilityElement = false
+                                }
+                            ),
+                            .view(view.element)
+                        )
+                    }
                 }
             }
-        })
+        )
     }
 }
 
 private class FeedSpringButton: SpringButton {
     let feedItemView: FeedItemView
-    
+
     init(itemView: FeedItemView) {
         feedItemView = itemView
-        
+
         super.init(frame: .zero)
-        
+
         addSubview(itemView)
         itemView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
     }
-    
+
     override var accessibilityLabel: String? {
         get { feedItemView.accessibilityLabel }
-        set { assertionFailure("Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored") }
+        set {
+            assertionFailure(
+                "Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored"
+            )
+        }
     }
 }

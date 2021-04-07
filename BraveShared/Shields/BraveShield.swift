@@ -12,7 +12,7 @@ public enum BraveShield {
     case SafeBrowsing
     case FpProtection
     case NoScript
-    
+
     public var globalPreference: Bool {
         switch self {
         case .AllOff:

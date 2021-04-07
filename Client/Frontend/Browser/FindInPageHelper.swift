@@ -9,8 +9,14 @@ import WebKit
 private let log = Logger.browserLogger
 
 protocol FindInPageHelperDelegate: class {
-    func findInPageHelper(_ findInPageHelper: FindInPageHelper, didUpdateCurrentResult currentResult: Int)
-    func findInPageHelper(_ findInPageHelper: FindInPageHelper, didUpdateTotalResults totalResults: Int)
+    func findInPageHelper(
+        _ findInPageHelper: FindInPageHelper,
+        didUpdateCurrentResult currentResult: Int
+    )
+    func findInPageHelper(
+        _ findInPageHelper: FindInPageHelper,
+        didUpdateTotalResults totalResults: Int
+    )
 }
 
 class FindInPageHelper: TabContentScript {
@@ -29,18 +35,23 @@ class FindInPageHelper: TabContentScript {
         return "findInPageHandler"
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceiveScriptMessage message: WKScriptMessage
+    ) {
         guard let body = message.body as? [String: AnyObject] else {
             return
         }
-        
+
         if UserScriptManager.isMessageHandlerTokenMissing(in: body) {
             log.debug("Missing required security token.")
             return
         }
-        
+
         guard let data = body["data"] as? [String: Int] else {
-            log.error("Could not find a message body or the data did not meet expectations: \(message.body)")
+            log.error(
+                "Could not find a message body or the data did not meet expectations: \(message.body)"
+            )
             return
         }
 

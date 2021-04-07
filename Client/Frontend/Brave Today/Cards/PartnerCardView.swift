@@ -3,31 +3,35 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import Foundation
 import BraveUI
+import Foundation
 
 class PartnerCardView: FeedCardBackgroundButton, FeedCardContent {
     var actionHandler: ((Int, FeedItemAction) -> Void)?
     var contextMenu: FeedItemMenu?
     var promotedButtonTapped: (() -> Void)?
-    
+
     let feedView = FeedItemView(layout: .partner).then {
         $0.thumbnailImageView.contentMode = .scaleAspectFit
     }
-    
+
     private var contextMenuDelegate: NSObject?
-    
+
     required init() {
         super.init(frame: .zero)
-        
+
         addSubview(feedView)
         feedView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
+
         addTarget(self, action: #selector(tappedSelf), for: .touchUpInside)
-        feedView.promotedButton.addTarget(self, action: #selector(tappedPromotedButton), for: .touchUpInside)
-        
+        feedView.promotedButton.addTarget(
+            self,
+            action: #selector(tappedPromotedButton),
+            for: .touchUpInside
+        )
+
         let contextMenuDelegate = FeedContextMenuDelegate(
             performedPreviewAction: { [weak self] in
                 self?.actionHandler?(0, .opened())
@@ -38,22 +42,26 @@ class PartnerCardView: FeedCardBackgroundButton, FeedCardContent {
         )
         addInteraction(UIContextMenuInteraction(delegate: contextMenuDelegate))
         self.contextMenuDelegate = contextMenuDelegate
-        
+
         isAccessibilityElement = false
         accessibilityElements = [feedView, feedView.promotedButton]
         feedView.accessibilityTraits.insert(.button)
         shouldGroupAccessibilityChildren = true
     }
-    
+
     override var accessibilityLabel: String? {
         get { feedView.accessibilityLabel }
-        set { assertionFailure("Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored") }
+        set {
+            assertionFailure(
+                "Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored"
+            )
+        }
     }
-    
+
     @objc private func tappedSelf() {
         actionHandler?(0, .opened())
     }
-    
+
     @objc private func tappedPromotedButton() {
         promotedButtonTapped?()
     }

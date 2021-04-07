@@ -4,17 +4,17 @@ class FifoDict {
     var fifoArrayOfDicts: [NSMutableDictionary] = []
     let maxDicts = 5
     let maxItemsPerDict = 50
-    
+
     // the url key is a combination of urls, the main doc url, and the url being checked
     func addItem(_ key: String, value: AnyObject?) {
         if fifoArrayOfDicts.count > maxItemsPerDict {
             fifoArrayOfDicts.removeFirst()
         }
-        
+
         if fifoArrayOfDicts.last == nil || (fifoArrayOfDicts.last?.count ?? 0) > maxItemsPerDict {
             fifoArrayOfDicts.append(NSMutableDictionary())
         }
-        
+
         if let lastDict = fifoArrayOfDicts.last {
             if value == nil {
                 lastDict[key] = NSNull()
@@ -23,7 +23,7 @@ class FifoDict {
             }
         }
     }
-    
+
     func getItem(_ key: String) -> AnyObject?? {
         for dict in fifoArrayOfDicts {
             if let item = dict[key] {

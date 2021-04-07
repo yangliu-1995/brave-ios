@@ -4,100 +4,131 @@
 
 import Foundation
 import LocalAuthentication
+import Shared
 import Static
 import SwiftKeychainWrapper
-import Shared
 
 class PasscodeSettingsViewController: TableViewController {
-    
+
     init() {
         super.init(style: .grouped)
     }
-    
+
     @available(*, unavailable)
     required init?(coder aDecoder: NSCoder) {
         fatalError()
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         updateTitleForTouchIDState()
-        
+
         tableView.accessibilityIdentifier = "PasscodeSettingsViewController.tableView"
         tableView.separatorColor = UIConstants.tableViewSeparatorColor
         tableView.backgroundColor = UIConstants.tableViewHeaderBackgroundColor
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         reloadSections()
     }
-    
+
     func reloadSections() {
         if let authenticationInfo = KeychainWrapper.sharedAppContainerKeychain.authenticationInfo() {
             // Passcode
             dataSource.sections = [
                 Section(rows: [
-                    Row(text: Strings.authenticationTurnOffPasscode,
+                    Row(
+                        text: Strings.authenticationTurnOffPasscode,
                         selection: { [unowned self] in
                             let setupPasscodeController = RemovePasscodeViewController()
                             setupPasscodeController.completion = self.reloadSections
-                            let container = UINavigationController(rootViewController: setupPasscodeController)
+                            let container = UINavigationController(
+                                rootViewController: setupPasscodeController
+                            )
                             self.present(container, animated: true)
                         },
                         cellClass: ButtonCell.self
                     ),
-                    Row(text: Strings.authenticationChangePasscode,
+                    Row(
+                        text: Strings.authenticationChangePasscode,
                         selection: { [unowned self] in
                             let changePasscodeController = ChangePasscodeViewController()
                             changePasscodeController.completion = self.reloadSections
-                            let container = UINavigationController(rootViewController: changePasscodeController)
+                            let container = UINavigationController(
+                                rootViewController: changePasscodeController
+                            )
                             self.present(container, animated: true)
                         }
-                    )
-                    ])
+                    ),
+                ])
             ]
-            
+
             var otherSection = Section(rows: [
                 // TODO: Need localized copy of this
-                Row(text: "Require Passcode Immediately",
+                Row(
+                    text: "Require Passcode Immediately",
                     accessory: .switchToggle(
                         value: authenticationInfo.isPasscodeRequiredImmediately,
                         // TODO: Make a new option "infinite" instead of using time intervals
-                        { on in authenticationInfo.isPasscodeRequiredImmediately = on; KeychainWrapper.sharedAppContainerKeychain.setAuthenticationInfo(authenticationInfo) }
+                        { on in authenticationInfo.isPasscodeRequiredImmediately = on
+                            KeychainWrapper.sharedAppContainerKeychain.setAuthenticationInfo(
+                                authenticationInfo
+                            )
+                        }
                     )
                 )
             ])
-            
+
             if deviceBiometryType != .none {
                 let title = deviceBiometryType == .faceID ? Strings.useFaceID : Strings.useTouchID
-                otherSection.rows.append(Row(text: title, accessory: .switchToggle(value: authenticationInfo.useTouchID, { authenticationInfo.useTouchID = $0; KeychainWrapper.sharedAppContainerKeychain.setAuthenticationInfo(authenticationInfo) })))
+                otherSection.rows.append(
+                    Row(
+                        text: title,
+                        accessory: .switchToggle(
+                            value: authenticationInfo.useTouchID,
+                            {
+                                authenticationInfo.useTouchID = $0
+                                KeychainWrapper.sharedAppContainerKeychain.setAuthenticationInfo(
+                                    authenticationInfo
+                                )
+                            }
+                        )
+                    )
+                )
             }
-            
+
             dataSource.sections.append(otherSection)
         } else {
             // No Passcode
             dataSource.sections = [
                 Section(rows: [
-                    Row(text: Strings.authenticationTurnOnPasscode,
+                    Row(
+                        text: Strings.authenticationTurnOnPasscode,
                         selection: { [unowned self] in
                             let setupPasscodeController = SetupPasscodeViewController()
                             setupPasscodeController.completion = self.reloadSections
-                            let container = UINavigationController(rootViewController: setupPasscodeController)
+                            let container = UINavigationController(
+                                rootViewController: setupPasscodeController
+                            )
                             self.present(container, animated: true)
                         },
                         cellClass: ButtonCell.self
                     ),
-                    Row(text: Strings.authenticationChangePasscode, cellClass: DisabledCell.self)
+                    Row(text: Strings.authenticationChangePasscode, cellClass: DisabledCell.self),
                 ]),
                 Section(rows: [
                     // TODO: Need localized copy of this
-                    Row(text: "Require Passcode Immediately", accessory: .switchToggle(value: false, { _ in }), cellClass: DisabledCell.self),
-                ])
+                    Row(
+                        text: "Require Passcode Immediately",
+                        accessory: .switchToggle(value: false, { _ in }),
+                        cellClass: DisabledCell.self
+                    )
+                ]),
             ]
         }
     }
-    
+
     private var deviceBiometryType: LABiometryType {
         let context = LAContext()
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) {
@@ -105,7 +136,7 @@ class PasscodeSettingsViewController: TableViewController {
         }
         return .none
     }
-    
+
     func updateTitleForTouchIDState() {
         switch deviceBiometryType {
         case .faceID:
@@ -123,11 +154,11 @@ class PasscodeSettingsViewController: TableViewController {
 class DisabledCell: Value1Cell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+
         selectionStyle = .none
         textLabel?.textColor = .lightGray
     }
-    
+
     override var accessoryView: UIView? {
         didSet {
             if let control = accessoryView as? UIControl {
@@ -135,7 +166,7 @@ class DisabledCell: Value1Cell {
             }
         }
     }
-    
+
     @available(*, unavailable)
     required init?(coder aDecoder: NSCoder) {
         fatalError()

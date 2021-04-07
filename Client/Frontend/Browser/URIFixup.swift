@@ -14,15 +14,15 @@ class URIFixup {
             guard let decodedASCIIURL = host.removingPercentEncoding else {
                 return nil
             }
-            
+
             if decodedASCIIURL.rangeOfCharacter(from: CharacterSet.URLAllowed.inverted) != nil {
                 return nil
             }
         }
-        
+
         return url
     }
-    
+
     static func getURL(_ entry: String) -> URL? {
         let trimmed = entry.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let escaped = trimmed.addingPercentEncoding(withAllowedCharacters: .URLAllowed) else {
@@ -49,7 +49,7 @@ class URIFixup {
         if trimmed.range(of: " ") != nil {
             return nil
         }
-        
+
         // Partially canonicalize the URL and check if it has a "user"..
         // If it is, it should go to the search engine and not the DNS server..
         // This behaviour is mimicking SAFARI! It has the safest behaviour so far.
@@ -62,10 +62,10 @@ class URIFixup {
         //    - Chrome takes you to the domain (seems like a security flaw).
         //    - Safari passes on the entire url to the Search Engine just like it does
         //      without a path or query.
-        if URL(string: trimmed)?.user != nil ||
-            URL(string: escaped)?.user != nil ||
-            URL(string: "http://\(trimmed)")?.user != nil ||
-            URL(string: "http://\(escaped)")?.user != nil {
+        if URL(string: trimmed)?.user != nil || URL(string: escaped)?.user != nil
+            || URL(string: "http://\(trimmed)")?.user != nil
+            || URL(string: "http://\(escaped)")?.user != nil
+        {
             return nil
         }
 

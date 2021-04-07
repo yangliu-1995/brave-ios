@@ -9,33 +9,33 @@ struct FeedItem: Equatable, Comparable {
     var score: Double
     var content: Content
     var source: Source
-    
+
     static func < (lhs: Self, rhs: Self) -> Bool {
         lhs.score < rhs.score
     }
 }
 
 extension FeedItem {
-    
+
     struct Source: Equatable, Decodable {
         var id: String
         var isDefault: Bool
         var category: String
         var name: String
         var isUserSource = false
-        
+
         enum CodingKeys: String, CodingKey {
             case id = "publisher_id"
             case isDefault = "enabled"
             case category
             case name = "publisher_name"
         }
-        
+
         static func == (lhs: Self, rhs: Self) -> Bool {
             lhs.id == rhs.id
         }
     }
-    
+
     struct FeedContentType: Decodable, Equatable {
         var rawValue: String
         init(rawValue: String) {
@@ -62,7 +62,7 @@ extension FeedItem {
         var baseScore: Double
         var offersCategory: String?
         var creativeInstanceID: String?
-        
+
         enum CodingKeys: String, CodingKey {
             case publishTime = "publish_time"
             case url

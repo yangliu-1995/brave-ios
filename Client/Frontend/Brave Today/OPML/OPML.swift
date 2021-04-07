@@ -33,12 +33,15 @@ class OPMLParser {
     /// Parses the data passed and returns an OPML object
     static func parse(data: Data) -> OPML? {
         guard let document = try? XMLDocument(data: data),
-              let _ = document.firstChild(xpath: "//opml") else {
+            let _ = document.firstChild(xpath: "//opml")
+        else {
             log.warning("Failed to parse XML document")
             return nil
         }
         let title = document.firstChild(xpath: "//head/title")?.stringValue
-        let outlines = document.xpath("//outline[contains(@type, \"rss\") and not(contains(@isComment, \"true\"))]").map { element in
+        let outlines = document.xpath(
+            "//outline[contains(@type, \"rss\") and not(contains(@isComment, \"true\"))]"
+        ).map { element in
             OPML.Outline(
                 text: element["text"],
                 xmlUrl: element["xmlUrl"]

@@ -5,41 +5,51 @@
 import UIKit
 
 class IndentedImageTableViewCell: UITableViewCell {
-    
+
     private let mainStackView = UIStackView().then {
         $0.spacing = 8
         $0.alignment = .fill
     }
-    
+
     private let folderNameStackView = UIStackView().then {
         $0.axis = .vertical
         $0.distribution = .equalSpacing
     }
-    
+
     let customImage = UIImageView().then {
         $0.image = #imageLiteral(resourceName: "shields-menu-icon")
         $0.contentMode = .scaleAspectFit
         $0.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
         $0.setContentHuggingPriority(.defaultHigh, for: .horizontal)
     }
-    
+
     let folderName = UILabel().then {
         $0.textAlignment = .left
     }
-    
+
     private var spacerLine: UIView {
         let view = UIView().then {
-        $0.backgroundColor = .lightGray
-        $0.translatesAutoresizingMaskIntoConstraints = false
-        $0.addConstraint(NSLayoutConstraint(item: $0, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 0.5))
+            $0.backgroundColor = .lightGray
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.addConstraint(
+                NSLayoutConstraint(
+                    item: $0,
+                    attribute: .height,
+                    relatedBy: .equal,
+                    toItem: nil,
+                    attribute: .notAnAttribute,
+                    multiplier: 1,
+                    constant: 0.5
+                )
+            )
         }
-        
+
         return view
     }
-    
+
     convenience init(image: UIImage) {
         self.init(style: .default, reuseIdentifier: nil)
-        
+
         customImage.image = image
     }
 
@@ -48,20 +58,20 @@ class IndentedImageTableViewCell: UITableViewCell {
 
         indentationWidth = 20
         mainStackView.addArrangedSubview(customImage)
-        
+
         let transparentLine = spacerLine
         transparentLine.backgroundColor = .clear
-        
+
         [transparentLine, folderName, spacerLine].forEach(folderNameStackView.addArrangedSubview)
-        
+
         mainStackView.addArrangedSubview(folderNameStackView)
-        
+
         // Hide UITableViewCells separator, a custom one will be used.
         // This separator inset was problematic to update based on indentation.
         separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
-        
+
         addSubview(mainStackView)
-        
+
         mainStackView.snp.makeConstraints {
             $0.top.bottom.equalTo(self)
             $0.leading.trailing.equalTo(self).inset(8)
@@ -72,7 +82,7 @@ class IndentedImageTableViewCell: UITableViewCell {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
         let indentation = (CGFloat(indentationLevel) * indentationWidth)

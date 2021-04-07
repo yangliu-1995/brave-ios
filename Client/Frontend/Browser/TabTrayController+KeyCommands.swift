@@ -7,20 +7,74 @@ import UIKit
 
 extension TabTrayController {
     override var keyCommands: [UIKeyCommand]? {
-        let toggleText = privateMode ? Strings.switchToNonPBMKeyCodeTitle: Strings.switchToPBMKeyCodeTitle
+        let toggleText =
+            privateMode ? Strings.switchToNonPBMKeyCodeTitle : Strings.switchToPBMKeyCodeTitle
         return [
-            UIKeyCommand(input: "`", modifierFlags: .command, action: #selector(didTogglePrivateModeKeyCommand), discoverabilityTitle: toggleText),
-            UIKeyCommand(input: "w", modifierFlags: .command, action: #selector(didCloseTabKeyCommand)),
-            UIKeyCommand(input: "\u{8}", modifierFlags: [], action: #selector(didCloseTabKeyCommand), discoverabilityTitle: Strings.closeTabFromTabTrayKeyCodeTitle),
-            UIKeyCommand(input: "w", modifierFlags: [.command, .shift], action: #selector(didCloseAllTabsKeyCommand), discoverabilityTitle: Strings.closeAllTabsFromTabTrayKeyCodeTitle),
-            UIKeyCommand(input: "\r", modifierFlags: [], action: #selector(didEnterTabKeyCommand), discoverabilityTitle: Strings.openSelectedTabFromTabTrayKeyCodeTitle),
-            UIKeyCommand(input: "\\", modifierFlags: [.command, .shift], action: #selector(didEnterTabKeyCommand)),
-            UIKeyCommand(input: "\t", modifierFlags: [.command, .alternate], action: #selector(didEnterTabKeyCommand)),
-            UIKeyCommand(input: "t", modifierFlags: .command, action: #selector(didOpenNewTabKeyCommand), discoverabilityTitle: Strings.openNewTabFromTabTrayKeyCodeTitle),
-            UIKeyCommand(input: UIKeyCommand.inputLeftArrow, modifierFlags: [], action: #selector(didChangeSelectedTabKeyCommand(sender:))),
-            UIKeyCommand(input: UIKeyCommand.inputRightArrow, modifierFlags: [], action: #selector(didChangeSelectedTabKeyCommand(sender:))),
-            UIKeyCommand(input: UIKeyCommand.inputDownArrow, modifierFlags: [], action: #selector(didChangeSelectedTabKeyCommand(sender:))),
-            UIKeyCommand(input: UIKeyCommand.inputUpArrow, modifierFlags: [], action: #selector(didChangeSelectedTabKeyCommand(sender:))),
+            UIKeyCommand(
+                input: "`",
+                modifierFlags: .command,
+                action: #selector(didTogglePrivateModeKeyCommand),
+                discoverabilityTitle: toggleText
+            ),
+            UIKeyCommand(
+                input: "w",
+                modifierFlags: .command,
+                action: #selector(didCloseTabKeyCommand)
+            ),
+            UIKeyCommand(
+                input: "\u{8}",
+                modifierFlags: [],
+                action: #selector(didCloseTabKeyCommand),
+                discoverabilityTitle: Strings.closeTabFromTabTrayKeyCodeTitle
+            ),
+            UIKeyCommand(
+                input: "w",
+                modifierFlags: [.command, .shift],
+                action: #selector(didCloseAllTabsKeyCommand),
+                discoverabilityTitle: Strings.closeAllTabsFromTabTrayKeyCodeTitle
+            ),
+            UIKeyCommand(
+                input: "\r",
+                modifierFlags: [],
+                action: #selector(didEnterTabKeyCommand),
+                discoverabilityTitle: Strings.openSelectedTabFromTabTrayKeyCodeTitle
+            ),
+            UIKeyCommand(
+                input: "\\",
+                modifierFlags: [.command, .shift],
+                action: #selector(didEnterTabKeyCommand)
+            ),
+            UIKeyCommand(
+                input: "\t",
+                modifierFlags: [.command, .alternate],
+                action: #selector(didEnterTabKeyCommand)
+            ),
+            UIKeyCommand(
+                input: "t",
+                modifierFlags: .command,
+                action: #selector(didOpenNewTabKeyCommand),
+                discoverabilityTitle: Strings.openNewTabFromTabTrayKeyCodeTitle
+            ),
+            UIKeyCommand(
+                input: UIKeyCommand.inputLeftArrow,
+                modifierFlags: [],
+                action: #selector(didChangeSelectedTabKeyCommand(sender:))
+            ),
+            UIKeyCommand(
+                input: UIKeyCommand.inputRightArrow,
+                modifierFlags: [],
+                action: #selector(didChangeSelectedTabKeyCommand(sender:))
+            ),
+            UIKeyCommand(
+                input: UIKeyCommand.inputDownArrow,
+                modifierFlags: [],
+                action: #selector(didChangeSelectedTabKeyCommand(sender:))
+            ),
+            UIKeyCommand(
+                input: UIKeyCommand.inputUpArrow,
+                modifierFlags: [],
+                action: #selector(didChangeSelectedTabKeyCommand(sender:))
+            ),
         ]
     }
 

@@ -3,19 +3,27 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import BraveShared
 import Foundation
 import Shared
-import BraveShared
 
 struct BraveVPNCommonUI {
-    
+
     struct UX {
-        static let purpleBackgroundColor = #colorLiteral(red: 0.1529411765, green: 0.08235294118, blue: 0.368627451, alpha: 1)
+        static let purpleBackgroundColor = #colorLiteral(
+            red: 0.1529411765,
+            green: 0.08235294118,
+            blue: 0.368627451,
+            alpha: 1
+        )
     }
-    
+
     struct Views {
-        static func poweredByView(textColor: UIColor, fontSize: CGFloat = 13,
-                                  imageColor: UIColor) -> UIStackView {
+        static func poweredByView(
+            textColor: UIColor,
+            fontSize: CGFloat = 13,
+            imageColor: UIColor
+        ) -> UIStackView {
             UIStackView().then { stackView in
                 stackView.distribution = .fillEqually
                 stackView.spacing = 6
@@ -29,22 +37,30 @@ struct BraveVPNCommonUI {
                     $0.font = UIFont.systemFont(ofSize: fontSize, weight: .regular)
                 }
 
-                let image = UIImageView(image: #imageLiteral(resourceName: "vpn_brand").template).then {
-                    $0.contentMode = .left
-                    $0.tintColor = imageColor
-                }
+                let image = UIImageView(image: #imageLiteral(resourceName: "vpn_brand").template)
+                    .then {
+                        $0.contentMode = .left
+                        $0.tintColor = imageColor
+                    }
 
                 [label, image].forEach(stackView.addArrangedSubview(_:))
             }
         }
-        
-        static func checkmarkView(string: String, textColor: UIColor, font: UIFont,
-                                  useShieldAsCheckmark: Bool) -> UIStackView {
+
+        static func checkmarkView(
+            string: String,
+            textColor: UIColor,
+            font: UIFont,
+            useShieldAsCheckmark: Bool
+        ) -> UIStackView {
             UIStackView().then { stackView in
                 stackView.alignment = useShieldAsCheckmark ? .center : .top
                 stackView.spacing = 4
-                let image = useShieldAsCheckmark ? #imageLiteral(resourceName: "vpn_checkmark") : #imageLiteral(resourceName: "vpn_checkmark_popup")
-                
+                let image =
+                    useShieldAsCheckmark
+                    ? #imageLiteral(resourceName: "vpn_checkmark")
+                    : #imageLiteral(resourceName: "vpn_checkmark_popup")
+
                 let checkmarkImage = UIImageView(image: image).then {
                     $0.contentMode = .scaleAspectFit
                     $0.snp.makeConstraints { make in
@@ -53,14 +69,14 @@ struct BraveVPNCommonUI {
 
                 }
                 stackView.addArrangedSubview(checkmarkImage)
-                
+
                 let verticalStackView = UIStackView().then {
                     $0.axis = .vertical
                     $0.alignment = .leading
                 }
-                
+
                 verticalStackView.addArrangedSubview(UIView.spacer(.vertical, amount: 2))
-                
+
                 let label = ShrinkableLabel().then {
                     $0.text = string
                     $0.font = font
@@ -69,19 +85,19 @@ struct BraveVPNCommonUI {
                     $0.lineBreakMode = .byWordWrapping
                 }
                 verticalStackView.addArrangedSubview(label)
-                
+
                 stackView.addArrangedSubview(verticalStackView)
             }
         }
-        
+
         class ShrinkableLabel: UILabel {
             override init(frame: CGRect) {
                 super.init(frame: frame)
-                
+
                 minimumScaleFactor = 0.5
                 adjustsFontSizeToFitWidth = true
             }
-            
+
             @available(*, unavailable)
             required init(coder: NSCoder) { fatalError() }
         }

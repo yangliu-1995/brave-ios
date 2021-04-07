@@ -39,11 +39,11 @@ public func isIgnoredURL(_ url: URL) -> Bool {
     if let _ = ignoredSchemes.firstIndex(of: scheme) {
         return true
     }
-    
+
     if url.host == "localhost" {
         return true
     }
-    
+
     return false
 }
 
@@ -51,6 +51,6 @@ public func isIgnoredURL(_ url: String) -> Bool {
     if let url = URL(string: url) {
         return isIgnoredURL(url)
     }
-    
+
     return false
 }

@@ -8,7 +8,7 @@ import Shared
 
 extension WalletTransferCompleteViewController {
     class WalletTransferCompleteView: UIView, Themeable {
-        
+
         private let scrollView = UIScrollView()
         private let stackView = UIStackView().then {
             $0.axis = .vertical
@@ -27,17 +27,17 @@ extension WalletTransferCompleteViewController {
             $0.numberOfLines = 0
             $0.font = .systemFont(ofSize: 17)
         }
-        
+
         override init(frame: CGRect) {
             super.init(frame: frame)
-            
+
             addSubview(scrollView)
             scrollView.addSubview(stackView)
             stackView.addStackViewItems(
                 .view(titleLabel),
                 .view(bodyLabel)
             )
-            
+
             scrollView.snp.makeConstraints {
                 $0.edges.equalToSuperview()
             }
@@ -49,12 +49,12 @@ extension WalletTransferCompleteViewController {
                 $0.edges.equalToSuperview()
             }
         }
-        
+
         @available(*, unavailable)
         required init(coder: NSCoder) {
             fatalError()
         }
-        
+
         func applyTheme(_ theme: Theme) {
             backgroundColor = theme.colors.home
             titleLabel.textColor = theme.colors.tints.home

@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import Foundation
-import WebKit
-import Shared
 import BraveShared
+import Foundation
+import Shared
+import WebKit
 
 class NoImageModeHelper: TabContentScript {
     fileprivate weak var tab: Tab?
@@ -22,7 +22,10 @@ class NoImageModeHelper: TabContentScript {
         return "NoImageMode"
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceiveScriptMessage message: WKScriptMessage
+    ) {
         // Do nothing.
     }
 

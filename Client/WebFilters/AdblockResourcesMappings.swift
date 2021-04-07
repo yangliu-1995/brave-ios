@@ -11,18 +11,18 @@ struct AdblockResourcesMappings {
         default: return nil
         }
     }
-    
+
     static let generalHttpseName = "httpse"
     static let defaultLocale = "en"
 }
 
 enum ResourceLocale: String {
     case ar, bg, zh, cs, de, da, et, fi, fr, el, hu, id, hi, fa, `is`, he, it, ja, ko, lt, lv, nl,
-    pl, ru, uk, be, es, sl, sv, tr, vi
-    
+        pl, ru, uk, be, es, sl, sv, tr, vi
+
     func resourceName(for fileType: FileType) -> String {
         var resourceId = ""
-        
+
         switch self {
         case .ar: return "9FCEECEC-52B4-4487-8E57-8781E82C91D0"
         case .bg: return "FD176DD1-F9A0-4469-B43E-B1764893DD5C"

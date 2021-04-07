@@ -9,8 +9,8 @@
 // increased startup times which may lead to termination by the OS.
 import Shared
 import Storage
-import XCGLogger
 import SwiftKeychainWrapper
+import XCGLogger
 
 // Import these dependencies ONLY for the main `Client` application target.
 #if MOZ_TARGET_CLIENT
@@ -32,24 +32,36 @@ class ProfileFileAccessor: FileAccessor {
         // Bug 1147262: First option is for device, second is for simulator.
         var rootPath: String
         let sharedContainerIdentifier = AppInfo.sharedContainerIdentifier
-        if let url = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: sharedContainerIdentifier) {
+        if let url = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: sharedContainerIdentifier
+        ) {
             rootPath = url.path
         } else {
-            log.error("Unable to find the shared container. Defaulting profile location to ~/Library/Application Support/ instead.")
-            rootPath = (NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory,
-                                                            .userDomainMask, true)[0])
+            log.error(
+                "Unable to find the shared container. Defaulting profile location to ~/Library/Application Support/ instead."
+            )
+            rootPath =
+                (NSSearchPathForDirectoriesInDomains(
+                    .applicationSupportDirectory,
+                    .userDomainMask,
+                    true
+                )[0])
         }
 
-        super.init(rootPath: URL(fileURLWithPath: rootPath).appendingPathComponent(profileDirName).path)
-        
+        super.init(
+            rootPath: URL(fileURLWithPath: rootPath).appendingPathComponent(profileDirName).path
+        )
+
         // Create the "Downloads" folder in the documents directory if doesn't exist.
-        FileManager.default.getOrCreateFolder(name: "Downloads", excludeFromBackups: true, location: .documentDirectory)
+        FileManager.default.getOrCreateFolder(
+            name: "Downloads",
+            excludeFromBackups: true,
+            location: .documentDirectory
+        )
     }
 }
 
-/**
- * A Profile manages access to the user's data.
- */
+/// A Profile manages access to the user's data.
 protocol Profile: class {
     var prefs: Prefs { get }
     var searchEngines: SearchEngines { get }
@@ -60,7 +72,7 @@ protocol Profile: class {
     var panelDataObservers: PanelDataObservers { get }
 
     var isShutdown: Bool { get }
-    
+
     func shutdown()
     func reopen()
 
@@ -69,7 +81,7 @@ protocol Profile: class {
     func localName() -> String
 }
 
-fileprivate let PrefKeyClientID = "PrefKeyClientID"
+private let PrefKeyClientID = "PrefKeyClientID"
 extension Profile {
     var clientID: String {
         let clientID: String
@@ -84,7 +96,7 @@ extension Profile {
 }
 
 open class BrowserProfile: Profile {
-    
+
     fileprivate let name: String
     fileprivate let keychain: KeychainWrapper
     var isShutdown = false
@@ -142,7 +154,12 @@ open class BrowserProfile: Profile {
         let isNewProfile = !files.exists("")
 
         // Set up our database handles.
-        self.loginsDB = BrowserDB(filename: "logins.db", secretKey: BrowserProfile.loginsKey, schema: LoginsSchema(), files: files)
+        self.loginsDB = BrowserDB(
+            filename: "logins.db",
+            secretKey: BrowserProfile.loginsKey,
+            schema: LoginsSchema(),
+            files: files
+        )
 
         if isNewProfile {
             log.info("New profile. Removing old account metadata.")
@@ -158,17 +175,17 @@ open class BrowserProfile: Profile {
     func reopen() {
         log.debug("Reopening profile.")
         isShutdown = false
-        
+
         loginsDB.reopenIfClosed()
     }
 
     func shutdown() {
         log.debug("Shutting down profile.")
         isShutdown = true
-        
+
         loginsDB.forceClose()
     }
-    
+
     deinit {
         log.debug("Deiniting profile \(self.localName()).")
     }

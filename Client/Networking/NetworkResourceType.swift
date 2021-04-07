@@ -7,7 +7,7 @@ import Foundation
 enum NetworkResourceType {
     case cached(etag: String?)
     case regular
-    
+
     func isCached() -> Bool {
         switch self {
         case .cached(_): return true

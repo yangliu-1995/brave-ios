@@ -30,7 +30,7 @@ extension String {
     */
     public func ellipsize(maxLength: Int) -> String {
         if (maxLength >= 2) && (self.count > maxLength) {
-            let index1 = self.index(self.startIndex, offsetBy: (maxLength + 1) / 2) // `+ 1` has the same effect as an int ceil
+            let index1 = self.index(self.startIndex, offsetBy: (maxLength + 1) / 2)  // `+ 1` has the same effect as an int ceil
             let index2 = self.index(self.endIndex, offsetBy: maxLength / -2)
 
             return String(self[..<index1]) + "…\u{2060}" + String(self[index2...])
@@ -47,8 +47,7 @@ extension String {
         // Let's escape | for them.
         // We'd love to use one of the more sophisticated CFURL* or NSString.* functions, but
         // none seem to be quite suitable.
-        return URL(string: self) ??
-               URL(string: self.stringWithAdditionalEscaping)
+        return URL(string: self) ?? URL(string: self.stringWithAdditionalEscaping)
     }
 
     /// Returns a new string made by removing the leading String characters contained
@@ -60,7 +59,7 @@ extension String {
         }
         return trimmed
     }
-    
+
     // Minimize trimming effort for characterset based on string
     public func trim(_ charactersInString: String) -> String {
         return self.trimmingCharacters(in: CharacterSet(charactersIn: charactersInString))
@@ -86,52 +85,73 @@ extension String {
         return newString
     }
 
-    public static func contentsOfFileWithResourceName(_ name: String, ofType type: String, fromBundle bundle: Bundle, encoding: String.Encoding, error: NSErrorPointer) -> String? {
+    public static func contentsOfFileWithResourceName(
+        _ name: String,
+        ofType type: String,
+        fromBundle bundle: Bundle,
+        encoding: String.Encoding,
+        error: NSErrorPointer
+    ) -> String? {
         return bundle.path(forResource: name, ofType: type).flatMap {
             try? String(contentsOfFile: $0, encoding: encoding)
         }
     }
-    
+
     public func regexReplacePattern(_ pattern: String, with: String) throws -> String {
         let regex = try NSRegularExpression(pattern: pattern, options: [])
-        return regex.stringByReplacingMatches(in: self, options: [], range: NSRange(location: 0, length: self.count), withTemplate: with)
+        return regex.stringByReplacingMatches(
+            in: self,
+            options: [],
+            range: NSRange(location: 0, length: self.count),
+            withTemplate: with
+        )
     }
-    
+
     public func separatedBy(_ string: String) -> [String] {
         let cleaned = self.replacingOccurrences(of: "\n", with: " ")
-        return cleaned.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: string)
+        return cleaned.trimmingCharacters(in: .whitespacesAndNewlines).components(
+            separatedBy: string
+        )
     }
-    
+
     /*
      Truncates the string to the specified length number of characters and appends an optional trailing string if longer.
      - Parameter length: Desired maximum lengths of a string
      - Parameter trailing: A 'String' that will be appended after the truncation.
-     
+
      - Returns: 'String' object.
      */
     public func truncate(length: Int, trailing: String = "…") -> String {
         return (self.count > length) ? self.prefix(length) + trailing : self
     }
-    
+
     public var capitalizeFirstLetter: String {
         return prefix(1).capitalized + dropFirst()
     }
-    
-    public func attributedText(stringToChange: String, font: UIFont, color: UIColor = .black) -> NSAttributedString {
+
+    public func attributedText(stringToChange: String, font: UIFont, color: UIColor = .black)
+        -> NSAttributedString
+    {
         let attributedString =
-            NSMutableAttributedString(string: self,
-                                      attributes: [NSAttributedString.Key.font: font,
-                                                   NSAttributedString.Key.foregroundColor: color])
-        let boldFontAttribute: [NSAttributedString.Key: Any] = [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: font.pointSize)]
+            NSMutableAttributedString(
+                string: self,
+                attributes: [
+                    NSAttributedString.Key.font: font,
+                    NSAttributedString.Key.foregroundColor: color,
+                ]
+            )
+        let boldFontAttribute: [NSAttributedString.Key: Any] = [
+            NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: font.pointSize)
+        ]
         let range = (self as NSString).range(of: stringToChange)
         attributedString.addAttributes(boldFontAttribute, range: range)
         return attributedString
     }
-    
+
     public var withNonBreakingSpace: String {
         self.replacingOccurrences(of: " ", with: "\u{00a0}")
     }
-    
+
     public var withSecureUrlScheme: String {
         var textEntered = self
 
@@ -139,11 +159,11 @@ extension String {
             if textEntered.hasPrefix("http://") {
                 textEntered = String(textEntered.dropFirst(7))
             }
-            
+
             return "https://\(textEntered)"
         } else {
             let substringWithoutHttps = String(textEntered.dropFirst(8))
-            
+
             if substringWithoutHttps.hasPrefix("https://") {
                 return substringWithoutHttps
             } else if substringWithoutHttps.hasPrefix("http://") {
@@ -151,7 +171,7 @@ extension String {
                 return "https://\(substringWithoutHttp)"
             }
         }
-        
+
         return textEntered
     }
 }

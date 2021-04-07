@@ -3,13 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
+import SDWebImage
 import Shared
 import Storage
-import SDWebImage
+
 import class Data.FaviconMO
 
 class FaviconHandler {
-    static let maximumFaviconSize = 1 * 1024 * 1024 // 1 MiB file size limit
+    static let maximumFaviconSize = 1 * 1024 * 1024  // 1 MiB file size limit
 
     private var tabObservers: TabObservers!
     private let backgroundQueue = OperationQueue()
@@ -22,7 +23,9 @@ class FaviconHandler {
         unregister(tabObservers)
     }
 
-    func loadFaviconURL(_ faviconURL: String, type: IconType, forTab tab: Tab) -> Deferred<Maybe<(Favicon, Data?)>> {
+    func loadFaviconURL(_ faviconURL: String, type: IconType, forTab tab: Tab) -> Deferred<
+        Maybe<(Favicon, Data?)>
+    > {
         guard let iconURL = URL(string: faviconURL), let currentURL = tab.url else {
             return deferMaybe(FaviconError())
         }
@@ -34,16 +37,18 @@ class FaviconHandler {
         let webImageCache = WebImageCacheManager.shared
 
         let onProgress: ImageCacheProgress = { receivedSize, expectedSize, _ in
-            if receivedSize >= FaviconHandler.maximumFaviconSize || expectedSize > FaviconHandler.maximumFaviconSize {
+            if receivedSize >= FaviconHandler.maximumFaviconSize
+                || expectedSize > FaviconHandler.maximumFaviconSize
+            {
                 imageOperation?.cancel()
             }
         }
 
         let onSuccess: (Favicon, Data?) -> Void = { [weak tab] (favicon, data) -> Void in
             defer { deferred.fill(Maybe(success: (favicon, data))) }
-            
+
             guard let tab = tab else { return }
-            
+
             tab.favicons.append(favicon)
             FaviconMO.add(favicon, forSiteUrl: currentURL, persistent: !tab.isPrivate)
         }
@@ -70,7 +75,12 @@ class FaviconHandler {
                 // If we failed to download a page-level icon, try getting the domain-level icon
                 // instead before ultimately failing.
                 let siteIconURL = currentURL.domainURL.appendingPathComponent("favicon.ico")
-                imageOperation = webImageCache.load(from: siteIconURL, options: [.lowPriority], progress: onProgress, completion: onCompletedSiteFavicon)
+                imageOperation = webImageCache.load(
+                    from: siteIconURL,
+                    options: [.lowPriority],
+                    progress: onProgress,
+                    completion: onCompletedSiteFavicon
+                )
                 return
             }
 
@@ -81,7 +91,12 @@ class FaviconHandler {
             onSuccess(favicon, data)
         }
 
-        imageOperation = webImageCache.load(from: iconURL, options: [.lowPriority], progress: onProgress, completion: onCompletedPageFavicon)
+        imageOperation = webImageCache.load(
+            from: iconURL,
+            options: [.lowPriority],
+            progress: onProgress,
+            completion: onCompletedPageFavicon
+        )
 
         return deferred
     }

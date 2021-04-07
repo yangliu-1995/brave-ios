@@ -71,7 +71,7 @@ struct FilteredFillStrategy: FillStrategy {
     /// A global predicate to determine what items are valid to pull from. For example, only pulling items
     /// that are in a given category
     var isIncluded: ((FeedItem) -> Bool)
-    
+
     func next(
         _ length: Int,
         from list: inout [FeedItem],
@@ -109,15 +109,19 @@ class CategoryFillStrategy<Category>: FillStrategy where Category: Hashable {
     private var remainingCategories: Set<Category>
     /// The upcoming category that will be used
     private var nextCategory: Category?
-    
-    init(categories: Set<Category>, category: KeyPath<FeedItem, Category>, initialCategory: Category? = nil) {
+
+    init(
+        categories: Set<Category>,
+        category: KeyPath<FeedItem, Category>,
+        initialCategory: Category? = nil
+    ) {
         self.categories = categories
         self.category = category
         self.remainingCategories = categories
         self.initialCategory = initialCategory
         self.nextCategory = initialCategory ?? categories.first
     }
-    
+
     func next(
         _ length: Int,
         from list: inout [FeedItem],
@@ -131,7 +135,7 @@ class CategoryFillStrategy<Category>: FillStrategy where Category: Hashable {
         }
         guard let nextCategory = nextCategory else { return nil }
         workingList = workingList.filter({ $0[keyPath: category] == nextCategory })
-        
+
         remainingCategories.remove(nextCategory)
         if remainingCategories.isEmpty {
             remainingCategories = categories
@@ -139,7 +143,7 @@ class CategoryFillStrategy<Category>: FillStrategy where Category: Hashable {
         } else {
             self.nextCategory = remainingCategories.randomElement()!
         }
-        
+
         if workingList.count < length { return nil }
         let items = Array(workingList.prefix(upTo: length))
         items.forEach { item in
@@ -156,7 +160,7 @@ struct RandomizedFillStrategy: FillStrategy {
     /// A global predicate to determine what random items are valid to pull from. For example, only pulling
     /// random items that are less than 48 hours old
     var isIncluded: ((FeedItem) -> Bool)?
-    
+
     func next(
         _ length: Int,
         from list: inout [FeedItem],

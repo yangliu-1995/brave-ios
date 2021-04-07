@@ -10,7 +10,7 @@ struct FormPostData {
     let target: String
     let enctype: String
     let requestBody: Data
-    
+
     init?(messageBody: Any) {
         guard let messageBodyDict = messageBody as? [String: String],
             let actionString = messageBodyDict["action"],
@@ -19,27 +19,29 @@ struct FormPostData {
             let enctype = messageBodyDict["enctype"],
             let requestBodyString = messageBodyDict["requestBody"],
             let action = URL(string: actionString),
-            let requestBody = requestBodyString.data(using: .utf8) else {
-                return nil
+            let requestBody = requestBodyString.data(using: .utf8)
+        else {
+            return nil
         }
-        
+
         self.action = action
         self.method = method
         self.target = target
         self.enctype = enctype
         self.requestBody = requestBody
     }
-    
+
     func matchesNavigationAction(_ navigationAction: WKNavigationAction) -> Bool {
         let request = navigationAction.request
         let headers = request.allHTTPHeaderFields ?? [:]
-        
+
         if self.action == request.url,
             self.method == request.httpMethod,
-            self.enctype == headers["Content-Type"] {
+            self.enctype == headers["Content-Type"]
+        {
             return true
         }
-        
+
         return false
     }
 
@@ -60,36 +62,46 @@ class FormPostHelper: TabContentScript {
     required init(tab: Tab) {
         self.tab = tab
     }
-    
+
     static func name() -> String {
         return "FormPostHelper"
     }
-    
+
     func scriptMessageHandlerName() -> String? {
         return "formPostHelper"
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceiveScriptMessage message: WKScriptMessage
+    ) {
         guard let formPostData = FormPostData(messageBody: message.body) else {
             print("Unable to parse FormPostData from script message body.")
             return
         }
-        
+
         blankTargetFormPosts.append(formPostData)
     }
 
     func urlRequestForNavigationAction(_ navigationAction: WKNavigationAction) -> URLRequest {
-        guard let formPostData = blankTargetFormPosts.first(where: { $0.matchesNavigationAction(navigationAction) }) else {
+        guard
+            let formPostData = blankTargetFormPosts.first(where: {
+                $0.matchesNavigationAction(navigationAction)
+            })
+        else {
             return navigationAction.request
         }
-        
-        let request = formPostData.urlRequestWithHeaders(navigationAction.request.allHTTPHeaderFields)
-        
-        if let index = blankTargetFormPosts.firstIndex(where: { $0.matchesNavigationAction(navigationAction) }) {
+
+        let request = formPostData.urlRequestWithHeaders(
+            navigationAction.request.allHTTPHeaderFields
+        )
+
+        if let index = blankTargetFormPosts.firstIndex(where: {
+            $0.matchesNavigationAction(navigationAction)
+        }) {
             blankTargetFormPosts.remove(at: index)
         }
-        
+
         return request
     }
 }
-

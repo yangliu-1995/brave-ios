@@ -4,9 +4,7 @@
 
 import Foundation
 
-/**
- * Handles screenshots for a given tab, including pages with non-webview content.
- */
+/// Handles screenshots for a given tab, including pages with non-webview content.
 class ScreenshotHelper {
     var viewIsVisible = false
 
@@ -22,11 +20,16 @@ class ScreenshotHelper {
         if let url = tab.url {
             if url.isAboutHomeURL {
                 if let homePanel = controller?.tabManager.selectedTab?.newTabPageViewController {
-                    screenshot = homePanel.view.screenshot(quality: UIConstants.activeScreenshotQuality)
+                    screenshot = homePanel.view.screenshot(
+                        quality: UIConstants.activeScreenshotQuality
+                    )
                 }
             } else {
                 let offset = CGPoint(x: 0, y: -(tab.webView?.scrollView.contentInset.top ?? 0))
-                screenshot = tab.webView?.screenshot(offset: offset, quality: UIConstants.activeScreenshotQuality)
+                screenshot = tab.webView?.screenshot(
+                    offset: offset,
+                    quality: UIConstants.activeScreenshotQuality
+                )
             }
         }
 

@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import BraveUI
 import Foundation
 import Lottie
-import BraveUI
 import Shared
 
 enum OptInCardAction {
@@ -16,25 +16,28 @@ enum OptInCardAction {
 
 class BraveTodayOptInView: UIView, FeedCardContent {
     private let backgroundView = FeedCardBackgroundView()
-    
+
     private let stackView = UIStackView().then {
         $0.axis = .vertical
         $0.alignment = .center
         $0.spacing = 16
     }
-    
+
     let graphicAnimationView = AnimationView(name: "brave-today-welcome-graphic").then {
         $0.contentMode = .scaleAspectFit
         $0.loopMode = .loop
     }
-    
+
     var optInCardActionHandler: ((OptInCardAction) -> Void)?
-    
+
     private let closeButton = UIButton(type: .system).then {
-        $0.setImage(#imageLiteral(resourceName: "card_close").withRenderingMode(.alwaysOriginal), for: .normal)
+        $0.setImage(
+            #imageLiteral(resourceName: "card_close").withRenderingMode(.alwaysOriginal),
+            for: .normal
+        )
         $0.accessibilityLabel = Strings.close
     }
-    
+
     let turnOnBraveTodayButton = ActionButton().then {
         $0.layer.borderWidth = 0
         $0.titleLabel?.font = .systemFont(ofSize: 16.0, weight: .semibold)
@@ -46,21 +49,21 @@ class BraveTodayOptInView: UIView, FeedCardContent {
             $0.tintColor = .white
         }
     }
-    
+
     private let learnMoreButton = UIButton(type: .system).then {
         $0.setTitle(Strings.BraveToday.learnMoreTitle, for: .normal)
         $0.titleLabel?.font = .systemFont(ofSize: 15.0, weight: .semibold)
         $0.titleLabel?.appearanceTextColor = .white
         $0.setTitleColor(.white, for: .normal)
     }
-    
+
     required init() {
         super.init(frame: .zero)
-        
+
         addSubview(backgroundView)
         addSubview(stackView)
         addSubview(closeButton)
-        
+
         backgroundView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -70,70 +73,86 @@ class BraveTodayOptInView: UIView, FeedCardContent {
         stackView.addStackViewItems(
             .view(graphicAnimationView),
             .customSpace(30),
-            .view(UILabel().then {
-                $0.text = Strings.BraveToday.introCardTitle
-                $0.textAlignment = .center
-                $0.appearanceTextColor = .white
-                $0.font = .systemFont(ofSize: 18, weight: .semibold)
-                $0.numberOfLines = 0
-            }),
-            .view(UILabel().then {
-                $0.text = Strings.BraveToday.introCardBody
-                $0.textAlignment = .center
-                $0.appearanceTextColor = .white
-                $0.font = .systemFont(ofSize: 14)
-                $0.numberOfLines = 0
-            }),
-            .view(UIStackView().then {
-                $0.spacing = 4
-                $0.axis = .vertical
-                $0.alignment = .center
-                $0.addStackViewItems(
-                    .view(MaskedNewLabel()),
-                    .view(UILabel().then {
-                        $0.text = Strings.BraveToday.introCardNewTextBody
-                        $0.textAlignment = .center
-                        $0.appearanceTextColor = .white
-                        $0.font = .systemFont(ofSize: 13)
-                        $0.numberOfLines = 0
-                    })
-                )
-            }),
+            .view(
+                UILabel().then {
+                    $0.text = Strings.BraveToday.introCardTitle
+                    $0.textAlignment = .center
+                    $0.appearanceTextColor = .white
+                    $0.font = .systemFont(ofSize: 18, weight: .semibold)
+                    $0.numberOfLines = 0
+                }
+            ),
+            .view(
+                UILabel().then {
+                    $0.text = Strings.BraveToday.introCardBody
+                    $0.textAlignment = .center
+                    $0.appearanceTextColor = .white
+                    $0.font = .systemFont(ofSize: 14)
+                    $0.numberOfLines = 0
+                }
+            ),
+            .view(
+                UIStackView().then {
+                    $0.spacing = 4
+                    $0.axis = .vertical
+                    $0.alignment = .center
+                    $0.addStackViewItems(
+                        .view(MaskedNewLabel()),
+                        .view(
+                            UILabel().then {
+                                $0.text = Strings.BraveToday.introCardNewTextBody
+                                $0.textAlignment = .center
+                                $0.appearanceTextColor = .white
+                                $0.font = .systemFont(ofSize: 13)
+                                $0.numberOfLines = 0
+                            }
+                        )
+                    )
+                }
+            ),
             .customSpace(24),
             .view(turnOnBraveTodayButton),
             .view(learnMoreButton)
         )
-        
+
         closeButton.snp.makeConstraints {
             $0.top.right.equalToSuperview().inset(8)
         }
-        
+
         closeButton.addTarget(self, action: #selector(tappedCloseButton), for: .touchUpInside)
-        learnMoreButton.addTarget(self, action: #selector(tappedLearnMoreButton), for: .touchUpInside)
-        turnOnBraveTodayButton.addTarget(self, action: #selector(tappedTurnOnBraveButton), for: .touchUpInside)
+        learnMoreButton.addTarget(
+            self,
+            action: #selector(tappedLearnMoreButton),
+            for: .touchUpInside
+        )
+        turnOnBraveTodayButton.addTarget(
+            self,
+            action: #selector(tappedTurnOnBraveButton),
+            for: .touchUpInside
+        )
     }
-    
+
     // MARK: - Actions
-    
+
     @objc private func tappedCloseButton() {
         optInCardActionHandler?(.closedButtonTapped)
     }
-    
+
     @objc private func tappedLearnMoreButton() {
         optInCardActionHandler?(.learnMoreButtonTapped)
     }
-    
+
     @objc private func tappedTurnOnBraveButton() {
         optInCardActionHandler?(.turnOnBraveTodayButtonTapped)
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()
     }
-    
+
     // MARK: - FeedCardContent
-    
+
     var actionHandler: ((Int, FeedItemAction) -> Void)? {
         didSet {
             assertionFailure("Unused for welcome card")
@@ -149,7 +168,7 @@ class BraveTodayOptInView: UIView, FeedCardContent {
 /// Displays the word "New" with a gradient mask
 private class MaskedNewLabel: UIView {
     private let gradientView = GradientView(
-        colors: [UIColor(rgb: 0x4C54D2), UIColor(rgb: 0xBF14A2), UIColor(rgb: 0xF73A1C)],   // light
+        colors: [UIColor(rgb: 0x4C54D2), UIColor(rgb: 0xBF14A2), UIColor(rgb: 0xF73A1C)],  // light
         positions: [0, 0.4, 1],
         startPoint: .zero,
         endPoint: .init(x: 1, y: 1)
@@ -161,16 +180,16 @@ private class MaskedNewLabel: UIView {
     }
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+
         backgroundColor = .white
         layer.cornerRadius = 8
         if #available(iOS 13.0, *) {
             layer.cornerCurve = .continuous
         }
-        
+
         gradientView.mask = label
         clipsToBounds = true
-        
+
         addSubview(gradientView)
         label.sizeToFit()
         gradientView.snp.makeConstraints {
@@ -190,6 +209,6 @@ private class MaskedNewLabel: UIView {
     }
     override var accessibilityLabel: String? {
         get { label.accessibilityLabel }
-        set { } // swiftlint:disable:this unused_setter_value
+        set {}  // swiftlint:disable:this unused_setter_value
     }
 }

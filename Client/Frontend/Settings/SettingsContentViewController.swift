@@ -7,12 +7,10 @@ import SnapKit
 import UIKit
 import WebKit
 
-let DefaultTimeoutTimeInterval = 10.0 // Seconds.  We'll want some telemetry on load times in the wild.
+let DefaultTimeoutTimeInterval = 10.0  // Seconds.  We'll want some telemetry on load times in the wild.
 
-/**
- * A controller that manages a single web view and provides a way for
- * the user to navigate back to Settings.
- */
+/// A controller that manages a single web view and provides a way for
+/// the user to navigate back to Settings.
 class SettingsContentViewController: UIViewController, WKNavigationDelegate {
     let interstitialBackgroundColor: UIColor
     var settingsTitle: NSAttributedString?
@@ -22,13 +20,16 @@ class SettingsContentViewController: UIViewController, WKNavigationDelegate {
     var isLoaded: Bool = false {
         didSet {
             if isLoaded {
-                UIView.transition(from: interstitialView, to: webView,
+                UIView.transition(
+                    from: interstitialView,
+                    to: webView,
                     duration: 0.5,
                     options: .transitionCrossDissolve,
                     completion: { finished in
                         self.interstitialView.removeFromSuperview()
                         self.interstitialSpinnerView.stopAnimating()
-                })
+                    }
+                )
             }
         }
     }
@@ -37,13 +38,16 @@ class SettingsContentViewController: UIViewController, WKNavigationDelegate {
         didSet {
             if isError {
                 interstitialErrorView.isHidden = false
-                UIView.transition(from: interstitialSpinnerView, to: interstitialErrorView,
+                UIView.transition(
+                    from: interstitialSpinnerView,
+                    to: interstitialErrorView,
                     duration: 0.5,
                     options: .transitionCrossDissolve,
                     completion: { finished in
                         self.interstitialSpinnerView.removeFromSuperview()
                         self.interstitialSpinnerView.stopAnimating()
-                })
+                    }
+                )
             }
         }
     }
@@ -61,7 +65,13 @@ class SettingsContentViewController: UIViewController, WKNavigationDelegate {
             return
         }
         if timeout > 0 {
-            self.timer = Timer.scheduledTimer(timeInterval: timeout, target: self, selector: #selector(didTimeOut), userInfo: nil, repeats: false)
+            self.timer = Timer.scheduledTimer(
+                timeInterval: timeout,
+                target: self,
+                selector: #selector(didTimeOut),
+                userInfo: nil,
+                repeats: false
+            )
         } else {
             self.timer = nil
         }
@@ -152,16 +162,26 @@ class SettingsContentViewController: UIViewController, WKNavigationDelegate {
         self.isError = true
     }
 
-    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    func webView(
+        _ webView: WKWebView,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+    ) {
         // If this is a request to our local web server, use our private credentials.
-        if challenge.protectionSpace.host == "localhost" && challenge.protectionSpace.port == Int(WebServer.sharedInstance.server.port) {
+        if challenge.protectionSpace.host == "localhost"
+            && challenge.protectionSpace.port == Int(WebServer.sharedInstance.server.port)
+        {
             completionHandler(.useCredential, WebServer.sharedInstance.credentials)
             return
         }
         completionHandler(.performDefaultHandling, nil)
     }
 
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+    func webView(
+        _ webView: WKWebView,
+        didFailProvisionalNavigation navigation: WKNavigation!,
+        withError error: Error
+    ) {
         didTimeOut()
     }
 

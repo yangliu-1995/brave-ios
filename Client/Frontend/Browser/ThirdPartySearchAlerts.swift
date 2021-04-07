@@ -24,12 +24,15 @@ class ThirdPartySearchAlerts: UIAlertController {
      - returns: UIAlertController for asking the user to add a search engine
      **/
 
-    static func addThirdPartySearchEngine(_ engine: OpenSearchEngine, completion: @escaping (UIAlertAction) -> Void) -> UIAlertController {
+    static func addThirdPartySearchEngine(
+        _ engine: OpenSearchEngine,
+        completion: @escaping (UIAlertAction) -> Void
+    ) -> UIAlertController {
         let alertMessage = """
-                            \n\(engine.displayName)
-                            \(engine.searchTemplate)
-                            \n\(Strings.CustomSearchEngine.thirdPartySearchEngineAddAlertDescription)
-                            """
+            \n\(engine.displayName)
+            \(engine.searchTemplate)
+            \n\(Strings.CustomSearchEngine.thirdPartySearchEngineAddAlertDescription)
+            """
         let alert = ThirdPartySearchAlerts(
             title: Strings.CustomSearchEngine.thirdPartySearchEngineAddAlertTitle,
             message: alertMessage,
@@ -61,43 +64,53 @@ class ThirdPartySearchAlerts: UIAlertController {
      **/
 
     static func failedToAddThirdPartySearch() -> UIAlertController {
-        return searchAlertWithOK(title: Strings.CustomSearchEngine.thirdPartySearchEngineAddErrorTitle,
-                                 message: Strings.CustomSearchEngine.thirdPartySearchEngineAddErrorDescription)
+        return searchAlertWithOK(
+            title: Strings.CustomSearchEngine.thirdPartySearchEngineAddErrorTitle,
+            message: Strings.CustomSearchEngine.thirdPartySearchEngineAddErrorDescription
+        )
     }
-    
+
     static func missingInfoToAddThirdPartySearch() -> UIAlertController {
-        return searchAlertWithOK(title: Strings.CustomSearchEngine.thirdPartySearchEngineAddErrorTitle,
-                                 message: Strings.CustomSearchEngine.thirdPartySearchEngineMissingInfoErrorDescription)
+        return searchAlertWithOK(
+            title: Strings.CustomSearchEngine.thirdPartySearchEngineAddErrorTitle,
+            message: Strings.CustomSearchEngine.thirdPartySearchEngineMissingInfoErrorDescription
+        )
     }
-    
+
     static func incorrectCustomEngineForm() -> UIAlertController {
-        return searchAlertWithOK(title: Strings.CustomSearchEngine.thirdPartySearchEngineIncorrectFormErrorTitle,
-                                 message: Strings.CustomSearchEngine.thirdPartySearchEngineIncorrectFormErrorDescription)
+        return searchAlertWithOK(
+            title: Strings.CustomSearchEngine.thirdPartySearchEngineIncorrectFormErrorTitle,
+            message: Strings.CustomSearchEngine.thirdPartySearchEngineIncorrectFormErrorDescription
+        )
     }
-    
+
     static func duplicateCustomEngine() -> UIAlertController {
-        return searchAlertWithOK(title: Strings.CustomSearchEngine.thirdPartySearchEngineAddErrorTitle,
-                                 message: Strings.CustomSearchEngine.thirdPartySearchEngineDuplicateErrorDescription)
+        return searchAlertWithOK(
+            title: Strings.CustomSearchEngine.thirdPartySearchEngineAddErrorTitle,
+            message: Strings.CustomSearchEngine.thirdPartySearchEngineDuplicateErrorDescription
+        )
     }
-    
+
     static func insecureURLEntryThirdPartySearch() -> UIAlertController {
-        return searchAlertWithOK(title: Strings.CustomSearchEngine.thirdPartySearchEngineAddErrorTitle,
-                                 message: Strings.CustomSearchEngine.thirdPartySearchEngineInsecureURLErrorDescription)
+        return searchAlertWithOK(
+            title: Strings.CustomSearchEngine.thirdPartySearchEngineAddErrorTitle,
+            message: Strings.CustomSearchEngine.thirdPartySearchEngineInsecureURLErrorDescription
+        )
     }
-    
+
     private static func searchAlertWithOK(title: String, message: String) -> UIAlertController {
         let alert = ThirdPartySearchAlerts(
             title: title,
             message: message,
             preferredStyle: .alert
         )
-        
+
         let okayOption = UIAlertAction(
             title: Strings.OKString,
             style: .default,
             handler: nil
         )
-        
+
         alert.addAction(okayOption)
         return alert
     }

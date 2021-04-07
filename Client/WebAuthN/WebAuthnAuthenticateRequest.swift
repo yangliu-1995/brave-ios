@@ -19,7 +19,7 @@ struct WebAuthnAuthenticateRequest {
     enum RequestKeys: String, CodingKey {
         case publicKey
     }
-    
+
     enum PublicKeyDictionaryKeys: String, CodingKey {
         case rpId
         case challenge
@@ -37,20 +37,30 @@ private struct AllowCredentials: Codable {
 extension WebAuthnAuthenticateRequest: Decodable {
     init(from decoder: Decoder) throws {
         let request = try decoder.container(keyedBy: RequestKeys.self)
-        let publicKeyDictionary = try request.nestedContainer(keyedBy: PublicKeyDictionaryKeys.self, forKey: .publicKey)
-        
+        let publicKeyDictionary = try request.nestedContainer(
+            keyedBy: PublicKeyDictionaryKeys.self,
+            forKey: .publicKey
+        )
+
         rpID = try publicKeyDictionary.decodeIfPresent(String.self, forKey: .rpId)
         challenge = try publicKeyDictionary.decode(String.self, forKey: .challenge)
-        
+
         // As of the latest spec changes, this valid will always be true!
         // https://github.com/w3c/webauthn/pull/1140/files
         userPresence = true
-        
+
         // As a result of the above, we need to ensure that the default value is preferred
-        userVerification = try publicKeyDictionary.decodeIfPresent(WebAuthnUserVerification.self, forKey: .userVerification) ?? .preferred
-        
-        let allowCredentialsArray = try publicKeyDictionary.decode([AllowCredentials].self, forKey: .allowCredentials)
-    
+        userVerification =
+            try publicKeyDictionary.decodeIfPresent(
+                WebAuthnUserVerification.self,
+                forKey: .userVerification
+            ) ?? .preferred
+
+        let allowCredentialsArray = try publicKeyDictionary.decode(
+            [AllowCredentials].self,
+            forKey: .allowCredentials
+        )
+
         for credential in allowCredentialsArray {
             let publicKey = credential.id
             allowCredentials.append(publicKey)

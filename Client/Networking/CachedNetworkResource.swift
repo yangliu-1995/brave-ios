@@ -10,4 +10,3 @@ struct CachedNetworkResource {
     /// When the resource was last time modified on the server.
     let lastModifiedTimestamp: TimeInterval?
 }
-

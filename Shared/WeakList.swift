@@ -4,15 +4,13 @@
 
 import Foundation
 
-/**
- * A list that weakly holds references to its items.
- * Note that while the references themselves are cleared, their wrapper objects
- * are not (though they are reused). Also note that since slots are reused,
- * order is not preserved.
- *
- * This class crashes at runtime with EXC_BAD_ACCESS if a protocol is given as
- * the type T. Make sure to use a class type.
- */
+/// A list that weakly holds references to its items.
+/// Note that while the references themselves are cleared, their wrapper objects
+/// are not (though they are reused). Also note that since slots are reused,
+/// order is not preserved.
+///
+/// This class crashes at runtime with EXC_BAD_ACCESS if a protocol is given as
+/// the type T. Make sure to use a class type.
 open class WeakList<T: AnyObject>: Sequence {
     private var items = [WeakRef<T>]()
 
@@ -37,7 +35,7 @@ open class WeakList<T: AnyObject>: Sequence {
     open func makeIterator() -> AnyIterator<T> {
         var index = 0
 
-        return AnyIterator() {
+        return AnyIterator {
             if index >= self.items.count {
                 return nil
             }
@@ -53,15 +51,15 @@ open class WeakList<T: AnyObject>: Sequence {
             return nil
         }
     }
-    
+
     open func count() -> Int {
         return self.items.count
     }
-    
+
     open func index(of object: T) -> Int? {
         return self.items.firstIndex(where: { $0.value === object })
     }
-    
+
     open subscript(index: Int) -> T? {
         return self.items[index].value
     }

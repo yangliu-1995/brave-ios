@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import WebKit
 import GCDWebServers
 import Shared
 import Storage
+import WebKit
 
 private let log = Logger.browserLogger
 
@@ -30,7 +30,7 @@ class ErrorPageHelper {
         NSURLErrorServerCertificateUntrusted,
         NSURLErrorServerCertificateHasBadDate,
         NSURLErrorServerCertificateHasUnknownRoot,
-        NSURLErrorServerCertificateNotYetValid
+        NSURLErrorServerCertificateNotYetValid,
     ]
 
     // Error codes copied from Gecko. The ints corresponding to these codes were determined
@@ -54,10 +54,12 @@ class ErrorPageHelper {
         case .cfsocks5ErrorBadState: return "CFSOCKS5ErrorBadState"
         case .cfsocks5ErrorBadResponseAddr: return "CFSOCKS5ErrorBadResponseAddr"
         case .cfsocks5ErrorBadCredentials: return "CFSOCKS5ErrorBadCredentials"
-        case .cfsocks5ErrorUnsupportedNegotiationMethod: return "CFSOCKS5ErrorUnsupportedNegotiationMethod"
+        case .cfsocks5ErrorUnsupportedNegotiationMethod:
+            return "CFSOCKS5ErrorUnsupportedNegotiationMethod"
         case .cfsocks5ErrorNoAcceptableMethod: return "CFSOCKS5ErrorNoAcceptableMethod"
         case .cfftpErrorUnexpectedStatusCode: return "CFFTPErrorUnexpectedStatusCode"
-        case .cfErrorHTTPAuthenticationTypeUnsupported: return "CFErrorHTTPAuthenticationTypeUnsupported"
+        case .cfErrorHTTPAuthenticationTypeUnsupported:
+            return "CFErrorHTTPAuthenticationTypeUnsupported"
         case .cfErrorHTTPBadCredentials: return "CFErrorHTTPBadCredentials"
         case .cfErrorHTTPConnectionLost: return "CFErrorHTTPConnectionLost"
         case .cfErrorHTTPParseFailure: return "CFErrorHTTPParseFailure"
@@ -68,10 +70,13 @@ class ErrorPageHelper {
         case .cfErrorPACFileError: return "CFErrorPACFileError"
         case .cfErrorPACFileAuth: return "CFErrorPACFileAuth"
         case .cfErrorHTTPSProxyConnectionFailure: return "CFErrorHTTPSProxyConnectionFailure"
-        case .cfStreamErrorHTTPSProxyFailureUnexpectedResponseToCONNECTMethod: return "CFStreamErrorHTTPSProxyFailureUnexpectedResponseToCONNECTMethod"
+        case .cfStreamErrorHTTPSProxyFailureUnexpectedResponseToCONNECTMethod:
+            return "CFStreamErrorHTTPSProxyFailureUnexpectedResponseToCONNECTMethod"
 
-        case .cfurlErrorBackgroundSessionInUseByAnotherProcess: return "CFURLErrorBackgroundSessionInUseByAnotherProcess"
-        case .cfurlErrorBackgroundSessionWasDisconnected: return "CFURLErrorBackgroundSessionWasDisconnected"
+        case .cfurlErrorBackgroundSessionInUseByAnotherProcess:
+            return "CFURLErrorBackgroundSessionInUseByAnotherProcess"
+        case .cfurlErrorBackgroundSessionWasDisconnected:
+            return "CFURLErrorBackgroundSessionWasDisconnected"
         case .cfurlErrorUnknown: return "CFURLErrorUnknown"
         case .cfurlErrorCancelled: return "CFURLErrorCancelled"
         case .cfurlErrorBadURL: return "CFURLErrorBadURL"
@@ -84,7 +89,8 @@ class ErrorPageHelper {
         case .cfurlErrorHTTPTooManyRedirects: return "CFURLErrorHTTPTooManyRedirects"
         case .cfurlErrorResourceUnavailable: return "CFURLErrorResourceUnavailable"
         case .cfurlErrorNotConnectedToInternet: return "CFURLErrorNotConnectedToInternet"
-        case .cfurlErrorRedirectToNonExistentLocation: return "CFURLErrorRedirectToNonExistentLocation"
+        case .cfurlErrorRedirectToNonExistentLocation:
+            return "CFURLErrorRedirectToNonExistentLocation"
         case .cfurlErrorBadServerResponse: return "CFURLErrorBadServerResponse"
         case .cfurlErrorUserCancelledAuthentication: return "CFURLErrorUserCancelledAuthentication"
         case .cfurlErrorUserAuthenticationRequired: return "CFURLErrorUserAuthenticationRequired"
@@ -103,8 +109,10 @@ class ErrorPageHelper {
         case .cfurlErrorSecureConnectionFailed: return "CFURLErrorSecureConnectionFailed"
         case .cfurlErrorServerCertificateHasBadDate: return "CFURLErrorServerCertificateHasBadDate"
         case .cfurlErrorServerCertificateUntrusted: return "CFURLErrorServerCertificateUntrusted"
-        case .cfurlErrorServerCertificateHasUnknownRoot: return "CFURLErrorServerCertificateHasUnknownRoot"
-        case .cfurlErrorServerCertificateNotYetValid: return "CFURLErrorServerCertificateNotYetValid"
+        case .cfurlErrorServerCertificateHasUnknownRoot:
+            return "CFURLErrorServerCertificateHasUnknownRoot"
+        case .cfurlErrorServerCertificateNotYetValid:
+            return "CFURLErrorServerCertificateNotYetValid"
         case .cfurlErrorClientCertificateRejected: return "CFURLErrorClientCertificateRejected"
         case .cfurlErrorClientCertificateRequired: return "CFURLErrorClientCertificateRequired"
         case .cfurlErrorCannotLoadFromNetwork: return "CFURLErrorCannotLoadFromNetwork"
@@ -114,8 +122,10 @@ class ErrorPageHelper {
         case .cfurlErrorCannotWriteToFile: return "CFURLErrorCannotWriteToFile"
         case .cfurlErrorCannotRemoveFile: return "CFURLErrorCannotRemoveFile"
         case .cfurlErrorCannotMoveFile: return "CFURLErrorCannotMoveFile"
-        case .cfurlErrorDownloadDecodingFailedMidStream: return "CFURLErrorDownloadDecodingFailedMidStream"
-        case .cfurlErrorDownloadDecodingFailedToComplete: return "CFURLErrorDownloadDecodingFailedToComplete"
+        case .cfurlErrorDownloadDecodingFailedMidStream:
+            return "CFURLErrorDownloadDecodingFailedMidStream"
+        case .cfurlErrorDownloadDecodingFailedToComplete:
+            return "CFURLErrorDownloadDecodingFailedToComplete"
 
         case .cfhttpCookieCannotParseCookieFile: return "CFHTTPCookieCannotParseCookieFile"
         case .cfNetServiceErrorUnknown: return "CFNetServiceErrorUnknown"
@@ -134,101 +144,127 @@ class ErrorPageHelper {
     class func register(_ server: WebServer, certStore: CertStore?) {
         self.certStore = certStore
 
-        server.registerHandlerForMethod("GET", module: "errors", resource: "error.html", handler: { (request) -> GCDWebServerResponse? in
-            guard let url = request?.url.originalURLFromErrorURL else {
-                return GCDWebServerResponse(statusCode: 404)
-            }
-
-            guard let index = self.redirecting.firstIndex(of: url) else {
-                return GCDWebServerDataResponse(redirect: url, permanent: false)
-            }
-
-            self.redirecting.remove(at: index)
-
-            guard let query = request?.query, 
-                  let code = query["code"],
-                  let errCode = Int(code),
-                  let errDescription = query["description"],
-                  let errURLString = query["url"],
-                  var errDomain = query["domain"] else {
-                return GCDWebServerResponse(statusCode: 404)
-            }
-
-            var asset = Bundle.main.path(forResource: "NetError", ofType: "html")
-            var variables = [
-                "error_code": "\(errCode)",
-                "error_title": errDescription,
-                "short_description": errDomain,
-            ]
-
-            var actions = "<button onclick='webkit.messageHandlers.localRequestHelper.postMessage({" +
-                "\"securitytoken\": \"\(UserScriptManager.messageHandlerToken.uuidString)\"," +
-                "\"type\": \"reload\" })'>\(Strings.errorPageReloadButtonTitle)</button>"
-
-            if errDomain == kCFErrorDomainCFNetwork as String {
-                if let code = CFNetworkErrors(rawValue: Int32(errCode)) {
-                    errDomain = self.cfErrorToName(code)
-                }
-            } else if errDomain == ErrorPageHelper.mozDomain {
-                if errCode == ErrorPageHelper.mozErrorDownloadsNotEnabled {
-                    // Overwrite the normal try-again action.
-                    actions = "<button onclick='webkit.messageHandlers.errorPageHelperMessageManager.postMessage({\"securitytoken\": \"\(UserScriptManager.messageHandlerToken.uuidString)\", \"type\": \"\(messageOpenInSafari)\"})'>\(Strings.errorPageOpenInSafariButtonTitle)</button>"
-                }
-                errDomain = ""
-            } else if certErrors.contains(errCode) {
-                guard let query = request?.query, let certError = query["certerror"],
-                    let errURLDomain = URL(string: errURLString)?.host else {
+        server.registerHandlerForMethod(
+            "GET",
+            module: "errors",
+            resource: "error.html",
+            handler: { (request) -> GCDWebServerResponse? in
+                guard let url = request?.url.originalURLFromErrorURL else {
                     return GCDWebServerResponse(statusCode: 404)
                 }
 
-                asset = Bundle.main.path(forResource: "CertError", ofType: "html")
-                actions = "<button onclick='history.back()'>\(Strings.errorPagesGoBackButton)</button>"
-                variables["error_title"] = Strings.errorPagesCertWarningTitle
-                variables["cert_error"] = certError
-                variables["long_description"] = String(format: Strings.errorPagesCertWarningDescription, "<b>\(errURLDomain)</b>")
-                variables["advanced_button"] = Strings.errorPagesAdvancedButton
-                variables["warning_description"] = Strings.errorPagesCertWarningDescription
-                variables["warning_advanced1"] = Strings.errorPagesAdvancedWarning1
-                variables["warning_advanced2"] = Strings.errorPagesAdvancedWarning2
-                variables["warning_actions"] =
-                    "<p><a href='javascript:webkit.messageHandlers.errorPageHelperMessageManager.postMessage({\"securitytoken\": \"\(UserScriptManager.messageHandlerToken.uuidString)\", \"type\": \"\(messageCertVisitOnce)\"})'>\(Strings.errorPagesVisitOnceButton)</button></p>"
-            }
+                guard let index = self.redirecting.firstIndex(of: url) else {
+                    return GCDWebServerDataResponse(redirect: url, permanent: false)
+                }
 
-            variables["actions"] = actions
-            variables["security_token"] = UserScriptManager.messageHandlerToken.uuidString
+                self.redirecting.remove(at: index)
 
-            guard let unwrappedAsset = asset else {
-                log.error("Asset is nil")
-                return GCDWebServerResponse(statusCode: 404)
-            }
-            
-            let response = GCDWebServerDataResponse(htmlTemplate: unwrappedAsset, variables: variables)
-            response?.setValue("no cache", forAdditionalHeader: "Pragma")
-            response?.setValue("no-cache,must-revalidate", forAdditionalHeader: "Cache-Control")
-            response?.setValue(Date().description, forAdditionalHeader: "Expires")
-            return response
-        })
+                guard let query = request?.query,
+                    let code = query["code"],
+                    let errCode = Int(code),
+                    let errDescription = query["description"],
+                    let errURLString = query["url"],
+                    var errDomain = query["domain"]
+                else {
+                    return GCDWebServerResponse(statusCode: 404)
+                }
 
-        server.registerHandlerForMethod("GET", module: "errors", resource: "NetError.css", handler: { (request) -> GCDWebServerResponse? in
-            let path = Bundle(for: self).path(forResource: "NetError", ofType: "css")!
-            guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else {
-                log.error("NetError data is nil")
-                return GCDWebServerResponse(statusCode: 404)
-            }
-            
-            return GCDWebServerDataResponse(data: data, contentType: "text/css")
-        })
+                var asset = Bundle.main.path(forResource: "NetError", ofType: "html")
+                var variables = [
+                    "error_code": "\(errCode)",
+                    "error_title": errDescription,
+                    "short_description": errDomain,
+                ]
 
-        server.registerHandlerForMethod("GET", module: "errors", resource: "CertError.css", handler: { (request) -> GCDWebServerResponse? in
-            let path = Bundle(for: self).path(forResource: "CertError", ofType: "css")!
-            
-            guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else {
-                log.error("CertError data is nil")
-                return GCDWebServerResponse(statusCode: 404)
+                var actions =
+                    "<button onclick='webkit.messageHandlers.localRequestHelper.postMessage({"
+                    + "\"securitytoken\": \"\(UserScriptManager.messageHandlerToken.uuidString)\","
+                    + "\"type\": \"reload\" })'>\(Strings.errorPageReloadButtonTitle)</button>"
+
+                if errDomain == kCFErrorDomainCFNetwork as String {
+                    if let code = CFNetworkErrors(rawValue: Int32(errCode)) {
+                        errDomain = self.cfErrorToName(code)
+                    }
+                } else if errDomain == ErrorPageHelper.mozDomain {
+                    if errCode == ErrorPageHelper.mozErrorDownloadsNotEnabled {
+                        // Overwrite the normal try-again action.
+                        actions =
+                            "<button onclick='webkit.messageHandlers.errorPageHelperMessageManager.postMessage({\"securitytoken\": \"\(UserScriptManager.messageHandlerToken.uuidString)\", \"type\": \"\(messageOpenInSafari)\"})'>\(Strings.errorPageOpenInSafariButtonTitle)</button>"
+                    }
+                    errDomain = ""
+                } else if certErrors.contains(errCode) {
+                    guard let query = request?.query, let certError = query["certerror"],
+                        let errURLDomain = URL(string: errURLString)?.host
+                    else {
+                        return GCDWebServerResponse(statusCode: 404)
+                    }
+
+                    asset = Bundle.main.path(forResource: "CertError", ofType: "html")
+                    actions =
+                        "<button onclick='history.back()'>\(Strings.errorPagesGoBackButton)</button>"
+                    variables["error_title"] = Strings.errorPagesCertWarningTitle
+                    variables["cert_error"] = certError
+                    variables["long_description"] = String(
+                        format: Strings.errorPagesCertWarningDescription,
+                        "<b>\(errURLDomain)</b>"
+                    )
+                    variables["advanced_button"] = Strings.errorPagesAdvancedButton
+                    variables["warning_description"] = Strings.errorPagesCertWarningDescription
+                    variables["warning_advanced1"] = Strings.errorPagesAdvancedWarning1
+                    variables["warning_advanced2"] = Strings.errorPagesAdvancedWarning2
+                    variables["warning_actions"] =
+                        "<p><a href='javascript:webkit.messageHandlers.errorPageHelperMessageManager.postMessage({\"securitytoken\": \"\(UserScriptManager.messageHandlerToken.uuidString)\", \"type\": \"\(messageCertVisitOnce)\"})'>\(Strings.errorPagesVisitOnceButton)</button></p>"
+                }
+
+                variables["actions"] = actions
+                variables["security_token"] = UserScriptManager.messageHandlerToken.uuidString
+
+                guard let unwrappedAsset = asset else {
+                    log.error("Asset is nil")
+                    return GCDWebServerResponse(statusCode: 404)
+                }
+
+                let response = GCDWebServerDataResponse(
+                    htmlTemplate: unwrappedAsset,
+                    variables: variables
+                )
+                response?.setValue("no cache", forAdditionalHeader: "Pragma")
+                response?.setValue("no-cache,must-revalidate", forAdditionalHeader: "Cache-Control")
+                response?.setValue(Date().description, forAdditionalHeader: "Expires")
+                return response
             }
-            
-            return GCDWebServerDataResponse(data: data, contentType: "text/css")
-        })
+        )
+
+        server.registerHandlerForMethod(
+            "GET",
+            module: "errors",
+            resource: "NetError.css",
+            handler: { (request) -> GCDWebServerResponse? in
+                let path = Bundle(for: self).path(forResource: "NetError", ofType: "css")!
+                guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else {
+                    log.error("NetError data is nil")
+                    return GCDWebServerResponse(statusCode: 404)
+                }
+
+                return GCDWebServerDataResponse(data: data, contentType: "text/css")
+            }
+        )
+
+        server.registerHandlerForMethod(
+            "GET",
+            module: "errors",
+            resource: "CertError.css",
+            handler: { (request) -> GCDWebServerResponse? in
+                let path = Bundle(for: self).path(forResource: "CertError", ofType: "css")!
+
+                guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else {
+                    log.error("CertError data is nil")
+                    return GCDWebServerResponse(statusCode: 404)
+                }
+
+                return GCDWebServerDataResponse(data: data, contentType: "text/css")
+            }
+        )
     }
 
     func showPage(_ error: NSError, forUrl url: URL, inWebView webView: WKWebView) {
@@ -256,12 +292,14 @@ class ErrorPageHelper {
         // (instead of redirecting to the original URL).
         ErrorPageHelper.redirecting.append(url)
 
-        var components = URLComponents(string: WebServer.sharedInstance.base + "/errors/error.html")!
+        var components = URLComponents(
+            string: WebServer.sharedInstance.base + "/errors/error.html"
+        )!
         var queryItems = [
             URLQueryItem(name: "url", value: url.absoluteString),
             URLQueryItem(name: "code", value: String(error.code)),
             URLQueryItem(name: "domain", value: error.domain),
-            URLQueryItem(name: "description", value: error.localizedDescription)
+            URLQueryItem(name: "description", value: error.localizedDescription),
         ]
 
         // If this is an invalid certificate, show a certificate error allowing the
@@ -269,10 +307,11 @@ class ErrorPageHelper {
         // a query parameter to the error page URL; we then read the certificate from
         // the URL if the user wants to continue.
         if ErrorPageHelper.certErrors.contains(error.code),
-           let certChain = error.userInfo["NSErrorPeerCertificateChainKey"] as? [SecCertificate],
-           let cert = certChain.first,
-           let underlyingError = error.userInfo[NSUnderlyingErrorKey] as? NSError,
-           let certErrorCode = underlyingError.userInfo["_kCFStreamErrorCodeKey"] as? Int {
+            let certChain = error.userInfo["NSErrorPeerCertificateChainKey"] as? [SecCertificate],
+            let cert = certChain.first,
+            let underlyingError = error.userInfo[NSUnderlyingErrorKey] as? NSError,
+            let certErrorCode = underlyingError.userInfo["_kCFStreamErrorCodeKey"] as? Int
+        {
             let encodedCert = (SecCertificateCopyData(cert) as Data).base64EncodedString
             queryItems.append(URLQueryItem(name: "badcert", value: encodedCert))
 
@@ -283,11 +322,11 @@ class ErrorPageHelper {
         components.queryItems = queryItems
         webView.load(PrivilegedRequest(url: components.url!) as URLRequest)
     }
-    
+
     public static func certificateError(for url: URL) -> Int {
         if url.isErrorPageURL {
             let query = url.getQuery()
-            
+
             let cfErrors: [CFNetworkErrors] = [
                 .cfurlErrorSecureConnectionFailed,
                 .cfurlErrorServerCertificateHasBadDate,
@@ -295,21 +334,21 @@ class ErrorPageHelper {
                 .cfurlErrorServerCertificateHasUnknownRoot,
                 .cfurlErrorServerCertificateNotYetValid,
                 .cfurlErrorClientCertificateRejected,
-                .cfurlErrorClientCertificateRequired
+                .cfurlErrorClientCertificateRequired,
             ]
-            
+
             guard let code = query["code"], let errCode = Int(code) else {
                 return 0
             }
-            
+
             if let code = CFNetworkErrors(rawValue: Int32(errCode)), cfErrors.contains(code) {
                 return errCode
             }
-            
+
             if ErrorPageHelper.certErrors.contains(errCode) {
                 return errCode
             }
-            
+
             if ErrorPageHelper.certErrorCodes[errCode] != nil {
                 return errCode
             }
@@ -328,26 +367,31 @@ extension ErrorPageHelper: TabContentScript {
         return "errorPageHelperMessageManager"
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceiveScriptMessage message: WKScriptMessage
+    ) {
         guard let body = message.body as? [String: String] else {
             return
         }
-        
+
         if UserScriptManager.isMessageHandlerTokenMissing(in: body) {
             log.debug("Missing required security token.")
             return
         }
-        
+
         if let errorURL = message.frameInfo.request.url, errorURL.isErrorPageURL,
-           let originalURL = errorURL.originalURLFromErrorURL,
-           let type = body["type"] {
+            let originalURL = errorURL.originalURLFromErrorURL,
+            let type = body["type"]
+        {
 
             switch type {
             case ErrorPageHelper.messageOpenInSafari:
                 UIApplication.shared.open(originalURL, options: [:])
             case ErrorPageHelper.messageCertVisitOnce:
                 if let cert = certFromErrorURL(errorURL),
-                   let host = originalURL.host {
+                    let host = originalURL.host
+                {
                     let origin = "\(host):\(originalURL.port ?? 443)"
                     ErrorPageHelper.certStore?.addCertificate(cert, forOrigin: origin)
                     _ = message.webView?.reload()
@@ -361,7 +405,8 @@ extension ErrorPageHelper: TabContentScript {
     fileprivate func certFromErrorURL(_ url: URL) -> SecCertificate? {
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         if let encodedCert = components?.queryItems?.filter({ $0.name == "badcert" }).first?.value,
-               let certData = Data(base64Encoded: encodedCert, options: []) {
+            let certData = Data(base64Encoded: encodedCert, options: [])
+        {
             return SecCertificateCreateWithData(nil, certData as CFData)
         }
 

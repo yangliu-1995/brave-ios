@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import Data
 import Shared
 import Storage
-import Data
 
 /// Shared data source for the SearchViewController and the URLBar domain completion.
 /// Since both of these use the same query, we can perform the query once and dispatch the results.
@@ -20,15 +20,15 @@ class SearchLoader: Loader<[Site], SearchViewController> {
 
             FrecencyQuery.sitesByFrecency(containing: query) { [weak self] result in
                 guard let self = self else { return }
-                
+
                 self.load(Array(result))
-                
+
                 // If the new search string is not longer than the previous
                 // we don't need to find an autocomplete suggestion.
                 if oldValue.count > self.query.count {
                     return
                 }
-                
+
                 for site in result {
                     if let completion = self.completionForURL(site.url) {
                         self.autocompleteSuggestionHandler?(completion)
@@ -43,8 +43,17 @@ class SearchLoader: Loader<[Site], SearchViewController> {
         // Extract the pre-path substring from the URL. This should be more efficient than parsing via
         // NSURL since we need to only look at the beginning of the string.
         // Note that we won't match non-HTTP(S) URLs.
-        guard let urlBeforePathRegex = try? NSRegularExpression(pattern: "^https?://([^/]+)/", options: []),
-              let match = urlBeforePathRegex.firstMatch(in: url, options: [], range: NSRange(location: 0, length: url.count)) else {
+        guard
+            let urlBeforePathRegex = try? NSRegularExpression(
+                pattern: "^https?://([^/]+)/",
+                options: []
+            ),
+            let match = urlBeforePathRegex.firstMatch(
+                in: url,
+                options: [],
+                range: NSRange(location: 0, length: url.count)
+            )
+        else {
             return nil
         }
 
@@ -68,10 +77,19 @@ class SearchLoader: Loader<[Site], SearchViewController> {
 
     fileprivate func completionForDomain(_ domain: String) -> String? {
         let domainWithDotPrefix: String = ".\(domain)"
-        if let range = domainWithDotPrefix.range(of: ".\(query)", options: .caseInsensitive, range: nil, locale: nil) {
+        if let range = domainWithDotPrefix.range(
+            of: ".\(query)",
+            options: .caseInsensitive,
+            range: nil,
+            locale: nil
+        ) {
             // We don't actually want to match the top-level domain ("com", "org", etc.) by itself, so
             // so make sure the result includes at least one ".".
-            let matchedDomain = String(domainWithDotPrefix.suffix(from: domainWithDotPrefix.index(range.lowerBound, offsetBy: 1)))
+            let matchedDomain = String(
+                domainWithDotPrefix.suffix(
+                    from: domainWithDotPrefix.index(range.lowerBound, offsetBy: 1)
+                )
+            )
             if matchedDomain.contains(".") {
                 return matchedDomain
             }

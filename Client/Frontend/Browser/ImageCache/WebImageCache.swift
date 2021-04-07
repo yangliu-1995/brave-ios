@@ -6,70 +6,84 @@ import Foundation
 import SDWebImage
 
 final class WebImageCache: ImageCacheProtocol {
-    
+
     private let webImageManager: SDWebImageManager
-    
+
     private let isPrivate: Bool
-    
+
     typealias ReturnAssociatedType = SDWebImageOperation
-    
+
     deinit {
         clearMemoryCache()
         clearDiskCache()
     }
-    
+
     init(isPrivate: Bool, sandbox: String? = nil) {
         self.isPrivate = isPrivate
-        
+
         var imageCache: SDImageCache
-        
+
         if let sandbox = sandbox {
             imageCache = SDImageCache(namespace: sandbox, diskCacheDirectory: sandbox)
         } else {
             imageCache = SDImageCache.shared
         }
-        
+
         let imageDownloader = SDWebImageDownloader.shared
-        
+
         webImageManager = SDWebImageManager(cache: imageCache, loader: imageDownloader)
     }
-    
+
     @discardableResult
-    func load(from url: URL, options: ImageCacheOptions = [], progress: ImageCacheProgress = nil,
-              completion: ImageCacheCompletion = nil) -> SDWebImageOperation? {
+    func load(
+        from url: URL,
+        options: ImageCacheOptions = [],
+        progress: ImageCacheProgress = nil,
+        completion: ImageCacheCompletion = nil
+    ) -> SDWebImageOperation? {
         let progressBlock: SDWebImageDownloaderProgressBlock = { receivedSize, expectedSize, url in
             guard let url = url else {
                 return
             }
-            
+
             progress?(receivedSize, expectedSize, url)
         }
-        
+
         var webImageOptions = self.webImageOptions
         let webImageContext = self.webImageContext
-        
+
         if options.contains(.lowPriority) {
             webImageOptions.append(.lowPriority)
         }
 
-        let imageOperation = webImageManager.loadImage(with: url, options: SDWebImageOptions(webImageOptions), context: webImageContext, progress: progressBlock) { image, data, error, webImageCacheType, _, imageURL in
+        let imageOperation = webImageManager.loadImage(
+            with: url,
+            options: SDWebImageOptions(webImageOptions),
+            context: webImageContext,
+            progress: progressBlock
+        ) { image, data, error, webImageCacheType, _, imageURL in
             let key = self.webImageManager.cacheKey(for: url)
             if let image = image, !self.isPrivate {
-                self.webImageManager.imageCache.store(image, imageData: data, forKey: key, cacheType: .all)
+                self.webImageManager.imageCache.store(
+                    image,
+                    imageData: data,
+                    forKey: key,
+                    cacheType: .all
+                )
             }
-            
+
             let cacheType = self.mapImageCacheType(from: webImageCacheType)
             completion?(image, data, error, cacheType, url)
         }
-        
+
         return imageOperation
     }
-    
+
     func cacheImage(image: UIImage, data: Data, url: URL) {
         let key = self.webImageManager.cacheKey(for: url)
         webImageManager.imageCache.store(image, imageData: data, forKey: key, cacheType: .all)
     }
-    
+
     func isCached(_ url: URL) -> Bool {
         return webImageManager.cacheKey(for: url) != nil
     }
@@ -88,15 +102,15 @@ final class WebImageCache: ImageCacheProtocol {
             webImageManager.imageCache.clear(with: .disk)
         }
     }
-    
+
 }
 
 extension WebImageCache {
-    
+
     private var webImageOptions: [SDWebImageOptions] {
         return [.retryFailed, .continueInBackground]
     }
-    
+
     private var webImageContext: [SDWebImageContextOption: Any] {
         var context: [SDWebImageContextOption: Any] = [:]
         if isPrivate {
@@ -104,15 +118,15 @@ extension WebImageCache {
         }
         return context
     }
-    
+
     private func mapImageCacheType(from imageCacheType: SDImageCacheType) -> ImageCacheType {
         switch imageCacheType {
         case .none:
             return ImageCacheType.none
-            
+
         case .memory:
             return ImageCacheType.memory
-            
+
         case .disk:
             return ImageCacheType.disk
 
@@ -120,5 +134,5 @@ extension WebImageCache {
             return ImageCacheType.none
         }
     }
-    
+
 }

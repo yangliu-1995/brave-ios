@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
 import Snap
+import UIKit
 
 class LoginViewController: UIViewController {
     var accountManager: AccountProfileManager!
@@ -18,14 +18,18 @@ class LoginViewController: UIViewController {
         let loginView = view as LoginView
 
         loginView.didClickLogin = { [unowned self] in
-            self.accountManager.login(loginView.username, password: loginView.password, { err in
-                switch err {
-                case .badAuth:
-                    println("Invalid username and/or password")
-                default:
-                    println("Connection error")
+            self.accountManager.login(
+                loginView.username,
+                password: loginView.password,
+                { err in
+                    switch err {
+                    case .badAuth:
+                        println("Invalid username and/or password")
+                    default:
+                        println("Connection error")
+                    }
                 }
-            })
+            )
         }
     }
 

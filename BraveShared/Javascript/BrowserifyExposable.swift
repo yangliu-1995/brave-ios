@@ -10,7 +10,7 @@ public struct ExposedJSFunction {
     let name: String
     /// Should be in format: `function(args) { // call browserified method; };`
     let body: String
-    
+
     public init(name: String, body: String) {
         self.name = name
         self.body = body
@@ -22,26 +22,26 @@ public struct ExposedJSFunction {
 public protocol BrowserifyExposable {
     /// Functions that are wrapped up to be globally available for Javascript core.
     var exposedFunctions: [ExposedJSFunction] { get }
-    
+
     /// Ads exposed functions to JSContext so they can be called using `globalObject` or `window`
     func addExposedFunctions(to context: JSContext)
-    
+
     /// A helper method to generate a function that can be called from JavascriptCore.
     static func generateFunction(name: String, arguments: String) -> String
 }
 
-public extension BrowserifyExposable {
-    func addExposedFunctions(to context: JSContext) {
+extension BrowserifyExposable {
+    public func addExposedFunctions(to context: JSContext) {
         exposedFunctions.forEach {
             context.evaluateScript("\($0.name) = \($0.body)")
         }
     }
-    
-    static func generateFunction(name: String, arguments: String = "") -> String {
+
+    public static func generateFunction(name: String, arguments: String = "") -> String {
         return """
-        function(\(arguments)) {
-        return module.exports.\(name)(\(arguments))
-        }
-        """
+            function(\(arguments)) {
+            return module.exports.\(name)(\(arguments))
+            }
+            """
     }
 }

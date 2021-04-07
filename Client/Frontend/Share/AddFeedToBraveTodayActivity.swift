@@ -8,24 +8,24 @@ import Shared
 
 class AddFeedToBraveTodayActivity: UIActivity {
     fileprivate let callback: () -> Void
-    
+
     init(callback: @escaping () -> Void) {
         self.callback = callback
     }
-    
+
     override var activityTitle: String? {
         return Strings.BraveToday.addSourceShareTitle
     }
-    
+
     override var activityImage: UIImage? {
         return #imageLiteral(resourceName: "settings-brave-today")
     }
-    
+
     override func perform() {
         callback()
         activityDidFinish(true)
     }
-    
+
     override func canPerform(withActivityItems activityItems: [Any]) -> Bool {
         return true
     }

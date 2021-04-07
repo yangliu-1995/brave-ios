@@ -4,13 +4,11 @@
 
 import Foundation
 
-/**
- * Something that knows how to construct a database.
- */
+/// Something that knows how to construct a database.
 public protocol Schema {
     var name: String { get }
     var version: Int { get }
-    
+
     func create(_ db: SQLiteDBConnection) -> Bool
     func update(_ db: SQLiteDBConnection, from: Int) -> Bool
     func drop(_ db: SQLiteDBConnection) -> Bool

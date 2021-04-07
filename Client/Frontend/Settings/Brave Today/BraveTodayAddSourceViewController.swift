@@ -3,18 +3,18 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import Foundation
-import Shared
 import BraveShared
 import BraveUI
-import Fuzi
 import FeedKit
+import Foundation
+import Fuzi
+import Shared
 
 class BraveTodayAddSourceViewController: UITableViewController {
-    
+
     private let feedDataSource: FeedDataSource
     var sourcesAdded: ((Set<RSSFeedLocation>) -> Void)?
-    
+
     private var isLoading: Bool = false {
         didSet {
             if isLoading {
@@ -27,7 +27,7 @@ class BraveTodayAddSourceViewController: UITableViewController {
     private let activityIndicator = UIActivityIndicatorView(style: .gray).then {
         $0.hidesWhenStopped = true
     }
-    
+
     init(dataSource: FeedDataSource) {
         self.feedDataSource = dataSource
         if #available(iOS 13.0, *) {
@@ -36,51 +36,55 @@ class BraveTodayAddSourceViewController: UITableViewController {
             super.init(style: .grouped)
         }
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()
     }
-    
+
     deinit {
         pageTask?.cancel()
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         title = Strings.BraveToday.addSource
-        
+
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
         navigationItem.backButtonTitle = ""
-        navigationItem.leftBarButtonItem = .init(barButtonSystemItem: .cancel, target: self, action: #selector(tappedCancel))
+        navigationItem.leftBarButtonItem = .init(
+            barButtonSystemItem: .cancel,
+            target: self,
+            action: #selector(tappedCancel)
+        )
         navigationItem.rightBarButtonItem = .init(customView: activityIndicator)
-        
+
         textField.addTarget(self, action: #selector(textFieldTextChanged), for: .editingChanged)
         textField.delegate = self
-        
+
         tableView.register(FeedSearchCellClass.self)
         tableView.register(CenteredButtonCell.self)
         tableView.tableHeaderView = UIView(frame: .init(x: 0, y: 0, width: 0, height: 10))
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         textField.becomeFirstResponder()
     }
-    
+
     @objc private func tappedCancel() {
         dismiss(animated: true, completion: nil)
     }
-    
+
     @objc private func textFieldTextChanged() {
         if let cell = tableView.cellForRow(at: IndexPath(row: 1, section: 0)) as? CenteredButtonCell {
             // Update the color of the search row when text field is non empty
             cell.tintColor = isSearchEnabled && !isLoading ? BraveUX.braveOrange : Colors.grey500
         }
     }
-    
+
     private func tappedImportOPML() {
         let picker = UIDocumentPickerViewController(documentTypes: ["public.opml"], in: .import)
         picker.delegate = self
@@ -90,24 +94,28 @@ class BraveTodayAddSourceViewController: UITableViewController {
         }
         present(picker, animated: true)
     }
-    
+
     private func rssLocationFromOPMLOutline(_ outline: OPML.Outline) -> RSSFeedLocation? {
         guard let url = outline.xmlUrl?.asURL else { return nil }
         return .init(title: outline.text, url: url)
     }
-    
+
     private let session: URLSession = {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.timeoutIntervalForRequest = 5
         return URLSession(configuration: configuration, delegate: nil, delegateQueue: .main)
     }()
-    
+
     private func displayError(_ error: FindFeedsError) {
-        let alert = UIAlertController(title: Strings.BraveToday.addSourceFailureTitle, message: error.localizedDescription, preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: Strings.BraveToday.addSourceFailureTitle,
+            message: error.localizedDescription,
+            preferredStyle: .alert
+        )
         alert.addAction(.init(title: Strings.OKString, style: .default, handler: nil))
         present(alert, animated: true)
     }
-    
+
     private func searchPageForFeeds() {
         guard var text = textField.text else { return }
         if text.hasPrefix("feed:"), let range = text.range(of: "feed:") {
@@ -132,7 +140,7 @@ class BraveTodayAddSourceViewController: UITableViewController {
             }
         }
     }
-    
+
     private enum FindFeedsError: Error {
         /// An error occured while attempting to download the page
         case dataTaskError(Error)
@@ -142,7 +150,7 @@ class BraveTodayAddSourceViewController: UITableViewController {
         case parserError(ParserError)
         /// No feeds were found at the given URL
         case noFeedsFound
-        
+
         var localizedDescription: String {
             switch self {
             case .dataTaskError(let error as URLError) where error.code == .notConnectedToInternet:
@@ -156,9 +164,12 @@ class BraveTodayAddSourceViewController: UITableViewController {
             }
         }
     }
-    
+
     private var pageTask: URLSessionDataTask?
-    private func downloadPageData(for url: URL, _ completion: @escaping (Result<[RSSFeedLocation], FindFeedsError>) -> Void) {
+    private func downloadPageData(
+        for url: URL,
+        _ completion: @escaping (Result<[RSSFeedLocation], FindFeedsError>) -> Void
+    ) {
         pageTask = session.dataTask(with: url) { [weak self] (data, response, error) in
             guard let self = self else { return }
             if let error = error {
@@ -166,12 +177,13 @@ class BraveTodayAddSourceViewController: UITableViewController {
                 return
             }
             guard let data = data,
-                  let root = try? HTMLDocument(data: data),
-                  let url = response?.url else {
+                let root = try? HTMLDocument(data: data),
+                let url = response?.url
+            else {
                 completion(.failure(.invalidData))
                 return
             }
-            
+
             // Check if `data` is actually an RSS feed
             if case .success(let feed) = FeedParser(data: data).parse() {
                 // User provided a direct feed
@@ -187,7 +199,7 @@ class BraveTodayAddSourceViewController: UITableViewController {
                 completion(.success([.init(title: title, url: url)]))
                 return
             }
-            
+
             if FeedDataSource.isOPMLParsingAvailable {
                 // Check if `data` is actually an OPML list
                 if let opml = OPMLParser.parse(data: data), !opml.outlines.isEmpty {
@@ -196,29 +208,32 @@ class BraveTodayAddSourceViewController: UITableViewController {
                     return
                 }
             }
-            
+
             // Ensure page is reloaded to final landing page before looking for
             // favicons
             var reloadUrl: URL?
             for meta in root.xpath("//head/meta") {
                 if let refresh = meta["http-equiv"]?.lowercased(), refresh == "refresh",
-                   let content = meta["content"],
-                   let index = content.range(of: "URL="),
-                   let url = NSURL(string: String(content.suffix(from: index.upperBound))) {
+                    let content = meta["content"],
+                    let index = content.range(of: "URL="),
+                    let url = NSURL(string: String(content.suffix(from: index.upperBound)))
+                {
                     reloadUrl = url as URL
                 }
             }
-            
+
             if let url = reloadUrl {
                 self.downloadPageData(for: url, completion)
                 return
             }
-            
+
             var feeds: [RSSFeedLocation] = []
-            let xpath = "//head//link[contains(@type, 'application/rss+xml') or contains(@type, 'application/atom+xml') or contains(@type, 'application/json')]"
+            let xpath =
+                "//head//link[contains(@type, 'application/rss+xml') or contains(@type, 'application/atom+xml') or contains(@type, 'application/json')]"
             for link in root.xpath(xpath) {
                 guard let href = link["href"], let url = URL(string: href, relativeTo: url),
-                      url.isWebPage(includeDataURIs: false) else {
+                    url.isWebPage(includeDataURIs: false)
+                else {
                     continue
                 }
                 feeds.append(.init(title: link["title"], url: url))
@@ -231,7 +246,7 @@ class BraveTodayAddSourceViewController: UITableViewController {
         }
         pageTask?.resume()
     }
-    
+
     private let textField = UITextField().then {
         $0.attributedPlaceholder = NSAttributedString(
             string: Strings.BraveToday.searchTextFieldPlaceholder,
@@ -243,16 +258,16 @@ class BraveTodayAddSourceViewController: UITableViewController {
         $0.autocapitalizationType = .none
         $0.returnKeyType = .search
     }
-    
+
     private var isSearchEnabled: Bool {
         if let text = textField.text {
             return URIFixup.getURL(text) != nil
         }
         return false
     }
-    
+
     // MARK: - UITableViewDelegate
-    
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 && indexPath.row == 1, isSearchEnabled, !isLoading {
             searchPageForFeeds()
@@ -262,8 +277,10 @@ class BraveTodayAddSourceViewController: UITableViewController {
         }
         tableView.deselectRow(at: indexPath, animated: true)
     }
-    
-    override func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
+
+    override func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath)
+        -> Bool
+    {
         if indexPath.section == 0 {
             if indexPath.row == 1 {
                 return isSearchEnabled && !isLoading
@@ -272,10 +289,12 @@ class BraveTodayAddSourceViewController: UITableViewController {
         }
         return true
     }
-    
+
     // MARK: - UITableViewDataSource
-    
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
+        -> UITableViewCell
+    {
         switch indexPath.section {
         case 0:
             switch indexPath.row {
@@ -286,7 +305,8 @@ class BraveTodayAddSourceViewController: UITableViewController {
             case 1:
                 let cell = tableView.dequeueReusableCell(for: indexPath) as CenteredButtonCell
                 cell.textLabel?.text = Strings.BraveToday.searchButtonTitle
-                cell.tintColor = isSearchEnabled && !isLoading ? BraveUX.braveOrange : Colors.grey500
+                cell.tintColor =
+                    isSearchEnabled && !isLoading ? BraveUX.braveOrange : Colors.grey500
                 return cell
             default:
                 fatalError("No cell available for index path: \(indexPath)")
@@ -300,11 +320,11 @@ class BraveTodayAddSourceViewController: UITableViewController {
             fatalError("No cell available for index path: \(indexPath)")
         }
     }
-    
+
     override func numberOfSections(in tableView: UITableView) -> Int {
         FeedDataSource.isOPMLParsingAvailable ? 2 : 1
     }
-    
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
         case 0: return 2
@@ -315,7 +335,10 @@ class BraveTodayAddSourceViewController: UITableViewController {
 }
 
 extension BraveTodayAddSourceViewController: UIDocumentPickerDelegate {
-    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+    func documentPicker(
+        _ controller: UIDocumentPickerViewController,
+        didPickDocumentsAt urls: [URL]
+    ) {
         guard let url = urls.first, url.isFileURL, let data = try? Data(contentsOf: url) else {
             controller.dismiss(animated: true) {
                 self.displayError(.noFeedsFound)
@@ -373,17 +396,19 @@ private class FeedSearchCellClass: UITableViewCell, TableViewReusable {
             if let textField = textField {
                 contentView.addSubview(textField)
                 textField.snp.makeConstraints {
-                    $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12))
+                    $0.edges.equalToSuperview().inset(
+                        UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+                    )
                     $0.height.greaterThanOrEqualTo(44)
                 }
             }
         }
     }
-    
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()

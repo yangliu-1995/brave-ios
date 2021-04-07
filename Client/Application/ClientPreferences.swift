@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import Foundation
 import BraveShared
+import Foundation
 
 enum TabBarVisibility: Int, CaseIterable {
     case never
@@ -17,8 +17,11 @@ extension Preferences {
         /// Whether or not the user has seen the DuckDuckGo popup at least once
         ///
         /// Defaults to false, meaning the user has not been given the choice yet
-        static let duckDuckGoPrivateSearch = Option<Bool>(key: "popups.ddg-private-search", default: false)
-        
+        static let duckDuckGoPrivateSearch = Option<Bool>(
+            key: "popups.ddg-private-search",
+            default: false
+        )
+
         /// Whether or not the user has seen the Browser Lock/PIN popup at least once
         static let browserLock = Option<Bool>(key: "popups.browser-lock", default: false)
     }
@@ -26,7 +29,10 @@ extension Preferences {
         /// A flag for determining if the app exited with user interaction in the previous session
         ///
         /// Value should only be checked on launch
-        static let backgroundedCleanly = Option<Bool>(key: "appstate.backgrounded-cleanly", default: true)
+        static let backgroundedCleanly = Option<Bool>(
+            key: "appstate.backgrounded-cleanly",
+            default: true
+        )
     }
 }
 
@@ -40,71 +46,105 @@ extension Preferences {
         /// Whether or not to block popups from websites automaticaly
         static let blockPopups = Option<Bool>(key: "general.block-popups", default: true)
         /// Controls how the tab bar should be shown (or not shown)
-        static let tabBarVisibility = Option<Int>(key: "general.tab-bar-visiblity", default: TabBarVisibility.always.rawValue)
+        static let tabBarVisibility = Option<Int>(
+            key: "general.tab-bar-visiblity",
+            default: TabBarVisibility.always.rawValue
+        )
         /// Defines the user's normal browsing theme
         /// `system`, follows the current OS display mode
-        static let themeNormalMode = Option<String>(key: "general.normal-mode-theme", default: Theme.DefaultTheme.system.rawValue)
-        static let themePrivateMode = Option<String>(key: "general.private-mode-theme", default: Theme.DefaultTheme.private.rawValue)
+        static let themeNormalMode = Option<String>(
+            key: "general.normal-mode-theme",
+            default: Theme.DefaultTheme.system.rawValue
+        )
+        static let themePrivateMode = Option<String>(
+            key: "general.private-mode-theme",
+            default: Theme.DefaultTheme.private.rawValue
+        )
         /// Specifies whether the bookmark button is present on toolbar
-        static let showBookmarkToolbarShortcut = Option<Bool>(key: "general.show-bookmark-toolbar-shortcut", default: UIDevice.isIpad)
+        static let showBookmarkToolbarShortcut = Option<Bool>(
+            key: "general.show-bookmark-toolbar-shortcut",
+            default: UIDevice.isIpad
+        )
         /// Sets Desktop UA for iPad by default (iOS 13+ & iPad only).
         /// Do not read it directly, prefer to use `UserAgent.shouldUseDesktopMode` instead.
-        static let alwaysRequestDesktopSite = Option<Bool>(key: "general.always-request-desktop-site", default: UIDevice.isIpad)
+        static let alwaysRequestDesktopSite = Option<Bool>(
+            key: "general.always-request-desktop-site",
+            default: UIDevice.isIpad
+        )
         /// Controls whether or not media auto-plays
         static let mediaAutoPlays = Option<Bool>(key: "general.media-auto-plays", default: false)
         /// Controls whether or not to show the last visited bookmarks folder
-        static let showLastVisitedBookmarksFolder = Option<Bool>(key: "general.bookmarks-show-last-visited-bookmarks-folder", default: true)
-        
+        static let showLastVisitedBookmarksFolder = Option<Bool>(
+            key: "general.bookmarks-show-last-visited-bookmarks-folder",
+            default: true
+        )
+
         /// Whether or not to show the clipboard bar when the user has a URL in their pasteboard on launch
         ///
         /// Currently unused.
-        static let showClipboardBar = Option<Bool>(key: "general.show-clipboard-bar", default: false)
+        static let showClipboardBar = Option<Bool>(
+            key: "general.show-clipboard-bar",
+            default: false
+        )
         /// Whether or not new user onboarding has completed.
         /// User skipping(tapping on skip) onboarding does NOT count as completed.
         /// If user kills the app before completing onboarding, it should be treated as unfinished.
-        static let basicOnboardingCompleted = Option<Int>(key: "general.basic-onboarding-completed",
-                                                          default: OnboardingState.undetermined.rawValue)
+        static let basicOnboardingCompleted = Option<Int>(
+            key: "general.basic-onboarding-completed",
+            default: OnboardingState.undetermined.rawValue
+        )
         /// The time until the next on-boarding shows
-        static let basicOnboardingNextOnboardingPrompt = Option<Date?>(key: "general.basic-onboarding-days",
-                                                                      default: nil)
-        
+        static let basicOnboardingNextOnboardingPrompt = Option<Date?>(
+            key: "general.basic-onboarding-days",
+            default: nil
+        )
+
         /// The progress the user has made with onboarding
-        static let basicOnboardingProgress = Option<Int>(key: "general.basic-onboarding-progress", default: OnboardingProgress.none.rawValue)
+        static let basicOnboardingProgress = Option<Int>(
+            key: "general.basic-onboarding-progress",
+            default: OnboardingProgress.none.rawValue
+        )
         /// Whether or not link preview upon long press action should be shown.
         static let enableLinkPreview = Option<Bool>(key: "general.night-mode", default: true)
-        
+
         /// Whether a default browser callout was dismissed.
         /// It should apply to all kinds of callouts: banner on NTP, at-launch modal etc.
         static let defaultBrowserCalloutDismissed =
             Option<Bool>(key: "general.default-browser-callout-dismissed", default: false)
-        
+
         /// Whether or not the app (in regular browsing mode) will follow universal links
-        static let followUniversalLinks = Option<Bool>(key: "general.follow-universal-links", default: true)
+        static let followUniversalLinks = Option<Bool>(
+            key: "general.follow-universal-links",
+            default: true
+        )
     }
-    
+
     final class DefaultBrowserIntro {
         /// Whether the default browser onboarding completed. This can happen by opening app settings or after the user
         /// dismissed the intro screen enough amount of times.
         static let completed =
             Option<Bool>(key: "general.default-browser-intro-completed", default: false)
-        
+
         static let appLaunchCount =
             Option<Int>(key: "general.default-browser-intro-launch-count", default: 0)
-        
+
         /// When to show next default browser popup.
         static let nextShowDate =
             Option<Date?>(key: "general.default-browser-intro-next-show-date", default: nil)
-        
+
         /// Whether system notification showed or not
         static let defaultBrowserNotificationScheduled =
             Option<Bool>(key: "general.default-browser-notification-scheduled", default: false)
     }
-    
+
     final class Search {
         /// Whether or not to show suggestions while the user types
         static let showSuggestions = Option<Bool>(key: "search.show-suggestions", default: false)
         /// If the user should see the show suggetsions opt-in
-        static let shouldShowSuggestionsOptIn = Option<Bool>(key: "search.show-suggestions-opt-in", default: true)
+        static let shouldShowSuggestionsOptIn = Option<Bool>(
+            key: "search.show-suggestions-opt-in",
+            default: true
+        )
         /// A list of disabled search engines
         static let disabledEngines = Option<[String]?>(key: "search.disabled-engines", default: nil)
         /// A list of ordered search engines or nil if they have not been set up yet
@@ -112,7 +152,10 @@ extension Preferences {
         /// The default selected search engine in regular mode
         static let defaultEngineName = Option<String?>(key: "search.default.name", default: nil)
         /// The default selected search engine in private mode
-        static let defaultPrivateEngineName = Option<String?>(key: "search.defaultprivate.name", default: nil)
+        static let defaultPrivateEngineName = Option<String?>(
+            key: "search.defaultprivate.name",
+            default: nil
+        )
     }
     final class Privacy {
         /// Forces all private tabs
@@ -120,55 +163,74 @@ extension Preferences {
         /// Blocks all cookies and access to local storage
         static let blockAllCookies = Option<Bool>(key: "privacy.block-all-cookies", default: false)
         /// The toggles states for clear private data screen
-        static let clearPrivateDataToggles = Option<[Bool]>(key: "privacy.clear-data-toggles", default: [])
+        static let clearPrivateDataToggles = Option<[Bool]>(
+            key: "privacy.clear-data-toggles",
+            default: []
+        )
     }
     final class NewTabPage {
         /// Whether bookmark image are enabled / shown
-        static let backgroundImages = Option<Bool>(key: "newtabpage.background-images", default: true)
+        static let backgroundImages = Option<Bool>(
+            key: "newtabpage.background-images",
+            default: true
+        )
         /// Whether sponsored images are included into the background image rotation
-        static let backgroundSponsoredImages = Option<Bool>(key: "newtabpage.background-sponsored-images", default: true)
-        
+        static let backgroundSponsoredImages = Option<Bool>(
+            key: "newtabpage.background-sponsored-images",
+            default: true
+        )
+
         /// At least one notification must show before we lock showing subsequent notifications.
-        static let atleastOneNTPNotificationWasShowed = Option<Bool>(key: "newtabpage.one-notificaiton-showed",
-                                                                     default: false)
-        
+        static let atleastOneNTPNotificationWasShowed = Option<Bool>(
+            key: "newtabpage.one-notificaiton-showed",
+            default: false
+        )
+
         /// Whether the callout to use branded image was shown.
-        static let brandedImageShowed = Option<Bool>(key: "newtabpage.branded-image-callout-showed",
-                                                     default: false)
-        
+        static let brandedImageShowed = Option<Bool>(
+            key: "newtabpage.branded-image-callout-showed",
+            default: false
+        )
+
         /// When true, a notification on new tab page will be shown that an ad grant can be claimed(if rewards and grant are available).
         /// This value is reseted on each app launch,
         /// The goal is to show the claim grant notification only once per app session if still available.
         static let attemptToShowClaimRewardsNotification =
             Option<Bool>(key: "newtabpage.show-grant-notification", default: true)
-        
+
         /// Whether preloaded favorites have been initialized. Uses custom favorites in case of super referral or default ones instead.
         static let preloadedFavoritiesInitialized =
             Option<Bool>(key: "newtabpage.favorites-initialized", default: false)
-        
+
         /// When super referrer fails to download and user hasn't changed their default favorites we might want to try to replace them
         /// with the ones provided super referrer once available.This should be done only once.
         static let initialFavoritesHaveBeenReplaced =
             Option<Bool>(key: "newtabpage.initial-favorites-replaced", default: false)
-        
+
         /// Custom theme used in app. Nil if default theme is used.
         static let selectedCustomTheme =
             Option<String?>(key: "newtabpage.selected-custom-theme", default: nil)
-        
+
         /// List of currently installed themes on the device.
         static let installedCustomThemes =
             Option<[String]>(key: "newtabpage.installed-custom-themes", default: [])
-        
+
         /// Tells the app whether we should try to fetch super referrer assets again in case of network error.
         static let superReferrerThemeRetryDeadline =
             Option<Date?>(key: "newtabpage.superreferrer-retry-deadline", default: nil)
     }
-    
+
     final class VPN {
         static let popupShowed = Option<Bool>(key: "vpn.popup-showed", default: false)
-        static let appLaunchCountForVPNPopup = Option<Int>(key: "vpn.popup-launch-count", default: 0)
+        static let appLaunchCountForVPNPopup = Option<Int>(
+            key: "vpn.popup-launch-count",
+            default: 0
+        )
         /// We get it from Guardian's servers.
-        static let lastPurchaseProductId = Option<String?>(key: "vpn.last-purchase-id", default: nil)
+        static let lastPurchaseProductId = Option<String?>(
+            key: "vpn.last-purchase-id",
+            default: nil
+        )
         /// When the current subscription plan expires. It is nil if the user has not bought any vpn plan yet.
         /// In case of receipt expiration this date might be set to some old date(like year 1970)
         /// to make sure vpn expiration logic will be called.
@@ -185,19 +247,33 @@ extension Preferences {
         static let vpnRegionOverride = Option<String?>(key: "vpn.region-override", default: nil)
         static let vpnHostDisplayName = Option<String?>(key: "vpn.host-location", default: nil)
     }
-    
+
     final class Chromium {
-        static let syncV2BookmarksMigrationCompleted = Option<Bool>(key: "chromium.migration.bookmarks", default: false)
-        static let syncV2BookmarksMigrationCount = Option<Int>(key: "chromium.migration.bookmarks.count", default: 0)
+        static let syncV2BookmarksMigrationCompleted = Option<Bool>(
+            key: "chromium.migration.bookmarks",
+            default: false
+        )
+        static let syncV2BookmarksMigrationCount = Option<Int>(
+            key: "chromium.migration.bookmarks.count",
+            default: 0
+        )
         static let syncEnabled = Option<Bool>(key: "chromium.sync.enabled", default: false)
-        static let lastBookmarksFolderNodeId = Option<Int?>(key: "chromium.last.bookmark.folder.node.id", default: nil)
+        static let lastBookmarksFolderNodeId = Option<Int?>(
+            key: "chromium.last.bookmark.folder.node.id",
+            default: nil
+        )
     }
-    
+
     final class Debug {
         /// When general blocklists were last time updated on the device.
-        static let lastGeneralAdblockUpdate = Option<Date?>(key: "last-general-adblock-update", default: nil)
+        static let lastGeneralAdblockUpdate = Option<Date?>(
+            key: "last-general-adblock-update",
+            default: nil
+        )
         /// When regional blocklists were last time updated on the device.
-        static let lastRegionalAdblockUpdate = Option<Date?>(key: "last-regional-adblock-update", default: nil)
+        static let lastRegionalAdblockUpdate = Option<Date?>(
+            key: "last-regional-adblock-update",
+            default: nil
+        )
     }
 }
-

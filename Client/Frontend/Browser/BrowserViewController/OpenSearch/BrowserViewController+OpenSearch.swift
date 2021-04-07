@@ -26,41 +26,52 @@ public struct OpenSearchReference: Codable {
 // MARK: - OpenSearch Browser Extension
 
 extension BrowserViewController {
-    
+
     /// Adding Toolbar button over the keyboard for adding Open Search Engine
     /// - Parameter webView: webview triggered open seach engine
     @discardableResult
     func evaluateWebsiteSupportOpenSearchEngine(_ webView: WKWebView) -> Bool {
         if let tab = tabManager[webView],
-           let openSearchMetaData = tab.pageMetadata?.search,
-           let url = webView.url,
-           url.isSecureWebPage() {
+            let openSearchMetaData = tab.pageMetadata?.search,
+            let url = webView.url,
+            url.isSecureWebPage()
+        {
             return updateAddOpenSearchEngine(
-                webView, referenceObject: OpenSearchReference(reference: openSearchMetaData.href, title: openSearchMetaData.title))
+                webView,
+                referenceObject: OpenSearchReference(
+                    reference: openSearchMetaData.href,
+                    title: openSearchMetaData.title
+                )
+            )
         }
-        
+
         return false
     }
-    
+
     @discardableResult
-    private func updateAddOpenSearchEngine(_ webView: WKWebView, referenceObject: OpenSearchReference) -> Bool {
+    private func updateAddOpenSearchEngine(
+        _ webView: WKWebView,
+        referenceObject: OpenSearchReference
+    )
+        -> Bool
+    {
         var supportsAutoAdd = true
-            
+
         // Add Reference Object as Open Search Engine
         openSearchEngine = referenceObject
-        
+
         // Open Search guidlines requires Title to be same as Short Name but it is not enforced,
         // thus in case of yahoo.com the title is 'Yahoo Search' and Shortname is 'Yahoo'
         // We are checking referenceURL match to determine searchEngine is added or not
         //In addition we are also checking if there is another engine with same name
-        
+
         let searchEngineExists = profile.searchEngines.orderedEngines.contains(where: {
             let nameExists = $0.shortName.lowercased() == referenceObject.title?.lowercased() ?? ""
-            
-            if let referenceURL =  $0.referenceURL {
+
+            if let referenceURL = $0.referenceURL {
                 return referenceObject.reference.contains(referenceURL) || nameExists
             }
-            
+
             return nameExists
         })
 
@@ -71,7 +82,7 @@ extension BrowserViewController {
             self.customSearchEngineButton.action = .enabled
             supportsAutoAdd = true
         }
-        
+
         /*
          This is how we access hidden views in the WKContentView
          Using the public headers we can find the keyboard accessoryView which is not usually available.
@@ -85,27 +96,36 @@ extension BrowserViewController {
              */
             return supportsAutoAdd
         }
-        
+
         if UIDevice.isIpad {
             webContentView.inputAssistantItem.trailingBarButtonGroups +=
-                [UIBarButtonItemGroup(barButtonItems: [UIBarButtonItem(customView: customSearchEngineButton)], representativeItem: nil)]
+                [
+                    UIBarButtonItemGroup(
+                        barButtonItems: [UIBarButtonItem(customView: customSearchEngineButton)],
+                        representativeItem: nil
+                    )
+                ]
 
         } else {
             let argumentNextItem: [Any] = ["_n", "extI", "tem"]
             let argumentView: [Any] = ["v", "ie", "w"]
-            
+
             let valueKeyNextItem = argumentNextItem.compactMap { $0 as? String }.joined()
             let valueKeyView = argumentView.compactMap { $0 as? String }.joined()
 
-            guard let input = webContentView.perform(#selector(getter: UIResponder.inputAccessoryView)),
-                  let inputView = input.takeUnretainedValue() as? UIInputView,
-                  let nextButton = inputView.value(forKey: valueKeyNextItem) as? UIBarButtonItem,
-                  let nextButtonView = nextButton.value(forKey: valueKeyView) as? UIView else {
+            guard
+                let input = webContentView.perform(
+                    #selector(getter:UIResponder.inputAccessoryView)
+                ),
+                let inputView = input.takeUnretainedValue() as? UIInputView,
+                let nextButton = inputView.value(forKey: valueKeyNextItem) as? UIBarButtonItem,
+                let nextButtonView = nextButton.value(forKey: valueKeyView) as? UIView
+            else {
                 return supportsAutoAdd
             }
-            
+
             inputView.addSubview(customSearchEngineButton)
-            
+
             customSearchEngineButton.snp.remakeConstraints { make in
                 make.leading.equalTo(nextButtonView.snp.trailing).offset(20)
                 make.width.equalTo(inputView.snp.height)
@@ -113,98 +133,129 @@ extension BrowserViewController {
                 make.height.equalTo(inputView.snp.height)
             }
         }
-        
+
         return supportsAutoAdd
     }
 
     @objc func addCustomSearchEngineForFocusedElement() {
         guard var reference = openSearchEngine?.reference,
-              let title = openSearchEngine?.title,
-              var url = URL(string: reference) else {
+            let title = openSearchEngine?.title,
+            var url = URL(string: reference)
+        else {
             let alert = ThirdPartySearchAlerts.failedToAddThirdPartySearch()
             present(alert, animated: true, completion: nil)
             return
         }
-                
+
         guard let scheme = tabManager.selectedTab?.webView?.url?.scheme,
-              let host = tabManager.selectedTab?.webView?.url?.host else {
+            let host = tabManager.selectedTab?.webView?.url?.host
+        else {
             log.error("Selected Tab doesn't have URL")
             return
         }
-        
+
         while reference.hasPrefix("/") {
             reference.remove(at: reference.startIndex)
         }
-        
+
         let constructedReferenceURLString = "\(scheme)://\(host)/\(reference)"
 
         if url.host == nil, let constructedReferenceURL = URL(string: constructedReferenceURLString) {
             url = constructedReferenceURL
         }
-                    
-        downloadOpenSearchXML(url, reference: reference, title: title, iconURL: tabManager.selectedTab?.displayFavicon?.url)
+
+        downloadOpenSearchXML(
+            url,
+            reference: reference,
+            title: title,
+            iconURL: tabManager.selectedTab?.displayFavicon?.url
+        )
     }
 
     func downloadOpenSearchXML(_ url: URL, reference: String, title: String, iconURL: String?) {
         customSearchEngineButton.action = .loading
-        
+
         var searchEngineIcon = #imageLiteral(resourceName: "defaultFavicon")
-        
+
         if let faviconURLString = tabManager.selectedTab?.displayFavicon?.url,
-           let iconURL = URL(string: faviconURLString) {
-            
+            let iconURL = URL(string: faviconURLString)
+        {
+
             // Try to fetch Engine Icon using cache manager
-            WebImageCacheManager.shared.load(from: iconURL, completion: { [weak self] (image, _, error, _, _) in
-                if error != nil {
-                    URLSession.shared.dataTask(with: iconURL, completionHandler: { [weak self] data, response, error in
-                        guard let data = data else { return }
-                        
-                        if let downloadedImage = UIImage(data: data) {
-                            searchEngineIcon = downloadedImage
-                            WebImageCacheManager.shared.cacheImage(image: downloadedImage, data: data, url: iconURL)
+            WebImageCacheManager.shared.load(
+                from: iconURL,
+                completion: { [weak self] (image, _, error, _, _) in
+                    if error != nil {
+                        URLSession.shared.dataTask(
+                            with: iconURL,
+                            completionHandler: { [weak self] data, response, error in
+                                guard let data = data else { return }
+
+                                if let downloadedImage = UIImage(data: data) {
+                                    searchEngineIcon = downloadedImage
+                                    WebImageCacheManager.shared.cacheImage(
+                                        image: downloadedImage,
+                                        data: data,
+                                        url: iconURL
+                                    )
+                                }
+
+                                self?.createSearchEngine(
+                                    url,
+                                    reference: reference,
+                                    icon: searchEngineIcon
+                                )
+                            }
+                        ).resume()
+                    } else {
+                        // In case fetch fails use default icon and do not block addition of this engine
+                        if let favIcon = image {
+                            searchEngineIcon = favIcon
                         }
-                        
+
                         self?.createSearchEngine(url, reference: reference, icon: searchEngineIcon)
-                    }).resume()
-                } else {
-                    // In case fetch fails use default icon and do not block addition of this engine
-                    if let favIcon = image {
-                        searchEngineIcon = favIcon
                     }
-                    
-                    self?.createSearchEngine(url, reference: reference, icon: searchEngineIcon)
+
                 }
-                 
-            })
+            )
         } else {
             createSearchEngine(url, reference: reference, icon: searchEngineIcon)
         }
     }
-    
+
     private func createSearchEngine(_ url: URL, reference: String, icon: UIImage) {
         NetworkManager().downloadResource(with: url).uponQueue(.main) { [weak self] response in
-            guard let openSearchEngine = OpenSearchParser(pluginMode: true).parse(
-                    response.data, referenceURL: reference, image: icon, isCustomEngine: true) else {
+            guard
+                let openSearchEngine = OpenSearchParser(pluginMode: true).parse(
+                    response.data,
+                    referenceURL: reference,
+                    image: icon,
+                    isCustomEngine: true
+                )
+            else {
                 return
             }
-            
+
             self?.addSearchEngine(openSearchEngine)
         }
     }
-    
+
     private func addSearchEngine(_ engine: OpenSearchEngine) {
         let alert = ThirdPartySearchAlerts.addThirdPartySearchEngine(engine) { alertAction in
             if alertAction.style == .cancel {
                 return
             }
-            
+
             do {
                 try self.profile.searchEngines.addSearchEngine(engine)
                 self.view.endEditing(true)
-                
+
                 let toast = SimpleToast()
-                toast.showAlertWithText(Strings.CustomSearchEngine.thirdPartySearchEngineAddedToastTitle, bottomContainer: self.webViewContainer)
-                
+                toast.showAlertWithText(
+                    Strings.CustomSearchEngine.thirdPartySearchEngineAddedToastTitle,
+                    bottomContainer: self.webViewContainer
+                )
+
                 self.customSearchEngineButton.action = .disabled
             } catch {
                 let alert = ThirdPartySearchAlerts.failedToAddThirdPartySearch()
@@ -221,7 +272,10 @@ extension BrowserViewController {
 // MARK: - KeyboardHelperDelegate
 
 extension BrowserViewController: KeyboardHelperDelegate {
-    func keyboardHelper(_ keyboardHelper: KeyboardHelper, keyboardWillShowWithState state: KeyboardState) {
+    func keyboardHelper(
+        _ keyboardHelper: KeyboardHelper,
+        keyboardWillShowWithState state: KeyboardState
+    ) {
         keyboardState = state
         updateViewConstraints()
 
@@ -235,12 +289,17 @@ extension BrowserViewController: KeyboardHelperDelegate {
         self.evaluateWebsiteSupportOpenSearchEngine(webView)
     }
 
-    func keyboardHelper(_ keyboardHelper: KeyboardHelper, keyboardWillHideWithState state: KeyboardState) {
+    func keyboardHelper(
+        _ keyboardHelper: KeyboardHelper,
+        keyboardWillHideWithState state: KeyboardState
+    ) {
         keyboardState = nil
         updateViewConstraints()
         // If the searchEngineButton exists remove it form the keyboard
         if let buttonGroup = customSearchBarButton?.buttonGroup {
-            buttonGroup.barButtonItems = buttonGroup.barButtonItems.filter { $0 != customSearchBarButton }
+            buttonGroup.barButtonItems = buttonGroup.barButtonItems.filter {
+                $0 != customSearchBarButton
+            }
             customSearchBarButton = nil
         }
 

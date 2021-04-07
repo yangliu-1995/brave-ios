@@ -2,32 +2,41 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
 import Shared
+import UIKit
 
 private let log = Logger.browserLogger
 
 class TrayToBrowserAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         if let bvc = transitionContext.viewController(forKey: .to) as? BrowserViewController,
-           let tabTray = transitionContext.viewController(forKey: .from) as? TabTrayController {
+            let tabTray = transitionContext.viewController(forKey: .from) as? TabTrayController
+        {
             transitionFromTray(tabTray, toBrowser: bvc, usingContext: transitionContext)
         }
     }
 
-    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?)
+        -> TimeInterval
+    {
         return 0.4
     }
 }
 
-private extension TrayToBrowserAnimator {
-    func transitionFromTray(_ tabTray: TabTrayController, toBrowser bvc: BrowserViewController, usingContext transitionContext: UIViewControllerContextTransitioning) {
+extension TrayToBrowserAnimator {
+    fileprivate func transitionFromTray(
+        _ tabTray: TabTrayController,
+        toBrowser bvc: BrowserViewController,
+        usingContext transitionContext: UIViewControllerContextTransitioning
+    ) {
         let container = transitionContext.containerView
 
         let tabManager = bvc.tabManager
         let displayedTabs = tabManager.tabsForCurrentMode
-        
-        guard let selectedTab = bvc.tabManager.selectedTab, let expandFromIndex = displayedTabs.firstIndex(of: selectedTab) else {
+
+        guard let selectedTab = bvc.tabManager.selectedTab,
+            let expandFromIndex = displayedTabs.firstIndex(of: selectedTab)
+        else {
             log.error("No tab selected for transition.")
             transitionContext.completeTransition(true)
             return
@@ -46,13 +55,18 @@ private extension TrayToBrowserAnimator {
         }
 
         // Take a snapshot of the collection view that we can scale/fade out. We don't need to wait for screen updates since it's already rendered on the screen
-        let tabCollectionViewSnapshot = tabTray.collectionView.snapshotView(afterScreenUpdates: false)!
+        let tabCollectionViewSnapshot = tabTray.collectionView.snapshotView(
+            afterScreenUpdates: false
+        )!
         tabTray.collectionView.alpha = 0
         tabCollectionViewSnapshot.frame = tabTray.collectionView.frame
         container.addSubview(tabCollectionViewSnapshot)
 
         // Create a fake cell to use for the upscaling animation
-        let startingFrame = calculateCollapsedCellFrameUsingCollectionView(tabTray.collectionView, atIndex: expandFromIndex)
+        let startingFrame = calculateCollapsedCellFrameUsingCollectionView(
+            tabTray.collectionView,
+            atIndex: expandFromIndex
+        )
         let cell = createTransitionCellFromTab(bvc.tabManager.selectedTab, withFrame: startingFrame)
         cell.backgroundHolder.layer.cornerRadius = 0
 
@@ -70,58 +84,77 @@ private extension TrayToBrowserAnimator {
         resetTransformsForViews([bvc.header, bvc.readerModeBar, bvc.footer])
         transformHeaderFooterForBVC(bvc, toFrame: startingFrame, container: container)
 
-        UIView.animate(withDuration: self.transitionDuration(using: transitionContext),
-            delay: 0, usingSpringWithDamping: 1,
+        UIView.animate(
+            withDuration: self.transitionDuration(using: transitionContext),
+            delay: 0,
+            usingSpringWithDamping: 1,
             initialSpringVelocity: 0,
             options: [],
             animations: {
-            // Scale up the cell and reset the transforms for the header/footers
-            cell.frame = finalFrame
-            container.layoutIfNeeded()
-            cell.titleBackgroundView.transform = CGAffineTransform(translationX: 0, y: -cell.titleBackgroundView.frame.height)
-            cell.layer.borderWidth = 0.0
+                // Scale up the cell and reset the transforms for the header/footers
+                cell.frame = finalFrame
+                container.layoutIfNeeded()
+                cell.titleBackgroundView.transform = CGAffineTransform(
+                    translationX: 0,
+                    y: -cell.titleBackgroundView.frame.height
+                )
+                cell.layer.borderWidth = 0.0
 
-            bvc.tabTrayDidDismiss(tabTray)
-            tabTray.navigationController?.setNeedsStatusBarAppearanceUpdate()
-            tabTray.toolbar.transform = CGAffineTransform(translationX: 0, y: UIConstants.bottomToolbarHeight)
-            tabCollectionViewSnapshot.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-            tabCollectionViewSnapshot.alpha = 0
-        }, completion: { finished in
-            // Remove any of the views we used for the animation
-            cell.removeFromSuperview()
-            tabCollectionViewSnapshot.removeFromSuperview()
-            bvc.footer.alpha = 1
-            bvc.toggleSnackBarVisibility(show: true)
-            toggleWebViewVisibility(true, usingTabManager: bvc.tabManager)
-            bvc.webViewContainerBackdrop.isHidden = false
-            selectedTab.newTabPageViewController?.view.isHidden = false
-            bvc.topToolbar.isTransitioning = false
-            bvc.updateTabsBarVisibility()
-            transitionContext.completeTransition(true)
-        })
+                bvc.tabTrayDidDismiss(tabTray)
+                tabTray.navigationController?.setNeedsStatusBarAppearanceUpdate()
+                tabTray.toolbar.transform = CGAffineTransform(
+                    translationX: 0,
+                    y: UIConstants.bottomToolbarHeight
+                )
+                tabCollectionViewSnapshot.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+                tabCollectionViewSnapshot.alpha = 0
+            },
+            completion: { finished in
+                // Remove any of the views we used for the animation
+                cell.removeFromSuperview()
+                tabCollectionViewSnapshot.removeFromSuperview()
+                bvc.footer.alpha = 1
+                bvc.toggleSnackBarVisibility(show: true)
+                toggleWebViewVisibility(true, usingTabManager: bvc.tabManager)
+                bvc.webViewContainerBackdrop.isHidden = false
+                selectedTab.newTabPageViewController?.view.isHidden = false
+                bvc.topToolbar.isTransitioning = false
+                bvc.updateTabsBarVisibility()
+                transitionContext.completeTransition(true)
+            }
+        )
     }
 }
 
 class BrowserToTrayAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         if let bvc = transitionContext.viewController(forKey: .from) as? BrowserViewController,
-           let tabTray = transitionContext.viewController(forKey: .to) as? TabTrayController {
+            let tabTray = transitionContext.viewController(forKey: .to) as? TabTrayController
+        {
             transitionFromBrowser(bvc, toTabTray: tabTray, usingContext: transitionContext)
         }
     }
 
-    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?)
+        -> TimeInterval
+    {
         return 0.4
     }
 }
 
-private extension BrowserToTrayAnimator {
-    func transitionFromBrowser(_ bvc: BrowserViewController, toTabTray tabTray: TabTrayController, usingContext transitionContext: UIViewControllerContextTransitioning) {
+extension BrowserToTrayAnimator {
+    fileprivate func transitionFromBrowser(
+        _ bvc: BrowserViewController,
+        toTabTray tabTray: TabTrayController,
+        usingContext transitionContext: UIViewControllerContextTransitioning
+    ) {
 
         let container = transitionContext.containerView
         let tabManager = bvc.tabManager
         let displayedTabs = tabManager.tabsForCurrentMode
-        guard let selectedTab = bvc.tabManager.selectedTab, let scrollToIndex = displayedTabs.firstIndex(of: selectedTab) else {
+        guard let selectedTab = bvc.tabManager.selectedTab,
+            let scrollToIndex = displayedTabs.firstIndex(of: selectedTab)
+        else {
             log.error("No tab selected for transition.")
             transitionContext.completeTransition(true)
             return
@@ -135,7 +168,11 @@ private extension BrowserToTrayAnimator {
         // Force subview layout on the collection view so we can calculate the correct end frame for the animation
         tabTray.view.layoutSubviews()
 
-        tabTray.collectionView.scrollToItem(at: IndexPath(item: scrollToIndex, section: 0), at: .centeredVertically, animated: false)
+        tabTray.collectionView.scrollToItem(
+            at: IndexPath(item: scrollToIndex, section: 0),
+            at: .centeredVertically,
+            animated: false
+        )
 
         // Build a tab cell that we will use to animate the scaling of the browser to the tab
         let expandedFrame = calculateExpandedCellFrameFromBVC(bvc)
@@ -143,7 +180,9 @@ private extension BrowserToTrayAnimator {
         cell.backgroundHolder.layer.cornerRadius = TabTrayControllerUX.cornerRadius
 
         // Take a snapshot of the collection view to perform the scaling/alpha effect
-        let tabCollectionViewSnapshot = tabTray.collectionView.snapshotView(afterScreenUpdates: true)!
+        let tabCollectionViewSnapshot = tabTray.collectionView.snapshotView(
+            afterScreenUpdates: true
+        )!
         tabCollectionViewSnapshot.frame = tabTray.collectionView.frame
         tabCollectionViewSnapshot.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         tabCollectionViewSnapshot.alpha = 0
@@ -152,10 +191,13 @@ private extension BrowserToTrayAnimator {
         if let toast = bvc.clipboardBarDisplayHandler?.clipboardToast {
             toast.removeFromSuperview()
         }
-        
+
         container.addSubview(cell)
         cell.layoutIfNeeded()
-        cell.titleBackgroundView.transform = CGAffineTransform(translationX: 0, y: -cell.titleBackgroundView.frame.size.height)
+        cell.titleBackgroundView.transform = CGAffineTransform(
+            translationX: 0,
+            y: -cell.titleBackgroundView.frame.size.height
+        )
 
         // Hide views we don't want to show during the animation in the BVC
         bvc.tabManager.selectedTab?.newTabPageViewController?.view.isHidden = true
@@ -170,58 +212,81 @@ private extension BrowserToTrayAnimator {
 
         DispatchQueue.main.async {
             tabTray.collectionView.isHidden = true
-            let finalFrame = calculateCollapsedCellFrameUsingCollectionView(tabTray.collectionView,
-                atIndex: scrollToIndex)
-            tabTray.toolbar.transform = CGAffineTransform(translationX: 0, y: UIConstants.bottomToolbarHeight)
+            let finalFrame = calculateCollapsedCellFrameUsingCollectionView(
+                tabTray.collectionView,
+                atIndex: scrollToIndex
+            )
+            tabTray.toolbar.transform = CGAffineTransform(
+                translationX: 0,
+                y: UIConstants.bottomToolbarHeight
+            )
 
-            UIView.animate(withDuration: self.transitionDuration(using: transitionContext),
-                delay: 0, usingSpringWithDamping: 1,
+            UIView.animate(
+                withDuration: self.transitionDuration(using: transitionContext),
+                delay: 0,
+                usingSpringWithDamping: 1,
                 initialSpringVelocity: 0,
                 options: [],
                 animations: {
-                cell.frame = finalFrame
-                cell.titleBackgroundView.transform = .identity
-                cell.layoutIfNeeded()
-                tabTray.navigationController?.setNeedsStatusBarAppearanceUpdate()
-                    
-                cell.layer.borderWidth = TabTrayControllerUX.defaultBorderWidth
-                
-                transformHeaderFooterForBVC(bvc, toFrame: finalFrame, container: container)
+                    cell.frame = finalFrame
+                    cell.titleBackgroundView.transform = .identity
+                    cell.layoutIfNeeded()
+                    tabTray.navigationController?.setNeedsStatusBarAppearanceUpdate()
 
-                bvc.topToolbar.updateAlphaForSubviews(0)
-                bvc.footer.alpha = 0
-                tabCollectionViewSnapshot.alpha = 1
+                    cell.layer.borderWidth = TabTrayControllerUX.defaultBorderWidth
 
-                tabTray.toolbar.transform = .identity
-                resetTransformsForViews([tabCollectionViewSnapshot])
-            }, completion: { finished in
-                // Remove any of the views we used for the animation
-                cell.removeFromSuperview()
-                tabCollectionViewSnapshot.removeFromSuperview()
-                tabTray.collectionView.isHidden = false
+                    transformHeaderFooterForBVC(bvc, toFrame: finalFrame, container: container)
 
-                bvc.toggleSnackBarVisibility(show: true)
-                toggleWebViewVisibility(true, usingTabManager: bvc.tabManager)
-                bvc.tabManager.selectedTab?.newTabPageViewController?.view.isHidden = false
+                    bvc.topToolbar.updateAlphaForSubviews(0)
+                    bvc.footer.alpha = 0
+                    tabCollectionViewSnapshot.alpha = 1
 
-                resetTransformsForViews([bvc.header, bvc.readerModeBar, bvc.footer])
-                bvc.topToolbar.isTransitioning = false
-                transitionContext.completeTransition(true)
-            })
+                    tabTray.toolbar.transform = .identity
+                    resetTransformsForViews([tabCollectionViewSnapshot])
+                },
+                completion: { finished in
+                    // Remove any of the views we used for the animation
+                    cell.removeFromSuperview()
+                    tabCollectionViewSnapshot.removeFromSuperview()
+                    tabTray.collectionView.isHidden = false
+
+                    bvc.toggleSnackBarVisibility(show: true)
+                    toggleWebViewVisibility(true, usingTabManager: bvc.tabManager)
+                    bvc.tabManager.selectedTab?.newTabPageViewController?.view.isHidden = false
+
+                    resetTransformsForViews([bvc.header, bvc.readerModeBar, bvc.footer])
+                    bvc.topToolbar.isTransitioning = false
+                    transitionContext.completeTransition(true)
+                }
+            )
         }
     }
 }
 
-private func transformHeaderFooterForBVC(_ bvc: BrowserViewController, toFrame finalFrame: CGRect, container: UIView) {
-    let footerForTransform = footerTransform(bvc.footer.frame, toFrame: finalFrame, container: container)
-    let headerForTransform = headerTransform(bvc.header.frame, toFrame: finalFrame, container: container)
+private func transformHeaderFooterForBVC(
+    _ bvc: BrowserViewController,
+    toFrame finalFrame: CGRect,
+    container: UIView
+) {
+    let footerForTransform = footerTransform(
+        bvc.footer.frame,
+        toFrame: finalFrame,
+        container: container
+    )
+    let headerForTransform = headerTransform(
+        bvc.header.frame,
+        toFrame: finalFrame,
+        container: container
+    )
 
     bvc.footer.transform = footerForTransform
     bvc.header.transform = headerForTransform
     bvc.readerModeBar?.transform = headerForTransform
 }
 
-private func footerTransform( _ frame: CGRect, toFrame finalFrame: CGRect, container: UIView) -> CGAffineTransform {
+private func footerTransform(_ frame: CGRect, toFrame finalFrame: CGRect, container: UIView)
+    -> CGAffineTransform
+{
     let frame = container.convert(frame, to: container)
     let endY = finalFrame.maxY - (frame.size.height / 2)
     let endX = finalFrame.midX
@@ -235,7 +300,9 @@ private func footerTransform( _ frame: CGRect, toFrame finalFrame: CGRect, conta
     return transform
 }
 
-private func headerTransform(_ frame: CGRect, toFrame finalFrame: CGRect, container: UIView) -> CGAffineTransform {
+private func headerTransform(_ frame: CGRect, toFrame finalFrame: CGRect, container: UIView)
+    -> CGAffineTransform
+{
     let frame = container.convert(frame, to: container)
     let endY = finalFrame.minY + (frame.size.height / 2)
     let endX = finalFrame.midX
@@ -250,8 +317,13 @@ private func headerTransform(_ frame: CGRect, toFrame finalFrame: CGRect, contai
 }
 
 // MARK: Private Helper Methods
-private func calculateCollapsedCellFrameUsingCollectionView(_ collectionView: UICollectionView, atIndex index: Int) -> CGRect {
-    if let attr = collectionView.collectionViewLayout.layoutAttributesForItem(at: IndexPath(item: index, section: 0)) {
+private func calculateCollapsedCellFrameUsingCollectionView(
+    _ collectionView: UICollectionView,
+    atIndex index: Int
+) -> CGRect {
+    if let attr = collectionView.collectionViewLayout.layoutAttributesForItem(
+        at: IndexPath(item: index, section: 0)
+    ) {
         return collectionView.convert(attr.frame, to: collectionView.superview)
     } else {
         return .zero

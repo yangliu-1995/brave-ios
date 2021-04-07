@@ -4,8 +4,8 @@
 
 import Foundation
 import Shared
-import WebKit
 import SwiftyJSON
+import WebKit
 
 private let log = Logger.browserLogger
 
@@ -106,12 +106,16 @@ struct ReaderModeStyle {
 
     /// Encode the style to a JSON dictionary that can be passed to ReaderMode.js
     func encode() -> String {
-        return JSON(["theme": theme.rawValue, "fontType": fontType.rawValue, "fontSize": fontSize.rawValue]).stringValue() ?? ""
+        return JSON([
+            "theme": theme.rawValue, "fontType": fontType.rawValue, "fontSize": fontSize.rawValue,
+        ]).stringValue() ?? ""
     }
 
     /// Encode the style to a dictionary that can be stored in the profile
     func encodeAsDictionary() -> [String: Any] {
-        return ["theme": theme.rawValue, "fontType": fontType.rawValue, "fontSize": fontSize.rawValue]
+        return [
+            "theme": theme.rawValue, "fontType": fontType.rawValue, "fontSize": fontSize.rawValue,
+        ]
     }
 
     init(theme: ReaderModeTheme, fontType: ReaderModeFontType, fontSize: ReaderModeFontSize) {
@@ -142,7 +146,11 @@ struct ReaderModeStyle {
     }
 }
 
-let DefaultReaderModeStyle = ReaderModeStyle(theme: .light, fontType: .sansSerif, fontSize: ReaderModeFontSize.defaultSize)
+let DefaultReaderModeStyle = ReaderModeStyle(
+    theme: .light,
+    fontType: .sansSerif,
+    fontSize: ReaderModeFontSize.defaultSize
+)
 
 /// This struct captures the response from the Readability.js code.
 struct ReadabilityResult {
@@ -198,7 +206,9 @@ struct ReadabilityResult {
 
     /// Encode to a dictionary, which can then for example be json encoded
     func encode() -> [String: Any] {
-        return ["domain": domain, "url": url, "content": content, "title": title, "credits": credits]
+        return [
+            "domain": domain, "url": url, "content": content, "title": title, "credits": credits,
+        ]
     }
 
     /// Encode to a JSON encoded string
@@ -210,9 +220,17 @@ struct ReadabilityResult {
 
 /// Delegate that contains callbacks that we have added on top of the built-in WKWebViewDelegate
 protocol ReaderModeDelegate {
-    func readerMode(_ readerMode: ReaderMode, didChangeReaderModeState state: ReaderModeState, forTab tab: Tab)
+    func readerMode(
+        _ readerMode: ReaderMode,
+        didChangeReaderModeState state: ReaderModeState,
+        forTab tab: Tab
+    )
     func readerMode(_ readerMode: ReaderMode, didDisplayReaderizedContentForTab tab: Tab)
-    func readerMode(_ readerMode: ReaderMode, didParseReadabilityResult readabilityResult: ReadabilityResult, forTab tab: Tab)
+    func readerMode(
+        _ readerMode: ReaderMode,
+        didParseReadabilityResult readabilityResult: ReadabilityResult,
+        forTab tab: Tab
+    )
 }
 
 let ReaderModeNamespace = "window.__firefox__.reader"
@@ -238,10 +256,10 @@ class ReaderMode: TabContentScript {
 
     fileprivate func handleReaderPageEvent(_ readerPageEvent: ReaderPageEvent) {
         switch readerPageEvent {
-            case .pageShow:
-                if let tab = tab {
-                    delegate?.readerMode(self, didDisplayReaderizedContentForTab: tab)
-                }
+        case .pageShow:
+            if let tab = tab {
+                delegate?.readerMode(self, didDisplayReaderizedContentForTab: tab)
+            }
         }
     }
 
@@ -260,31 +278,38 @@ class ReaderMode: TabContentScript {
         delegate?.readerMode(self, didParseReadabilityResult: readabilityResult, forTab: tab)
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceiveScriptMessage message: WKScriptMessage
+    ) {
         guard let body = message.body as? [String: AnyObject] else {
             return
         }
-        
+
         if UserScriptManager.isMessageHandlerTokenMissing(in: body) {
             log.debug("Missing required security token.")
             return
         }
-        
-        if let msg = body["data"] as? Dictionary<String, Any> {
+
+        if let msg = body["data"] as? [String: Any] {
             if let messageType = ReaderModeMessageType(rawValue: msg["Type"] as? String ?? "") {
                 switch messageType {
-                    case .pageEvent:
-                        if let readerPageEvent = ReaderPageEvent(rawValue: msg["Value"] as? String ?? "Invalid") {
-                            handleReaderPageEvent(readerPageEvent)
-                        }
-                    case .stateChange:
-                        if let readerModeState = ReaderModeState(rawValue: msg["Value"] as? String ?? "Invalid") {
-                            handleReaderModeStateChange(readerModeState)
-                        }
-                    case .contentParsed:
-                        if let readabilityResult = ReadabilityResult(object: msg["Value"] as AnyObject?) {
-                            handleReaderContentParsed(readabilityResult)
-                        }
+                case .pageEvent:
+                    if let readerPageEvent = ReaderPageEvent(
+                        rawValue: msg["Value"] as? String ?? "Invalid"
+                    ) {
+                        handleReaderPageEvent(readerPageEvent)
+                    }
+                case .stateChange:
+                    if let readerModeState = ReaderModeState(
+                        rawValue: msg["Value"] as? String ?? "Invalid"
+                    ) {
+                        handleReaderModeStateChange(readerModeState)
+                    }
+                case .contentParsed:
+                    if let readabilityResult = ReadabilityResult(object: msg["Value"] as AnyObject?) {
+                        handleReaderContentParsed(readabilityResult)
+                    }
                 }
             }
         }
@@ -293,7 +318,12 @@ class ReaderMode: TabContentScript {
     var style: ReaderModeStyle = DefaultReaderModeStyle {
         didSet {
             if state == ReaderModeState.active {
-                tab?.webView?.evaluateSafeJavaScript(functionName: "\(ReaderModeNamespace).setStyle", args: [style.encode()], sandboxed: false, escapeArgs: false) { (object, error) -> Void in
+                tab?.webView?.evaluateSafeJavaScript(
+                    functionName: "\(ReaderModeNamespace).setStyle",
+                    args: [style.encode()],
+                    sandboxed: false,
+                    escapeArgs: false
+                ) { (object, error) -> Void in
                     return
                 }
             }

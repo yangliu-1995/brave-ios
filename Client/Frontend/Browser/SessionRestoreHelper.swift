@@ -24,16 +24,19 @@ class SessionRestoreHelper: TabContentScript {
         return "sessionRestoreHelper"
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceiveScriptMessage message: WKScriptMessage
+    ) {
         guard let body = message.body as? [String: AnyObject] else {
             return
         }
-        
+
         if UserScriptManager.isMessageHandlerTokenMissing(in: body) {
             log.debug("Missing required security token.")
             return
         }
-        
+
         if let tab = tab {
             if body["name"] as? String == "didRestoreSession" {
                 DispatchQueue.main.async {

@@ -11,26 +11,35 @@ open class MockLogins: BrowserLogins, SyncableLogins {
     public init(files: FileAccessor) {
     }
 
-    open func getLoginsForProtectionSpace(_ protectionSpace: URLProtectionSpace) -> Deferred<Maybe<Cursor<LoginData>>> {
-        let cursor = ArrayCursor(data: cache.filter({ login in
-            return login.protectionSpace.host == protectionSpace.host
-        }).sorted(by: { (loginA, loginB) -> Bool in
-            return loginA.timeLastUsed > loginB.timeLastUsed
-        }).map({ login in
-            return login as LoginData
-        }))
+    open func getLoginsForProtectionSpace(_ protectionSpace: URLProtectionSpace) -> Deferred<
+        Maybe<Cursor<LoginData>>
+    > {
+        let cursor = ArrayCursor(
+            data: cache.filter({ login in
+                return login.protectionSpace.host == protectionSpace.host
+            }).sorted(by: { (loginA, loginB) -> Bool in
+                return loginA.timeLastUsed > loginB.timeLastUsed
+            }).map({ login in
+                return login as LoginData
+            })
+        )
         return Deferred(value: Maybe(success: cursor))
     }
 
-    open func getLoginsForProtectionSpace(_ protectionSpace: URLProtectionSpace, withUsername username: String?) -> Deferred<Maybe<Cursor<LoginData>>> {
-        let cursor = ArrayCursor(data: cache.filter({ login in
-            return login.protectionSpace.host == protectionSpace.host &&
-                   login.username == username
-        }).sorted(by: { (loginA, loginB) -> Bool in
-            return loginA.timeLastUsed > loginB.timeLastUsed
-        }).map({ login in
-            return login as LoginData
-        }))
+    open func getLoginsForProtectionSpace(
+        _ protectionSpace: URLProtectionSpace,
+        withUsername username: String?
+    ) -> Deferred<Maybe<Cursor<LoginData>>> {
+        let cursor = ArrayCursor(
+            data: cache.filter({ login in
+                return login.protectionSpace.host == protectionSpace.host
+                    && login.username == username
+            }).sorted(by: { (loginA, loginB) -> Bool in
+                return loginA.timeLastUsed > loginB.timeLastUsed
+            }).map({ login in
+                return login as LoginData
+            })
+        )
         return Deferred(value: Maybe(success: cursor))
     }
 
@@ -43,34 +52,39 @@ open class MockLogins: BrowserLogins, SyncableLogins {
     }
 
     open func getAllLogins() -> Deferred<Maybe<Cursor<Login>>> {
-        let cursor = ArrayCursor(data: cache.sorted(by: { (loginA, loginB) -> Bool in
-            return loginA.hostname > loginB.hostname
-        }))
+        let cursor = ArrayCursor(
+            data: cache.sorted(by: { (loginA, loginB) -> Bool in
+                return loginA.hostname > loginB.hostname
+            })
+        )
         return Deferred(value: Maybe(success: cursor))
     }
 
     open func searchLoginsWithQuery(_ query: String?) -> Deferred<Maybe<Cursor<Login>>> {
-        let cursor = ArrayCursor(data: cache.filter({ login in
-            var checks = [Bool]()
-            if let query = query {
-                checks.append(login.username?.contains(query) ?? false)
-                checks.append(login.password.contains(query))
-                checks.append(login.hostname.contains(query))
-            }
-            return checks.contains(true)
-        }).sorted(by: { (loginA, loginB) -> Bool in
-            return loginA.hostname > loginB.hostname
-        }))
+        let cursor = ArrayCursor(
+            data: cache.filter({ login in
+                var checks = [Bool]()
+                if let query = query {
+                    checks.append(login.username?.contains(query) ?? false)
+                    checks.append(login.password.contains(query))
+                    checks.append(login.hostname.contains(query))
+                }
+                return checks.contains(true)
+            }).sorted(by: { (loginA, loginB) -> Bool in
+                return loginA.hostname > loginB.hostname
+            })
+        )
         return Deferred(value: Maybe(success: cursor))
     }
 
     // This method is only here for testing
     open func getUsageDataForLoginByGUID(_ guid: GUID) -> Deferred<Maybe<LoginUsageData>> {
-        let res = cache.filter({ login in
-            return login.guid == guid
-        }).sorted(by: { (loginA, loginB) -> Bool in
-            return loginA.timeLastUsed > loginB.timeLastUsed
-        })[0] as LoginUsageData
+        let res =
+            cache.filter({ login in
+                return login.guid == guid
+            }).sorted(by: { (loginA, loginB) -> Bool in
+                return loginA.timeLastUsed > loginB.timeLastUsed
+            })[0] as LoginUsageData
 
         return Deferred(value: Maybe(success: res))
     }
@@ -117,7 +131,9 @@ open class MockLogins: BrowserLogins, SyncableLogins {
     open func removeLoginByGUID(_ guid: GUID) -> Success {
         let filtered = cache.filter { $0.guid != guid }
         if filtered.count == cache.count {
-            return deferMaybe(LoginDataError(description: "Can not remove a password that wasn't stored"))
+            return deferMaybe(
+                LoginDataError(description: "Can not remove a password that wasn't stored")
+            )
         }
         cache = filtered
         return succeed()
@@ -141,8 +157,12 @@ open class MockLogins: BrowserLogins, SyncableLogins {
     // TODO
     open func deleteByGUID(_ guid: GUID, deletedAt: Timestamp) -> Success { return succeed() }
     open func applyChangedLogin(_ upstream: ServerLogin) -> Success { return succeed() }
-    open func markAsSynchronized<T: Collection>(_: T, modified: Timestamp) -> Deferred<Maybe<Timestamp>> where T.Iterator.Element == GUID { return deferMaybe(0) }
-    open func markAsDeleted<T: Collection>(_ guids: T) -> Success where T.Iterator.Element == GUID { return succeed() }
+    open func markAsSynchronized<T: Collection>(_: T, modified: Timestamp) -> Deferred<
+        Maybe<Timestamp>
+    > where T.Iterator.Element == GUID { return deferMaybe(0) }
+    open func markAsDeleted<T: Collection>(_ guids: T) -> Success where T.Iterator.Element == GUID {
+        return succeed()
+    }
     open func onRemovedAccount() -> Success { return succeed() }
 }
 

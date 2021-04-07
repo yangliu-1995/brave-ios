@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import WebKit
-import Shared
-import Data
 import BraveShared
+import Data
+import Shared
+import WebKit
 
 private let log = Logger.rewardsLogger
 
@@ -23,20 +23,24 @@ extension ContentBlockerHelper: TabContentScript {
         blockedRequests.removeAll()
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceiveScriptMessage message: WKScriptMessage
+    ) {
         guard let body = message.body as? [String: AnyObject] else {
             return
         }
-        
+
         if UserScriptManager.isMessageHandlerTokenMissing(in: body) {
             log.debug("Missing required security token.")
             return
         }
-        
+
         guard isEnabled,
             let data = body["data"] as? [String: String],
             let urlString = data["url"],
-            let mainDocumentUrl = tab?.webView?.url else {
+            let mainDocumentUrl = tab?.webView?.url
+        else {
             return
         }
         let isPrivateBrowsing = PrivateBrowsingManager.shared.isPrivateBrowsing
@@ -45,24 +49,32 @@ extension ContentBlockerHelper: TabContentScript {
             // if domain is "all_off", can just skip
             return
         }
-    
+
         guard let url = URL(string: urlString) else { return }
-        
+
         let resourceType = TPStatsResourceType(rawValue: data["resourceType"] ?? "")
-        
-        if resourceType == .script && domain.isShieldExpected(.NoScript, considerAllShieldsOption: true) {
+
+        if resourceType == .script
+            && domain.isShieldExpected(.NoScript, considerAllShieldsOption: true)
+        {
             self.stats = self.stats.addingScriptBlock()
             BraveGlobalShieldStats.shared.scripts += 1
             return
         }
-        
+
         var req = URLRequest(url: url)
         req.mainDocumentURL = mainDocumentUrl
 
-        TPStatsBlocklistChecker.shared.isBlocked(request: req, domain: domain, resourceType: resourceType).uponQueue(.main) { listItem in
+        TPStatsBlocklistChecker.shared.isBlocked(
+            request: req,
+            domain: domain,
+            resourceType: resourceType
+        ).uponQueue(.main) { listItem in
             if let listItem = listItem {
                 if listItem == .https {
-                    if mainDocumentUrl.scheme == "https" && url.scheme == "http" && resourceType != .image {
+                    if mainDocumentUrl.scheme == "https" && url.scheme == "http"
+                        && resourceType != .image
+                    {
                         // WKWebView will block loading this URL so we can't count it due to mixed content restrictions
                         // Unfortunately, it does not check to see if a content blocker would promote said URL to https
                         // before blocking the load
@@ -72,10 +84,10 @@ extension ContentBlockerHelper: TabContentScript {
                 if self.blockedRequests.contains(url) {
                     return
                 }
-                
+
                 self.blockedRequests.insert(url)
                 self.stats = self.stats.create(byAddingListItem: listItem)
-                
+
                 // Increase global stats (here due to BlocklistName being in Client and BraveGlobalShieldStats being
                 // in BraveShared)
                 let stats = BraveGlobalShieldStats.shared

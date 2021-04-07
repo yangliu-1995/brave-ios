@@ -56,11 +56,16 @@ class HomePageHelper {
         let alertController = UIAlertController(
             title: Strings.setHomePageDialogTitle,
             message: Strings.setHomePageDialogMessage,
-            preferredStyle: .alert)
-        alertController.addAction(UIAlertAction(title: Strings.setHomePageDialogNo, style: .cancel, handler: nil))
-        alertController.addAction(UIAlertAction(title: Strings.setHomePageDialogYes, style: .default) { _ in
-            self.currentURL = tab.url as URL?
-        })
+            preferredStyle: .alert
+        )
+        alertController.addAction(
+            UIAlertAction(title: Strings.setHomePageDialogNo, style: .cancel, handler: nil)
+        )
+        alertController.addAction(
+            UIAlertAction(title: Strings.setHomePageDialogYes, style: .default) { _ in
+                self.currentURL = tab.url as URL?
+            }
+        )
         viewController?.present(alertController, animated: true, completion: nil)
     }
 }

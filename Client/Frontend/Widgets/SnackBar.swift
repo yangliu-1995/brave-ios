@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import SnapKit
 import Shared
+import SnapKit
 
 class SnackBarUX {
     static var maxWidth: CGFloat = 400
@@ -13,11 +13,9 @@ class SnackBarUX {
     static let highlightText = UIColor.Photon.blue60
 }
 
-/**
- * A specialized version of UIButton for use in SnackBars. These are displayed evenly
- * spaced in the bottom of the bar. The main convenience of these is that you can pass
- * in a callback in the constructor (although these also style themselves appropriately).
- */
+/// A specialized version of UIButton for use in SnackBars. These are displayed evenly
+/// spaced in the bottom of the bar. The main convenience of these is that you can pass
+/// in a callback in the constructor (although these also style themselves appropriately).
 typealias SnackBarCallback = (_ bar: SnackBar) -> Void
 class SnackButton: UIButton {
     let callback: SnackBarCallback?
@@ -198,11 +196,9 @@ class SnackBar: UIView {
     }
 }
 
-/**
- * A special version of a snackbar that persists for at least a timeout. After that
- * it will dismiss itself on the next page load where this tab isn't showing. As long as
- * you stay on the current tab though, it will persist until you interact with it.
- */
+/// A special version of a snackbar that persists for at least a timeout. After that
+/// it will dismiss itself on the next page load where this tab isn't showing. As long as
+/// you stay on the current tab though, it will persist until you interact with it.
 class TimerSnackBar: SnackBar {
     fileprivate var timer: Timer?
     fileprivate var timeout: TimeInterval
@@ -217,21 +213,36 @@ class TimerSnackBar: SnackBar {
     }
 
     static func showAppStoreConfirmationBar(forTab tab: Tab, appStoreURL: URL) {
-        let bar = TimerSnackBar(text: Strings.externalLinkAppStoreConfirmationTitle, img: #imageLiteral(resourceName: "defaultFavicon"))
-        let openAppStore = SnackButton(title: Strings.OKString, accessibilityIdentifier: "ConfirmOpenInAppStore") { bar in
+        let bar = TimerSnackBar(
+            text: Strings.externalLinkAppStoreConfirmationTitle,
+            img: #imageLiteral(resourceName: "defaultFavicon")
+        )
+        let openAppStore = SnackButton(
+            title: Strings.OKString,
+            accessibilityIdentifier: "ConfirmOpenInAppStore"
+        ) { bar in
             tab.removeSnackbar(bar)
             UIApplication.shared.open(appStoreURL)
         }
-        let cancelButton = SnackButton(title: Strings.cancelButtonTitle, accessibilityIdentifier: "CancelOpenInAppStore") { bar in
+        let cancelButton = SnackButton(
+            title: Strings.cancelButtonTitle,
+            accessibilityIdentifier: "CancelOpenInAppStore"
+        ) { bar in
             tab.removeSnackbar(bar)
         }
         bar.addButton(openAppStore)
         bar.addButton(cancelButton)
         tab.addSnackbar(bar)
     }
-    
+
     override func show() {
-        self.timer = Timer(timeInterval: timeout, target: self, selector: #selector(timerDone), userInfo: nil, repeats: false)
+        self.timer = Timer(
+            timeInterval: timeout,
+            target: self,
+            selector: #selector(timerDone),
+            userInfo: nil,
+            repeats: false
+        )
         RunLoop.current.add(self.timer!, forMode: .default)
         super.show()
     }

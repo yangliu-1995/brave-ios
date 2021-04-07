@@ -21,19 +21,23 @@ class BasePasscodeViewController: UIViewController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     var isCancellable: Bool = true {
         didSet {
             updateRightBarButtonItem()
         }
     }
-    
+
     func updateRightBarButtonItem() {
         navigationItem.rightBarButtonItem = isCancellable ? cancelBarButtonItem : nil
     }
-    
-    private lazy var cancelBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismissAnimated))
-    
+
+    private lazy var cancelBarButtonItem = UIBarButtonItem(
+        barButtonSystemItem: .cancel,
+        target: self,
+        action: #selector(dismissAnimated)
+    )
+
     override func viewDidLoad() {
         super.viewDidLoad()
         updateRightBarButtonItem()
@@ -67,7 +71,12 @@ extension BasePasscodeViewController {
             if inMinutes == 1 {
                 displayError(Strings.authenticationMaximumAttemptsReachedOneMinute)
             } else {
-                displayError(String.localizedStringWithFormat(Strings.authenticationMaximumAttemptsReached, inMinutes))
+                displayError(
+                    String.localizedStringWithFormat(
+                        Strings.authenticationMaximumAttemptsReached,
+                        inMinutes
+                    )
+                )
             }
         } else {
             displayError(Strings.authenticationMaximumAttemptsReachedNoTime)
@@ -79,7 +88,7 @@ extension BasePasscodeViewController {
     }
 
     func failMustBeDifferent() {
-        
+
         displayError(Strings.passcodeMatchOldErrorText)
     }
 
@@ -92,7 +101,12 @@ extension BasePasscodeViewController {
             inputView.isUserInteractionEnabled = false
             resignFirstResponder()
         } else {
-            displayError(String(format: Strings.authenticationIncorrectAttemptsRemaining, (AllowedPasscodeFailedAttempts - numberOfAttempts)))
+            displayError(
+                String(
+                    format: Strings.authenticationIncorrectAttemptsRemaining,
+                    (AllowedPasscodeFailedAttempts - numberOfAttempts)
+                )
+            )
         }
 
         inputView.resetCode()

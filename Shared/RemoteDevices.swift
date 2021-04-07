@@ -13,7 +13,13 @@ open class RemoteDevice {
     public let isCurrentDevice: Bool
     public let lastAccessTime: Timestamp?
 
-    public init(id: String?, name: String, type: String?, isCurrentDevice: Bool, lastAccessTime: Timestamp?) {
+    public init(
+        id: String?,
+        name: String,
+        type: String?,
+        isCurrentDevice: Bool,
+        lastAccessTime: Timestamp?
+    ) {
         self.id = id
         self.name = name
         self.type = type

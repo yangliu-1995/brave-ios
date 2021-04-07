@@ -6,20 +6,19 @@ import Foundation
 
 public typealias GUID = String
 
-/**
- * Utilities for futzing with bytes and such.
- */
+/// Utilities for futzing with bytes and such.
 open class Bytes {
     open class func generateRandomBytes(_ len: UInt) -> Data {
         let len = Int(len)
         var data = Data(count: len)
         data.withUnsafeMutableBytes {
             if let baseAddress = $0.baseAddress,
-                SecRandomCopyBytes(kSecRandomDefault, len, baseAddress) != errSecSuccess {
+                SecRandomCopyBytes(kSecRandomDefault, len, baseAddress) != errSecSuccess
+            {
                 fatalError("Random byte generation failed.")
             }
         }
-        
+
         return data
     }
 
@@ -44,7 +43,7 @@ open class Bytes {
     }
 
     func fromHex(_ str: String) -> Data {
-       // TODO
+        // TODO
         return Data()
     }
 }

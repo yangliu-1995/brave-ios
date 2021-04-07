@@ -2,11 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-@testable import Client
 import Foundation
 import Shared
 import Storage
 import XCTest
+
+@testable import Client
 
 open class MockTabQueue: TabQueue {
     open func addToQueue(_ tab: ShareItem) -> Success {
@@ -43,7 +44,7 @@ open class MockActivityStreamDataObserver: DataObserver {
 }
 
 open class MockProfile: Profile {
-    
+
     // Read/Writeable properties for mocking
     public var files: FileAccessor
     public var logins: BrowserLogins & SyncableLogins & ResettableSyncStorage

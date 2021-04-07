@@ -3,13 +3,17 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import Foundation
 import BraveShared
 import Data
+import Foundation
 
 /// Displays a large favicon given some favorite
 class LargeFaviconView: UIView {
-    func loadFavicon(siteURL: URL, domain: Domain? = nil, monogramFallbackCharacter: Character? = nil) {
+    func loadFavicon(
+        siteURL: URL,
+        domain: Domain? = nil,
+        monogramFallbackCharacter: Character? = nil
+    ) {
         // Use the base domain's first character, but if that isn't valid
         // use the favorites title as the monogram instead
         monogramFallbackLabel.text = FaviconFetcher.monogramLetter(
@@ -29,50 +33,50 @@ class LargeFaviconView: UIView {
             self.backgroundView.isHidden = !attributes.includePadding
         }
     }
-    
+
     private var fetcher: FaviconFetcher?
-    
+
     private let imageView = UIImageView().then {
         $0.contentMode = .scaleAspectFit
     }
-    
+
     private let monogramFallbackLabel = UILabel().then {
         $0.appearanceTextColor = .white
         $0.isHidden = true
     }
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
-        
+
         if bounds.height > 0 {
             monogramFallbackLabel.font = .systemFont(ofSize: bounds.height / 2)
         }
     }
-    
+
     private let backgroundView = UIVisualEffectView(effect: UIBlurEffect(style: .regular)).then {
         $0.isHidden = true
     }
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+
         layer.cornerRadius = 8
         layer.cornerCurve = .continuous
-        
+
         clipsToBounds = true
         layer.borderColor = BraveUX.faviconBorderColor.cgColor
         layer.borderWidth = BraveUX.faviconBorderWidth
-        
+
         layoutMargins = .zero
-        
+
         addSubview(backgroundView)
         addSubview(monogramFallbackLabel)
         addSubview(imageView)
-        
+
         backgroundView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
+
         imageView.snp.makeConstraints {
             $0.center.equalTo(self)
             $0.leading.top.greaterThanOrEqualTo(layoutMarginsGuide)
@@ -82,7 +86,7 @@ class LargeFaviconView: UIView {
             $0.center.equalTo(self)
         }
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()

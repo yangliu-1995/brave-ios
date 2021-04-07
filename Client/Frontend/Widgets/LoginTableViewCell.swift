@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
 import SnapKit
 import Storage
+import UIKit
 
 protocol LoginTableViewCellDelegate: class {
     func didSelectOpenAndFillForCell(_ cell: LoginTableViewCell)
@@ -53,7 +53,9 @@ class LoginTableViewCell: UITableViewCell {
 
         // Menu actions for password
         if item == .passwordItem {
-            let showRevealOption = self.descriptionLabel.isSecureTextEntry ? (action == MenuHelper.selectorReveal) : (action == MenuHelper.selectorHide)
+            let showRevealOption =
+                self.descriptionLabel.isSecureTextEntry
+                ? (action == MenuHelper.selectorReveal) : (action == MenuHelper.selectorHide)
             return action == MenuHelper.selectorCopy || showRevealOption
         }
 
@@ -66,7 +68,7 @@ class LoginTableViewCell: UITableViewCell {
         if item == .usernameItem {
             return action == MenuHelper.selectorCopy
         }
-        
+
         return false
     }
 
@@ -108,7 +110,9 @@ class LoginTableViewCell: UITableViewCell {
 
     fileprivate var customIndentView = UIView()
 
-    fileprivate var customCheckmarkIcon = UIImageView(image: #imageLiteral(resourceName: "loginUnselected"))
+    fileprivate var customCheckmarkIcon = UIImageView(
+        image: #imageLiteral(resourceName: "loginUnselected")
+    )
 
     /// Override the default accessibility label since it won't include the description by default
     /// since it's a UITextField acting as a label.
@@ -120,7 +124,7 @@ class LoginTableViewCell: UITableViewCell {
                 return "\(highlightedLabel.text ?? ""), \(descriptionLabel.text ?? "")"
             }
         }
-        set { // swiftlint:disable:this unused_setter_value
+        set {  // swiftlint:disable:this unused_setter_value
             // Ignore sets
         }
     }
@@ -156,8 +160,10 @@ class LoginTableViewCell: UITableViewCell {
             if editingDescription != oldValue {
                 descriptionLabel.isUserInteractionEnabled = editingDescription
 
-                highlightedLabel.textColor = editingDescription ?
-                    LoginTableViewCellUX.highlightedLabelEditingTextColor : LoginTableViewCellUX.highlightedLabelTextColor
+                highlightedLabel.textColor =
+                    editingDescription
+                    ? LoginTableViewCellUX.highlightedLabelEditingTextColor
+                    : LoginTableViewCellUX.highlightedLabelTextColor
 
                 // Trigger a layout configuration if we changed to editing/not editing the description.
                 configureLayoutForStyle(self.style)
@@ -219,7 +225,10 @@ class LoginTableViewCell: UITableViewCell {
         }
 
         customIndentView.frame = indentFrame
-        customCheckmarkIcon.frame.center = CGPoint(x: indentFrame.width / 2, y: indentFrame.height / 2)
+        customCheckmarkIcon.frame.center = CGPoint(
+            x: indentFrame.width / 2,
+            y: indentFrame.height / 2
+        )
 
         // Adjust content view frame based on indent
         var contentFrame = self.contentView.frame
@@ -239,7 +248,9 @@ class LoginTableViewCell: UITableViewCell {
             labelContainer.snp.remakeConstraints { make in
                 make.centerY.equalTo(contentView)
                 make.trailing.equalTo(contentView).offset(-LoginTableViewCellUX.horizontalMargin)
-                make.leading.equalTo(iconImageView.snp.trailing).offset(LoginTableViewCellUX.horizontalMargin)
+                make.leading.equalTo(iconImageView.snp.trailing).offset(
+                    LoginTableViewCellUX.horizontalMargin
+                )
             }
 
             highlightedLabel.snp.remakeConstraints { make in
@@ -263,7 +274,9 @@ class LoginTableViewCell: UITableViewCell {
             labelContainer.snp.remakeConstraints { make in
                 make.centerY.equalTo(contentView)
                 make.trailing.equalTo(contentView).offset(-LoginTableViewCellUX.horizontalMargin)
-                make.leading.equalTo(iconImageView.snp.trailing).offset(LoginTableViewCellUX.horizontalMargin)
+                make.leading.equalTo(iconImageView.snp.trailing).offset(
+                    LoginTableViewCellUX.horizontalMargin
+                )
             }
 
             highlightedLabel.snp.remakeConstraints { make in
@@ -277,7 +290,8 @@ class LoginTableViewCell: UITableViewCell {
         case .noIconAndBothLabels:
             // Currently we only support modifying the description for this layout which is why
             // we factor in the editingOffset when calculating the constraints.
-            let editingOffset = editingDescription ? LoginTableViewCellUX.editingDescriptionIndent : 0
+            let editingOffset =
+                editingDescription ? LoginTableViewCellUX.editingDescriptionIndent : 0
 
             iconImageView.snp.remakeConstraints { make in
                 make.centerY.equalTo(contentView)
@@ -314,21 +328,31 @@ class LoginTableViewCell: UITableViewCell {
 
             // Shift over content view
             var contentFrame = self.contentView.frame
-            contentFrame.origin.x += editing ? LoginTableViewCellUX.indentWidth : -LoginTableViewCellUX.indentWidth
+            contentFrame.origin.x +=
+                editing ? LoginTableViewCellUX.indentWidth : -LoginTableViewCellUX.indentWidth
             self.contentView.frame = contentFrame
 
             // Shift over custom indent view
             var indentFrame = self.customIndentView.frame
-            indentFrame.origin.x += editing ? LoginTableViewCellUX.indentWidth : -LoginTableViewCellUX.indentWidth
+            indentFrame.origin.x +=
+                editing ? LoginTableViewCellUX.indentWidth : -LoginTableViewCellUX.indentWidth
             self.customIndentView.frame = indentFrame
         }
 
-        animated ? UIView.animate(withDuration: LoginTableViewCellUX.indentAnimationDuration, animations: adjustConstraints) : adjustConstraints()
+        animated
+            ? UIView.animate(
+                withDuration: LoginTableViewCellUX.indentAnimationDuration,
+                animations: adjustConstraints
+            )
+            : adjustConstraints()
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-        customCheckmarkIcon.image = selected ? #imageLiteral(resourceName: "loginSelected") : #imageLiteral(resourceName: "loginUnselected")
+        customCheckmarkIcon.image =
+            selected
+            ? #imageLiteral(resourceName: "loginSelected")
+            : #imageLiteral(resourceName: "loginUnselected")
     }
 }
 

@@ -7,9 +7,7 @@ import Shared
 
 private let log = Logger.syncLogger
 
-/**
- * The kinda-immutable base interface for bookmarks and folders.
- */
+/// The kinda-immutable base interface for bookmarks and folders.
 open class BookmarkNode {
     open var id: Int?
     public let guid: GUID
@@ -17,7 +15,7 @@ open class BookmarkNode {
     public let isEditable: Bool
     open var favicon: Favicon?
 
-    init(guid: GUID, title: String, isEditable: Bool=false) {
+    init(guid: GUID, title: String, isEditable: Bool = false) {
         self.guid = guid
         self.title = title
         self.isEditable = isEditable
@@ -34,24 +32,20 @@ open class BookmarkSeparator: BookmarkNode {
     }
 }
 
-/**
- * An immutable item representing a bookmark.
- *
- * To modify this, issue changes against the backing store and get an updated model.
- */
+/// An immutable item representing a bookmark.
+///
+/// To modify this, issue changes against the backing store and get an updated model.
 open class BookmarkItem: BookmarkNode {
     public let url: String!
 
-    public init(guid: String, title: String, url: String, isEditable: Bool=false) {
+    public init(guid: String, title: String, url: String, isEditable: Bool = false) {
         self.url = url
         super.init(guid: guid, title: title, isEditable: isEditable)
     }
 }
 
-/**
- * A folder is an immutable abstraction over a named
- * thing that can return its child nodes by index.
- */
+/// A folder is an immutable abstraction over a named
+/// thing that can return its child nodes by index.
 open class BookmarkFolder: BookmarkNode {
     open var count: Int { return 0 }
     open subscript(index: Int) -> BookmarkNode? { return nil }
@@ -69,15 +63,13 @@ open class BookmarkFolder: BookmarkNode {
     }
 }
 
-/**
- * A model is a snapshot of the bookmarks store, suitable for backing a table view.
- *
- * Navigation through the folder hierarchy produces a sequence of models.
- *
- * Changes to the backing store implicitly invalidates a subset of models.
- *
- * 'Refresh' means requesting a new model from the store.
- */
+/// A model is a snapshot of the bookmarks store, suitable for backing a table view.
+///
+/// Navigation through the folder hierarchy produces a sequence of models.
+///
+/// Changes to the backing store implicitly invalidates a subset of models.
+///
+/// 'Refresh' means requesting a new model from the store.
 open class BookmarksModel: BookmarksModelFactorySource {
     fileprivate let factory: BookmarksModelFactory
     public let modelFactory: Deferred<Maybe<BookmarksModelFactory>>
@@ -117,7 +109,9 @@ open class BookmarksModel: BookmarksModelFactorySource {
         if let removedRoot = self.current.removeItemWithGUID(guid) {
             return BookmarksModel(modelFactory: self.factory, root: removedRoot)
         }
-        log.warning("BookmarksModel.removeGUIDFromCurrent did not remove anything. Check to make sure you're not using the abstract BookmarkFolder class.")
+        log.warning(
+            "BookmarksModel.removeGUIDFromCurrent did not remove anything. Check to make sure you're not using the abstract BookmarkFolder class."
+        )
         return self
     }
 
@@ -227,13 +221,17 @@ open class MemoryBookmarkFolder: BookmarkFolder, Sequence {
         if items.isEmpty {
             return self
         }
-        return MemoryBookmarkFolder(guid: self.guid, title: self.title, children: self.children + items)
+        return MemoryBookmarkFolder(
+            guid: self.guid,
+            title: self.title,
+            children: self.children + items
+        )
     }
 }
 
 open class MemoryBookmarksSink: ShareToDestination {
     var queue: [BookmarkNode] = []
-    public init() { }
+    public init() {}
     open func shareItem(_ item: ShareItem) -> Success {
         let title = item.title == nil ? "Untitled" : item.title!
         func exists(_ e: BookmarkNode) -> Bool {
@@ -253,9 +251,13 @@ open class MemoryBookmarksSink: ShareToDestination {
     }
 }
 
-private extension SuggestedSite {
-    func asBookmark() -> BookmarkNode {
-        let b = BookmarkItem(guid: self.guid ?? Bytes.generateGUID(), title: self.title, url: self.url)
+extension SuggestedSite {
+    fileprivate func asBookmark() -> BookmarkNode {
+        let b = BookmarkItem(
+            guid: self.guid ?? Bytes.generateGUID(),
+            title: self.title,
+            url: self.url
+        )
         b.favicon = self.icon
         return b
     }
@@ -289,7 +291,9 @@ open class PrependedBookmarkFolder: BookmarkFolder {
 
     override open func removeItemWithGUID(_ guid: GUID) -> BookmarkFolder? {
         guard let removedFolder = main.removeItemWithGUID(guid) else {
-            log.warning("Failed to remove child item from prepended folder. Check that main folder overrides removeItemWithGUID.")
+            log.warning(
+                "Failed to remove child item from prepended folder. Check that main folder overrides removeItemWithGUID."
+            )
             return nil
         }
         return PrependedBookmarkFolder(main: removedFolder, prepend: prepend)
@@ -319,7 +323,8 @@ open class ConcatenatedBookmarkFolder: BookmarkFolder {
     }
 
     override open func itemIsEditableAtIndex(_ index: Int) -> Bool {
-        return index < main.count ? main.itemIsEditableAtIndex(index) : append.itemIsEditableAtIndex(index - main.count)
+        return index < main.count
+            ? main.itemIsEditableAtIndex(index) : append.itemIsEditableAtIndex(index - main.count)
     }
 
     override open func removeItemWithGUID(_ guid: GUID) -> BookmarkFolder? {
@@ -329,9 +334,7 @@ open class ConcatenatedBookmarkFolder: BookmarkFolder {
     }
 }
 
-/**
- * A trivial offline model factory that represents a simple hierarchy.
- */
+/// A trivial offline model factory that represents a simple hierarchy.
 open class MockMemoryBookmarksStore: BookmarksModelFactory, ShareToDestination {
     let mobile: MemoryBookmarkFolder
     let root: MemoryBookmarkFolder
@@ -342,15 +345,29 @@ open class MockMemoryBookmarksStore: BookmarksModelFactory, ShareToDestination {
     public init() {
         let res = [BookmarkItem]()
 
-        mobile = MemoryBookmarkFolder(guid: BookmarkRoots.mobileFolderGUID, title: "Mobile Bookmarks", children: res)
+        mobile = MemoryBookmarkFolder(
+            guid: BookmarkRoots.mobileFolderGUID,
+            title: "Mobile Bookmarks",
+            children: res
+        )
 
-        unsorted = MemoryBookmarkFolder(guid: BookmarkRoots.unfiledFolderGUID, title: "Unsorted Bookmarks", children: [])
+        unsorted = MemoryBookmarkFolder(
+            guid: BookmarkRoots.unfiledFolderGUID,
+            title: "Unsorted Bookmarks",
+            children: []
+        )
         sink = MemoryBookmarksSink()
 
-        root = MemoryBookmarkFolder(guid: BookmarkRoots.rootGUID, title: "Root", children: [mobile, unsorted])
+        root = MemoryBookmarkFolder(
+            guid: BookmarkRoots.rootGUID,
+            title: "Root",
+            children: [mobile, unsorted]
+        )
     }
 
-    public func factoryForIndex(_ index: Int, inFolder folder: BookmarkFolder) -> BookmarksModelFactory {
+    public func factoryForIndex(_ index: Int, inFolder folder: BookmarkFolder)
+        -> BookmarksModelFactory
+    {
         return self
     }
 

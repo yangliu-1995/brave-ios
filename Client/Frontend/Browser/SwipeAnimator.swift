@@ -20,7 +20,8 @@ private let DefaultParameters =
         totalScale: 0.9,
         totalAlpha: 0,
         minExitVelocity: 800,
-        recenterAnimationDuration: 0.15)
+        recenterAnimationDuration: 0.15
+    )
 
 protocol SwipeAnimatorDelegate: class {
     func swipeAnimator(_ animator: SwipeAnimator, viewWillExitContainerBounds: UIView)
@@ -29,10 +30,10 @@ protocol SwipeAnimatorDelegate: class {
 class SwipeAnimator: NSObject {
     weak var delegate: SwipeAnimatorDelegate?
     weak var animatingView: UIView?
-    
+
     fileprivate var prevOffset: CGPoint?
     fileprivate let params: SwipeAnimationParameters
-    
+
     fileprivate var panGestureRecogniser: UIPanGestureRecognizer!
 
     var containerCenter: CGPoint {
@@ -62,10 +63,13 @@ class SwipeAnimator: NSObject {
 // MARK: Private Helpers
 extension SwipeAnimator {
     fileprivate func animateBackToCenter() {
-        UIView.animate(withDuration: params.recenterAnimationDuration, animations: {
-            self.animatingView?.transform = .identity
-            self.animatingView?.alpha = 1
-        })
+        UIView.animate(
+            withDuration: params.recenterAnimationDuration,
+            animations: {
+                self.animatingView?.transform = .identity
+                self.animatingView?.alpha = 1
+            }
+        )
     }
 
     fileprivate func animateAwayWithVelocity(_ velocity: CGPoint, speed: CGFloat) {
@@ -77,14 +81,18 @@ extension SwipeAnimator {
         let translation = velocity.x >= 0 ? animatingView.frame.width : -animatingView.frame.width
         let timeStep = TimeInterval(abs(translation) / speed)
         self.delegate?.swipeAnimator(self, viewWillExitContainerBounds: animatingView)
-        UIView.animate(withDuration: timeStep, animations: {
-            animatingView.transform = self.transformForTranslation(translation)
-            animatingView.alpha = self.alphaForDistanceFromCenter(abs(translation))
-        }, completion: { finished in
-            if finished {
-                animatingView.alpha = 0
+        UIView.animate(
+            withDuration: timeStep,
+            animations: {
+                animatingView.transform = self.transformForTranslation(translation)
+                animatingView.alpha = self.alphaForDistanceFromCenter(abs(translation))
+            },
+            completion: { finished in
+                if finished {
+                    animatingView.alpha = 0
+                }
             }
-        })
+        )
     }
 
     fileprivate func transformForTranslation(_ translation: CGFloat) -> CGAffineTransform {
@@ -137,7 +145,10 @@ extension SwipeAnimator {
 
     func close(right: Bool) {
         let direction = CGFloat(right ? -1 : 1)
-        animateAwayWithVelocity(CGPoint(x: -direction * params.minExitVelocity, y: 0), speed: direction * params.minExitVelocity)
+        animateAwayWithVelocity(
+            CGPoint(x: -direction * params.minExitVelocity, y: 0),
+            speed: direction * params.minExitVelocity
+        )
     }
 
     @discardableResult @objc func closeWithoutGesture() -> Bool {

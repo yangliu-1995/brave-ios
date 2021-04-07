@@ -63,7 +63,7 @@ public enum BookmarkTreeNode: Comparable {
     public func isSameType(as other: BookmarkTreeNode) -> Bool {
         switch (self, other) {
         case (.folder, .folder),
-             (.nonFolder, .nonFolder):
+            (.nonFolder, .nonFolder):
             return true
         default:
             return false
@@ -91,7 +91,7 @@ public enum BookmarkTreeNode: Comparable {
 
     }
 
-    public static func <(lhs: BookmarkTreeNode, rhs: BookmarkTreeNode) -> Bool {
+    public static func < (lhs: BookmarkTreeNode, rhs: BookmarkTreeNode) -> Bool {
         return lhs.recordGUID < rhs.recordGUID
     }
 }
@@ -135,11 +135,25 @@ public struct BookmarkTree {
     }
 
     public static func emptyTree() -> BookmarkTree {
-        return BookmarkTree(subtrees: [], lookup: [:], parents: [:], orphans: Set<GUID>(), deleted: Set<GUID>(), modified: Set<GUID>(), virtual: Set<GUID>())
+        return BookmarkTree(
+            subtrees: [],
+            lookup: [:],
+            parents: [:],
+            orphans: Set<GUID>(),
+            deleted: Set<GUID>(),
+            modified: Set<GUID>(),
+            virtual: Set<GUID>()
+        )
     }
 
     public static func emptyMirrorTree() -> BookmarkTree {
-        return mappingsToTreeForStructureRows([], withNonFoldersAndEmptyFolders: [], withDeletedRecords: Set(), modifiedRecords: Set(), alwaysIncludeRoots: true)
+        return mappingsToTreeForStructureRows(
+            [],
+            withNonFoldersAndEmptyFolders: [],
+            withDeletedRecords: Set(),
+            modifiedRecords: Set(),
+            alwaysIncludeRoots: true
+        )
     }
 
     public func includesOrDeletesNode(_ node: BookmarkTreeNode) -> Bool {
@@ -177,10 +191,10 @@ public struct BookmarkTree {
      */
     public func isFullyRootedIn(_ tree: BookmarkTree) -> Bool {
         // We don't compare against tree.deleted, because you can't *undelete*.
-        return self.orphans.every(tree.includesGUID) &&
-               self.subtrees.every { subtree in
+        return self.orphans.every(tree.includesGUID)
+            && self.subtrees.every { subtree in
                 tree.includesNode(subtree) || subtree.isRoot
-        }
+            }
     }
 
     // If this tree contains the root, return it.
@@ -190,7 +204,13 @@ public struct BookmarkTree {
 
     // Recursively process an input set of structure pairs to yield complete subtrees,
     // assembling those subtrees to make a minimal set of trees.
-    static func mappingsToTreeForStructureRows(_ mappings: [StructureRow], withNonFoldersAndEmptyFolders nonFoldersAndEmptyFolders: [BookmarkTreeNode], withDeletedRecords deleted: Set<GUID>, modifiedRecords modified: Set<GUID>, alwaysIncludeRoots: Bool) -> BookmarkTree {
+    static func mappingsToTreeForStructureRows(
+        _ mappings: [StructureRow],
+        withNonFoldersAndEmptyFolders nonFoldersAndEmptyFolders: [BookmarkTreeNode],
+        withDeletedRecords deleted: Set<GUID>,
+        modifiedRecords modified: Set<GUID>,
+        alwaysIncludeRoots: Bool
+    ) -> BookmarkTree {
         // Accumulate.
         var nodes: [GUID: BookmarkTreeNode] = [:]
         var parents: [GUID: GUID] = [:]
@@ -305,10 +325,18 @@ public struct BookmarkTree {
         // Do the not-tops first: shallower recursion.
         notTops.forEach({ nodeForGUID($0) })
 
-        let subtrees = tops.map(nodeForGUID)        // These will all be folders.
+        let subtrees = tops.map(nodeForGUID)  // These will all be folders.
 
         // Whatever we're left with in `tops` is the set of records for which we
         // didn't process a parent.
-        return BookmarkTree(subtrees: subtrees, lookup: nodes, parents: parents, orphans: orphans, deleted: deleted, modified: modified, virtual: virtual)
+        return BookmarkTree(
+            subtrees: subtrees,
+            lookup: nodes,
+            parents: parents,
+            orphans: orphans,
+            deleted: deleted,
+            modified: modified,
+            virtual: virtual
+        )
     }
 }

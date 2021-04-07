@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import UIKit
 import BraveUI
 import Shared
+import UIKit
 
 /// The header which is shown when the user scrolls down into the Brave Today feed
 class FeedSectionHeaderView: UIView {
@@ -21,27 +21,29 @@ class FeedSectionHeaderView: UIView {
         $0.setContentHuggingPriority(.required, for: .horizontal)
         $0.accessibilityLabel = Strings.BraveToday.sourcesAndSettings
     }
-    
+
     private let shadowLine = UIView().then {
         $0.backgroundColor = UIColor(white: 0.0, alpha: 0.5)
     }
-    
+
     override init(frame: CGRect) {
         backgroundView = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterialDark))
-        
+
         super.init(frame: frame)
-        
+
         addSubview(backgroundView)
         addSubview(shadowLine)
-        
+
         let stackView = UIStackView(arrangedSubviews: [label, settingsButton]).then {
             $0.spacing = 20
         }
         addSubview(stackView)
         stackView.snp.makeConstraints {
-            $0.edges.equalTo(safeAreaLayoutGuide).inset(UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16))
+            $0.edges.equalTo(safeAreaLayoutGuide).inset(
+                UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+            )
         }
-        
+
         backgroundView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -51,7 +53,7 @@ class FeedSectionHeaderView: UIView {
             $0.height.equalTo(1.0 / UIScreen.main.scale)
         }
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()

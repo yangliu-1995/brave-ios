@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-@testable import Client
 import WebKit
-
 import XCTest
+
+@testable import Client
 
 class TabEventHandlerTests: XCTestCase {
 
@@ -56,7 +56,6 @@ class TabEventHandlerTests: XCTestCase {
         handler.unregister(tabObservers)
     }
 }
-
 
 class DummyHandler: TabEventHandler {
     var tabObservers: TabObservers!

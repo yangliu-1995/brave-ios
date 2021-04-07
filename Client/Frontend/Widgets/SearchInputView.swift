@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import SnapKit
 import Shared
+import SnapKit
 
 private struct SearchInputViewUX {
 
@@ -79,7 +79,9 @@ class SearchInputView: UIView {
     fileprivate lazy var overlay: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.Photon.white100
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tappedSearch)))
+        view.addGestureRecognizer(
+            UITapGestureRecognizer(target: self, action: #selector(tappedSearch))
+        )
 
         view.isAccessibilityElement = true
         view.accessibilityLabel = Strings.searchInputViewOverlayAccessibilityLabel

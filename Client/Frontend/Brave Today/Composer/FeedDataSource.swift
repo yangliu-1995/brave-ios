@@ -3,12 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import Foundation
+import BraveShared
 import BraveUI
 import Data
-import Shared
-import BraveShared
 import FeedKit
+import Foundation
+import Shared
 
 // Named `logger` because we are using math function `log`
 private let logger = Logger.browserLogger
@@ -26,12 +26,12 @@ class FeedDataSource {
         case success([FeedCard])
         /// Some sort of error has occured when attempting to load feed content
         case failure(Error)
-        
+
         /// The list of generated feed cards, if the state is `success`
         var cards: [FeedCard]? {
             switch self {
             case .success(let cards),
-                 .loading(.success(let cards)):
+                .loading(.success(let cards)):
                 return cards
             default:
                 return nil
@@ -41,18 +41,18 @@ class FeedDataSource {
         var error: Error? {
             switch self {
             case .failure(let error),
-                 .loading(.failure(let error)):
+                .loading(.failure(let error)):
                 return error
             default:
                 return nil
             }
         }
     }
-    
+
     @Observable private(set) var state: State = .initial
     private(set) var sources: [FeedItem.Source] = []
     private var items: [FeedItem.Content] = []
-    
+
     /// Add a closure that will execute when `state` is changed.
     ///
     /// Executes the closure on the main queue by default
@@ -63,41 +63,44 @@ class FeedDataSource {
     ) {
         _state.observe(from: object, on: queue, handler)
     }
-    
+
     private let todayQueue = DispatchQueue(label: "com.brave.today")
     private let reloadQueue = DispatchQueue(label: "com.brave.today.reload")
-    
+
     // MARK: - Initialization
-    
+
     init() {
         restoreCachedSources()
         if !AppConstants.buildChannel.isPublic,
-           let savedEnvironment = Preferences.BraveToday.debugEnvironment.value,
-           let environment = Environment(rawValue: savedEnvironment) {
+            let savedEnvironment = Preferences.BraveToday.debugEnvironment.value,
+            let environment = Environment(rawValue: savedEnvironment)
+        {
             self.environment = environment
         }
     }
-    
+
     // MARK: - Resource Managment
-    
+
     private let session = NetworkManager(session: URLSession(configuration: .ephemeral))
-    
+
     private let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .formatted(DateFormatter().then {
-            $0.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            $0.timeZone = TimeZone(secondsFromGMT: 0)
-        })
+        decoder.dateDecodingStrategy = .formatted(
+            DateFormatter().then {
+                $0.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                $0.timeZone = TimeZone(secondsFromGMT: 0)
+            }
+        )
         return decoder
     }()
-    
+
     /// A Brave Today environment
     enum Environment: String, CaseIterable {
         case dev = "brave.software"
         case staging = "bravesoftware.com"
         case production = "brave.com"
     }
-    
+
     /// The current Brave Today environment.
     ///
     /// Updating the environment automatically clears the current cached items if any exist.
@@ -106,24 +109,26 @@ class FeedDataSource {
     var environment: Environment = .production {
         didSet {
             if oldValue == environment { return }
-            assert(!AppConstants.buildChannel.isPublic,
-                   "Environment cannot be changed on non-public build channels")
+            assert(
+                !AppConstants.buildChannel.isPublic,
+                "Environment cannot be changed on non-public build channels"
+            )
             Preferences.BraveToday.debugEnvironment.value = environment.rawValue
             clearCachedFiles()
         }
     }
-    
+
     /// A list of the supported languages
     static let supportedLanguages = [
         "en",
         "ja",
     ]
-    
+
     private struct TodayBucket {
         var name: String
         var path: String = ""
     }
-    
+
     private func resourceUrl(for bucket: TodayBucket) -> URL? {
         var components = URLComponents()
         components.scheme = "https"
@@ -131,14 +136,14 @@ class FeedDataSource {
         components.path = "/\(bucket.path)"
         return components.url
     }
-    
+
     private struct TodayResource {
         var bucket: TodayBucket
         var name: String
         var type: String
         var isLocalized: Bool
         var cacheLifetime: TimeInterval
-        
+
         static let sources = TodayResource(
             bucket: TodayBucket(name: "brave-today-cdn"),
             name: "sources",
@@ -154,51 +159,60 @@ class FeedDataSource {
             cacheLifetime: 1.hours
         )
     }
-    
+
     /// Get the full name of a file for a given Brave Today resource, taking into account whether
     /// or not the resource can be localized for supported languages
     private func resourceFilename(for resource: TodayResource) -> String {
         // "en" is the default language and thus does not get the language code inserted into the
         // file name.
         if resource.isLocalized, let languageCode = Locale.preferredLanguages.first?.prefix(2),
-           languageCode != "en", Self.supportedLanguages.contains(String(languageCode)) {
+            languageCode != "en", Self.supportedLanguages.contains(String(languageCode))
+        {
             return "\(resource.name).\(languageCode).\(resource.type)"
         }
         return "\(resource.name).\(resource.type)"
     }
-    
+
     private static let cacheFolderName = "brave-today"
-    
+
     /// Determine whether or not some cached resource is expired
     ///
     /// - Note: If no file can be found, this returns `true`
     private func isResourceExpired(_ resource: TodayResource) -> Bool {
         let fileManager = FileManager.default
         let filename = resourceFilename(for: resource)
-        let cachedPath = fileManager.getOrCreateFolder(name: Self.cacheFolderName)?.appendingPathComponent(filename).path
+        let cachedPath = fileManager.getOrCreateFolder(name: Self.cacheFolderName)?
+            .appendingPathComponent(filename).path
         if let cachedPath = cachedPath,
             let attributes = try? fileManager.attributesOfItem(atPath: cachedPath),
-            let date = attributes[.modificationDate] as? Date {
+            let date = attributes[.modificationDate] as? Date
+        {
             return Date().timeIntervalSince(date) > resource.cacheLifetime
         }
         return true
     }
-    
+
     /// A set of Brave Today specific errors that could occur outside of JSON decoding or network errors
     enum BraveTodayError: Error {
         /// The resource data that was loaded was empty after parsing
         case resourceEmpty
     }
-    
+
     /// Get a cached Brave Today resource file, optionally allowing expired data to be returned
-    private func cachedResource(_ resource: TodayResource, loadExpiredData: Bool = false) -> Deferred<Data?> {
+    private func cachedResource(_ resource: TodayResource, loadExpiredData: Bool = false)
+        -> Deferred<
+            Data?
+        >
+    {
         let name = resourceFilename(for: resource)
         let fileManager = FileManager.default
         let deferred = Deferred<Data?>(value: nil, defaultQueue: .main)
-        let cachedPath = fileManager.getOrCreateFolder(name: Self.cacheFolderName)?.appendingPathComponent(name).path
-        if (loadExpiredData || !isResourceExpired(resource)),
+        let cachedPath = fileManager.getOrCreateFolder(name: Self.cacheFolderName)?
+            .appendingPathComponent(name).path
+        if loadExpiredData || !isResourceExpired(resource),
             let cachedPath = cachedPath,
-            fileManager.fileExists(atPath: cachedPath) {
+            fileManager.fileExists(atPath: cachedPath)
+        {
             todayQueue.async {
                 if let cachedContents = fileManager.contents(atPath: cachedPath) {
                     deferred.fill(cachedContents)
@@ -211,7 +225,7 @@ class FeedDataSource {
         }
         return deferred
     }
-    
+
     /// Load a Brave Today resource either from a file cache or the web
     ///
     /// The `filename` provided will be appended as a path component to the request URL, and be used to
@@ -235,7 +249,10 @@ class FeedDataSource {
                     fatalError("Incorrect URL generated for the given resource: \(resource)")
                 }
                 let deferred = Deferred<Result<Data, Error>>(value: nil, defaultQueue: .main)
-                self.session.dataRequest(with: url.appendingPathComponent(filename)) { data, response, error in
+                self.session.dataRequest(with: url.appendingPathComponent(filename)) {
+                    data,
+                    response,
+                    error in
                     if let error = error {
                         deferred.fill(.failure(error))
                         return
@@ -251,7 +268,11 @@ class FeedDataSource {
                     do {
                         let decodedResource = try self.decoder.decode(DataType.self, from: data)
                         if !data.isEmpty {
-                            if !FileManager.default.writeToDiskInFolder(data, fileName: filename, folderName: Self.cacheFolderName) {
+                            if !FileManager.default.writeToDiskInFolder(
+                                data,
+                                fileName: filename,
+                                folderName: Self.cacheFolderName
+                            ) {
                                 logger.error("Failed to write sources to disk")
                             }
                         }
@@ -264,12 +285,15 @@ class FeedDataSource {
                 }
             }
     }
-    
+
     private func restoreCachedSources() {
         cachedResource(.sources, loadExpiredData: true).uponQueue(todayQueue) { [weak self] data in
             guard let self = self, let data = data else { return }
             do {
-                let decodedResource = try self.decoder.decode([FailableDecodable<FeedItem.Source>].self, from: data)
+                let decodedResource = try self.decoder.decode(
+                    [FailableDecodable<FeedItem.Source>].self,
+                    from: data
+                )
                 DispatchQueue.main.async {
                     self.sources = decodedResource.compactMap(\.wrappedValue)
                 }
@@ -280,7 +304,7 @@ class FeedDataSource {
             }
         }
     }
-    
+
     private func loadSources() -> Deferred<Result<[FeedItem.Source], Error>> {
         loadResource(.sources, decodedTo: [FailableDecodable<FeedItem.Source>].self).map { result in
             if case .success(let sources) = result, sources.isEmpty {
@@ -291,7 +315,7 @@ class FeedDataSource {
             }
         }
     }
-    
+
     private func loadFeed() -> Deferred<Result<[FeedItem.Content], Error>> {
         loadResource(.feed, decodedTo: [FailableDecodable<FeedItem.Content>].self).map { result in
             if case .success(let sources) = result, sources.isEmpty {
@@ -302,14 +326,16 @@ class FeedDataSource {
             }
         }
     }
-    
+
     /// Describes a single RSS feed's loaded data set converted into Brave Today based data
     private struct RSSDataFeed {
         var source: FeedItem.Source
         var items: [FeedItem.Content]
     }
-    
-    private func loadRSSLocation(_ location: RSSFeedLocation) -> Deferred<Result<RSSDataFeed, Error>> {
+
+    private func loadRSSLocation(_ location: RSSFeedLocation) -> Deferred<
+        Result<RSSDataFeed, Error>
+    > {
         let deferred = Deferred<Result<RSSDataFeed, Error>>(value: nil, defaultQueue: .main)
         let parser = FeedParser(URL: location.url)
         parser.parseAsync { [weak self] result in
@@ -319,7 +345,8 @@ class FeedDataSource {
                     var content: [FeedItem.Content] = []
                     switch feed {
                     case .atom(let atomFeed):
-                        if let feedItems = atomFeed.entries?.compactMap({ entry -> FeedItem.Content? in
+                        if let feedItems = atomFeed.entries?.compactMap({
+                            entry -> FeedItem.Content? in
                             FeedItem.Content(from: entry, location: location)
                         }) {
                             content = feedItems
@@ -331,7 +358,8 @@ class FeedDataSource {
                             content = feedItems
                         }
                     case .json(let jsonFeed):
-                        if let feedItems = jsonFeed.items?.compactMap({ entry -> FeedItem.Content? in
+                        if let feedItems = jsonFeed.items?.compactMap({
+                            entry -> FeedItem.Content? in
                             FeedItem.Content(from: entry, location: location)
                         }) {
                             content = feedItems
@@ -347,13 +375,13 @@ class FeedDataSource {
         }
         return deferred
     }
-    
+
     /// Load all RSS feeds that the user has enabled
     private func loadRSSFeeds() -> Deferred<[Result<RSSDataFeed, Error>]> {
         let locations = rssFeedLocations.filter(isRSSFeedEnabled)
         return all(locations.map(loadRSSLocation))
     }
-    
+
     /// Scores RSS items similar to how the backend scores regular Brave Today sources
     private func scored(rssItems: [FeedItem.Content]) -> [FeedItem.Content] {
         var varianceBySource: [String: Double] = [:]
@@ -366,7 +394,7 @@ class FeedDataSource {
             return content
         }
     }
-    
+
     /// Whether or not we should load content or just use what's in `state`.
     ///
     /// If the data source is already loading, returns `false`
@@ -380,17 +408,17 @@ class FeedDataSource {
             return isFeedContentExpired || isSourcesExpired || needsReloadCards
         }
     }
-    
+
     /// Whether or not the feed content is currently expired and needs to be reloaded
     var isFeedContentExpired: Bool {
         isResourceExpired(.feed)
     }
-    
+
     /// Whether or not the sources are currently expired and needs to be reloaded
     var isSourcesExpired: Bool {
         isResourceExpired(.sources)
     }
-    
+
     /// Loads Brave Today resources and generates cards for the loaded data. The result will be placed in
     /// the `state` property.
     ///
@@ -405,7 +433,7 @@ class FeedDataSource {
             guard let self = self else { return }
             switch results {
             case (.failure(let error), _),
-                 (_, .failure(let error)):
+                (_, .failure(let error)):
                 self.state = .failure(error)
                 completion?()
             case (.success(let sources), .success(let items)):
@@ -424,12 +452,16 @@ class FeedDataSource {
                             break
                         }
                     }
-                    self.reloadCards(from: self.items, sources: self.sources, completion: completion)
+                    self.reloadCards(
+                        from: self.items,
+                        sources: self.sources,
+                        completion: completion
+                    )
                 }
             }
         }
     }
-    
+
     /// Clears any cached files from the users device
     @discardableResult
     func clearCachedFiles() -> Bool {
@@ -449,11 +481,11 @@ class FeedDataSource {
         }
         return true
     }
-    
+
     // MARK: - Sources
-    
+
     static let topNewsCategory = "Top News"
-    
+
     /// Get a map of customized sources IDs and their overridden enabled states
     var customizedSources: [String: Bool] {
         let all = FeedSourceOverride.all()
@@ -461,17 +493,17 @@ class FeedDataSource {
             result[source.publisherID] = source.enabled
         }
     }
-    
+
     /// Whether or not a source is currently enabled (whether or not by default or by a user changing
     /// said default)
     func isSourceEnabled(_ source: FeedItem.Source) -> Bool {
         FeedSourceOverride.get(fromId: source.id)?.enabled ?? source.isDefault
     }
-    
+
     /// Toggle a source's enabled status
     func toggleSource(_ source: FeedItem.Source, enabled: Bool) {
         FeedSourceOverride.setEnabled(forId: source.id, enabled: enabled)
-        
+
         if let cards = state.cards, cards.isEmpty && enabled {
             // If we're enabling a source and we don't have any items because their source selection was
             // causing an empty generation, regenerate the cards
@@ -480,7 +512,7 @@ class FeedDataSource {
             needsReloadCards = true
         }
     }
-    
+
     /// Toggle an entire category on or off
     func toggleCategory(_ category: String, enabled: Bool) {
         let sourcesInCategory = sources.filter { $0.category == category }
@@ -488,7 +520,7 @@ class FeedDataSource {
             return
         }
         FeedSourceOverride.setEnabled(forIds: sourcesInCategory.map(\.id), enabled: enabled)
-        
+
         if let cards = state.cards, cards.isEmpty && enabled {
             // If we're enabling a category and we don't have any items because their source selection was
             // causing an empty generation, regenerate the cards
@@ -497,23 +529,23 @@ class FeedDataSource {
             needsReloadCards = true
         }
     }
-    
+
     /// Reset all source settings back to default
     func resetSourcesToDefault() {
         FeedSourceOverride.resetSourceSelection()
         needsReloadCards = true
     }
-    
+
     // MARK: - Card Generation
-    
+
     /// Whether or not cards need to be reloaded next time we attempt to request state data
     private var needsReloadCards = false
-    
+
     /// Notify the feed data source that it needs to reload cards next time we request state data
     func setNeedsReloadCards() {
         needsReloadCards = true
     }
-    
+
     /// Scores and generates cards from a set of items and sources
     private func reloadCards(
         from items: [FeedItem.Content],
@@ -540,7 +572,7 @@ class FeedDataSource {
             _ = group.wait(timeout: .now() + 30)
         }
     }
-    
+
     /// Scores a set of items in the feed based on recency, personalization and variety.
     ///
     /// The items returned in `completion` will be sorted based on score
@@ -553,15 +585,17 @@ class FeedDataSource {
     ) {
         // Ensure main thread since we're querying from CoreData
         dispatchPrecondition(condition: .onQueue(.main))
-        let lastVisitedDomains = (try? History.suffix(200)
-            .lazy
-            .compactMap(\.url)
-            .compactMap { URL(string: $0)?.baseDomain }) ?? []
+        let lastVisitedDomains =
+            (try? History.suffix(200)
+                .lazy
+                .compactMap(\.url)
+                .compactMap { URL(string: $0)?.baseDomain }) ?? []
         todayQueue.async {
             let items: [FeedItem] = feeds.compactMap { content in
                 var score = content.baseScore
                 if let feedBaseDomain = content.url?.baseDomain,
-                    lastVisitedDomains.contains(feedBaseDomain) {
+                    lastVisitedDomains.contains(feedBaseDomain)
+                {
                     score -= 5
                 }
                 guard let source = sources.first(where: { $0.id == content.publisherID }) else {
@@ -575,11 +609,11 @@ class FeedDataSource {
             }
         }
     }
-    
+
     private func generateCards(from items: [FeedItem], completion: @escaping ([FeedCard]) -> Void) {
         // Ensure main thread since we're querying from CoreData
         dispatchPrecondition(condition: .onQueue(.main))
-        
+
         let overridenSources = FeedSourceOverride.all()
         let feedsFromEnabledSources = items.filter { item in
             overridenSources.first(where: {
@@ -590,20 +624,26 @@ class FeedDataSource {
         var partners = feedsFromEnabledSources.filter { $0.content.contentType == .partner }
         var deals = feedsFromEnabledSources.filter { $0.content.contentType == .deals }
         var articles = feedsFromEnabledSources.filter { $0.content.contentType == .article }
-        
+
         let dealsCategoryFillStrategy = CategoryFillStrategy(
             categories: Set(deals.compactMap(\.content.offersCategory)),
             category: \.content.offersCategory
         )
-        
+
         let rules: [FeedSequenceElement] = [
             .sponsor,
-            .fillUsing(FilteredFillStrategy(isIncluded: { $0.source.category == Self.topNewsCategory }), [
-                .headline(paired: false)
-            ]),
-            .fillUsing(dealsCategoryFillStrategy, [
-                .deals
-            ]),
+            .fillUsing(
+                FilteredFillStrategy(isIncluded: { $0.source.category == Self.topNewsCategory }),
+                [
+                    .headline(paired: false)
+                ]
+            ),
+            .fillUsing(
+                dealsCategoryFillStrategy,
+                [
+                    .deals
+                ]
+            ),
             .repeating([
                 .repeating([.headline(paired: false)], times: 2),
                 .repeating([.headline(paired: true)], times: 2),
@@ -613,26 +653,35 @@ class FeedDataSource {
                         categories: Set(articles.map(\.source.category)),
                         category: \.source.category,
                         initialCategory: Self.topNewsCategory
-                    ), [
-                        .categoryGroup,
+                    ),
+                    [
+                        .categoryGroup
                     ]
                 ),
                 .headline(paired: false),
-                .fillUsing(dealsCategoryFillStrategy, [
-                    .deals
-                ]),
+                .fillUsing(
+                    dealsCategoryFillStrategy,
+                    [
+                        .deals
+                    ]
+                ),
                 .headline(paired: false),
                 .headline(paired: true),
                 .brandedGroup(numbered: true),
                 .group,
-                .fillUsing(RandomizedFillStrategy(isIncluded: { Date().timeIntervalSince($0.content.publishTime) < 48.hours }), [
-                    .headline(paired: false),
-                    .headline(paired: true),
-                    .headline(paired: false),
-                ])
-            ])
+                .fillUsing(
+                    RandomizedFillStrategy(isIncluded: {
+                        Date().timeIntervalSince($0.content.publishTime) < 48.hours
+                    }),
+                    [
+                        .headline(paired: false),
+                        .headline(paired: true),
+                        .headline(paired: false),
+                    ]
+                ),
+            ]),
         ]
-        
+
         func _cards(for element: FeedSequenceElement, fillStrategy: FillStrategy) -> [FeedCard]? {
             switch element {
             case .sponsor:
@@ -675,12 +724,18 @@ class FeedDataSource {
                 }
             case .brandedGroup(let numbered):
                 if let item = fillStrategy.next(from: &articles) {
-                    return fillStrategy.next(2, from: &articles, where: { $0.source == item.source }).map {
+                    return fillStrategy.next(
+                        2,
+                        from: &articles,
+                        where: { $0.source == item.source }
+                    ).map {
                         let items = [item] + $0
                         if numbered {
                             return [.numbered(items, title: item.source.name)]
                         } else {
-                            return [.group(items, title: "", direction: .vertical, displayBrand: true)]
+                            return [
+                                .group(items, title: "", direction: .vertical, displayBrand: true)
+                            ]
                         }
                     }
                 }
@@ -717,7 +772,7 @@ class FeedDataSource {
                 return cards
             }
         }
-        
+
         todayQueue.async {
             var generatedCards: [FeedCard] = []
             for rule in rules {

@@ -12,11 +12,11 @@ import Foundation
 /// `URL` using `URL(string:)`
 @propertyWrapper struct URLString: Equatable, Decodable {
     var wrappedValue: URL?
-    
+
     init(wrappedValue: URL?) {
         self.wrappedValue = wrappedValue
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() {

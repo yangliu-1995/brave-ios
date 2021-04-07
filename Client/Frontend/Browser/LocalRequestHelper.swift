@@ -13,19 +13,25 @@ class LocalRequestHelper: TabContentScript {
         return "localRequestHelper"
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
-        guard let params = message.body as? [String: String], message.frameInfo.request.url?.isLocal ?? false else {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceiveScriptMessage message: WKScriptMessage
+    ) {
+        guard let params = message.body as? [String: String],
+            message.frameInfo.request.url?.isLocal ?? false
+        else {
             return
         }
-        
+
         if UserScriptManager.isMessageHandlerTokenMissing(in: params) {
             log.debug("Missing required security token.")
             return
         }
 
         if params["type"] == "load",
-           let urlString = params["url"],
-           let url = URL(string: urlString) {
+            let urlString = params["url"],
+            let url = URL(string: urlString)
+        {
             _ = message.webView?.load(PrivilegedRequest(url: url) as URLRequest)
         } else if params["type"] == "reload" {
             _ = message.webView?.reload()

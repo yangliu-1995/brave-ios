@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
+import Shared
 import SnapKit
 import Storage
-import Shared
 import SwiftKeychainWrapper
+import UIKit
 
 private struct LoginListUX {
     static let rowHeight: CGFloat = 58
@@ -18,10 +18,12 @@ private struct LoginListUX {
     static let noResultsTextColor: UIColor = UIColor.Photon.grey40
 }
 
-private extension UITableView {
-    var allIndexPaths: [IndexPath] {
+extension UITableView {
+    fileprivate var allIndexPaths: [IndexPath] {
         return (0..<self.numberOfSections).flatMap { sectionNum in
-            (0..<self.numberOfRows(inSection: sectionNum)).map { IndexPath(row: $0, section: sectionNum) }
+            (0..<self.numberOfRows(inSection: sectionNum)).map {
+                IndexPath(row: $0, section: sectionNum)
+            }
         }
     }
 }
@@ -64,7 +66,7 @@ class LoginListViewController: UIViewController {
     fileprivate var selectedIndexPaths = [IndexPath]()
 
     fileprivate let tableView = UITableView()
-    
+
     weak var settingsDelegate: SettingsDelegate?
 
     init(profile: Profile) {
@@ -80,13 +82,27 @@ class LoginListViewController: UIViewController {
         super.viewDidLoad()
 
         let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(self, selector: #selector(remoteLoginsDidChange), name: .dataRemoteLoginChangesWereApplied, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(dismissAlertController), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        notificationCenter.addObserver(
+            self,
+            selector: #selector(remoteLoginsDidChange),
+            name: .dataRemoteLoginChangesWereApplied,
+            object: nil
+        )
+        notificationCenter.addObserver(
+            self,
+            selector: #selector(dismissAlertController),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
 
         tableView.contentInsetAdjustmentBehavior = .never
 
         self.view.backgroundColor = UIColor.Photon.white100
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(beginEditing))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .edit,
+            target: self,
+            action: #selector(beginEditing)
+        )
 
         self.title = Strings.loginListScreenTitle
 
@@ -151,7 +167,12 @@ class LoginListViewController: UIViewController {
         // Show delete bar button item if we have selected any items
         if loginSelectionController.selectedCount > 0 {
             if navigationItem.rightBarButtonItem == nil {
-                navigationItem.rightBarButtonItem = UIBarButtonItem(title: Strings.deleteLoginButtonTitle, style: .plain, target: self, action: #selector(tappedDelete))
+                navigationItem.rightBarButtonItem = UIBarButtonItem(
+                    title: Strings.deleteLoginButtonTitle,
+                    style: .plain,
+                    target: self,
+                    action: #selector(tappedDelete)
+                )
                 navigationItem.rightBarButtonItem?.tintColor = UIColor.Photon.red50
             }
         } else {
@@ -179,18 +200,18 @@ class LoginListViewController: UIViewController {
 }
 
 // MARK: - Selectors
-private extension LoginListViewController {
-    @objc func remoteLoginsDidChange() {
+extension LoginListViewController {
+    @objc fileprivate func remoteLoginsDidChange() {
         DispatchQueue.main.async {
             self.loadLogins()
         }
     }
 
-    @objc func dismissAlertController() {
+    @objc fileprivate func dismissAlertController() {
         self.deleteAlert?.dismiss(animated: false, completion: nil)
     }
 
-    func loadLogins(_ query: String? = nil) {
+    fileprivate func loadLogins(_ query: String? = nil) {
         loadingStateView.isHidden = false
 
         // Fill in an in-flight query and re-query
@@ -199,15 +220,19 @@ private extension LoginListViewController {
         activeLoginQuery! >>== self.loginDataSource.setLogins
     }
 
-    @objc func beginEditing() {
+    @objc fileprivate func beginEditing() {
         navigationItem.rightBarButtonItem = nil
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelSelection))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .cancel,
+            target: self,
+            action: #selector(cancelSelection)
+        )
         selectionButtonHeightConstraint?.update(offset: UIConstants.toolbarHeight)
         self.view.layoutIfNeeded()
         tableView.setEditing(true, animated: true)
     }
 
-    @objc func cancelSelection() {
+    @objc fileprivate func cancelSelection() {
         // Update selection and select all button
         loginSelectionController.deselectAll()
         toggleSelectionTitle()
@@ -216,28 +241,36 @@ private extension LoginListViewController {
 
         tableView.setEditing(false, animated: true)
         navigationItem.leftBarButtonItem = nil
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(beginEditing))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .edit,
+            target: self,
+            action: #selector(beginEditing)
+        )
     }
 
-    @objc func tappedDelete() {
+    @objc fileprivate func tappedDelete() {
         profile.logins.hasSyncedLogins().uponQueue(.main) { yes in
-            self.deleteAlert = UIAlertController.deleteLoginAlertWithDeleteCallback({ [unowned self] _ in
-                // Delete here
-                let guidsToDelete = self.loginSelectionController.selectedIndexPaths.map { indexPath in
-                    self.loginDataSource.loginAtIndexPath(indexPath)!.guid
-                }
+            self.deleteAlert = UIAlertController.deleteLoginAlertWithDeleteCallback(
+                { [unowned self] _ in
+                    // Delete here
+                    let guidsToDelete = self.loginSelectionController.selectedIndexPaths.map {
+                        indexPath in
+                        self.loginDataSource.loginAtIndexPath(indexPath)!.guid
+                    }
 
-                self.profile.logins.removeLoginsWithGUIDs(guidsToDelete).uponQueue(.main) { _ in
-                    self.cancelSelection()
-                    self.loadLogins()
-                }
-            }, hasSyncedLogins: yes.successValue ?? true)
+                    self.profile.logins.removeLoginsWithGUIDs(guidsToDelete).uponQueue(.main) { _ in
+                        self.cancelSelection()
+                        self.loadLogins()
+                    }
+                },
+                hasSyncedLogins: yes.successValue ?? true
+            )
 
             self.present(self.deleteAlert!, animated: true, completion: nil)
         }
     }
 
-    @objc func tappedSelectionButton() {
+    @objc fileprivate func tappedSelectionButton() {
         // If we haven't selected everything yet, select all
         if loginSelectionController.selectedCount < loginDataSource.count {
             // Find all unselected indexPaths
@@ -272,7 +305,7 @@ extension LoginListViewController: LoginDataSourceObserver {
         navigationItem.rightBarButtonItem?.isEnabled = loginDataSource.count > 0
         restoreSelectedRows()
     }
-    
+
     func restoreSelectedRows() {
         for path in self.loginSelectionController.selectedIndexPaths {
             tableView.selectRow(at: path, animated: false, scrollPosition: .none)
@@ -292,7 +325,9 @@ extension LoginListViewController: UITableViewDelegate {
         return LoginListUX.rowHeight
     }
 
-    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath)
+        -> UITableViewCell.EditingStyle
+    {
         return .none
     }
 
@@ -322,12 +357,18 @@ extension LoginListViewController: UITableViewDelegate {
 // MARK: - KeyboardHelperDelegate
 extension LoginListViewController: KeyboardHelperDelegate {
 
-    func keyboardHelper(_ keyboardHelper: KeyboardHelper, keyboardWillShowWithState state: KeyboardState) {
+    func keyboardHelper(
+        _ keyboardHelper: KeyboardHelper,
+        keyboardWillShowWithState state: KeyboardState
+    ) {
         let coveredHeight = state.intersectionHeightForView(tableView)
         tableView.contentInset.bottom = coveredHeight
     }
 
-    func keyboardHelper(_ keyboardHelper: KeyboardHelper, keyboardWillHideWithState state: KeyboardState) {
+    func keyboardHelper(
+        _ keyboardHelper: KeyboardHelper,
+        keyboardWillHideWithState state: KeyboardState
+    ) {
         tableView.contentInset.bottom = 0
     }
 }
@@ -350,13 +391,17 @@ extension LoginListViewController: SearchInputViewDelegate {
 
     @objc func searchInputViewFinishedEditing(_ searchView: SearchInputView) {
         // Show the edit after we're done with the search
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(beginEditing))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .edit,
+            target: self,
+            action: #selector(beginEditing)
+        )
         loadLogins()
     }
 }
 
 /// Controller that keeps track of selected indexes
-fileprivate class ListSelectionController: NSObject {
+private class ListSelectionController: NSObject {
 
     fileprivate unowned let tableView: UITableView
 
@@ -382,8 +427,14 @@ fileprivate class ListSelectionController: NSObject {
     }
 
     func deselectIndexPath(_ indexPath: IndexPath) {
-        guard let foundSelectedPath = (selectedIndexPaths.filter { $0.row == indexPath.row && $0.section == indexPath.section }).first,
-            let indexToRemove = selectedIndexPaths.firstIndex(of: foundSelectedPath) else {
+        guard
+            let foundSelectedPath =
+                (selectedIndexPaths.filter {
+                    $0.row == indexPath.row && $0.section == indexPath.section
+                })
+                .first,
+            let indexToRemove = selectedIndexPaths.firstIndex(of: foundSelectedPath)
+        else {
             return
         }
 
@@ -414,7 +465,10 @@ class LoginDataSource: NSObject, UITableViewDataSource {
 
     fileprivate var sections = [Character: [Login]]() {
         didSet {
-            assert(Thread.isMainThread, "Must be assigned to from the main thread or else data will be out of sync with reloadData.")
+            assert(
+                Thread.isMainThread,
+                "Must be assigned to from the main thread or else data will be out of sync with reloadData."
+            )
             self.dataObserver?.loginSectionsDidUpdate()
         }
     }
@@ -447,9 +501,13 @@ class LoginDataSource: NSObject, UITableViewDataSource {
         return loginsForSection(section)?.count ?? 0
     }
 
-    @objc func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    @objc func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
+        -> UITableViewCell
+    {
         // swiftlint:disable:next force_cast
-        let cell = tableView.dequeueReusableCell(withIdentifier: LoginCellIdentifier, for: indexPath) as! LoginTableViewCell
+        let cell =
+            tableView.dequeueReusableCell(withIdentifier: LoginCellIdentifier, for: indexPath)
+            as! LoginTableViewCell
         let login = loginAtIndexPath(indexPath)!
         cell.style = .noIconAndBothLabels
         cell.updateCellWithLogin(login)
@@ -460,7 +518,11 @@ class LoginDataSource: NSObject, UITableViewDataSource {
         return titles.map { String($0) }
     }
 
-    @objc func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
+    @objc func tableView(
+        _ tableView: UITableView,
+        sectionForSectionIndexTitle title: String,
+        at index: Int
+    ) -> Int {
         return titles.firstIndex(of: Character(title)) ?? 0
     }
 
@@ -485,9 +547,11 @@ class LoginDataSource: NSObject, UITableViewDataSource {
         }
     }
 
-    fileprivate func computeSectionsFromLogins(_ logins: [Login]) -> Deferred<Maybe<([Character], [Character: [Login]])>> {
+    fileprivate func computeSectionsFromLogins(_ logins: [Login]) -> Deferred<
+        Maybe<([Character], [Character: [Login]])>
+    > {
         guard !logins.isEmpty else {
-            return deferMaybe( ([Character](), [Character: [Login]]()) )
+            return deferMaybe(([Character](), [Character: [Login]]()))
         }
 
         var domainLookup = [GUID: (baseDomain: String?, host: String?, hostname: String)]()
@@ -508,14 +572,16 @@ class LoginDataSource: NSObject, UITableViewDataSource {
         // 3. If login URL was invalid, revert to full hostname
         func sortByDomain(_ loginA: Login, loginB: Login) -> Bool {
             guard let domainsA = domainLookup[loginA.guid],
-                  let domainsB = domainLookup[loginB.guid] else {
+                let domainsB = domainLookup[loginB.guid]
+            else {
                 return false
             }
 
             guard let baseDomainA = domainsA.baseDomain,
-                  let baseDomainB = domainsB.baseDomain,
-                  let hostA = domainsA.host,
-                let hostB = domainsB.host else {
+                let baseDomainB = domainsB.baseDomain,
+                let hostA = domainsA.host,
+                let hostB = domainsB.host
+            else {
                 return domainsA.hostname < domainsB.hostname
             }
 
@@ -549,13 +615,13 @@ class LoginDataSource: NSObject, UITableViewDataSource {
             // 4. Go through each section and sort.
             sections.forEach { sections[$0] = $1.sorted(by: sortByDomain) }
 
-            return deferMaybe( (Array(titleSet).sorted(), sections) )
+            return deferMaybe((Array(titleSet).sorted(), sections))
         }
     }
 }
 
 /// Empty state view when there is no logins to display.
-fileprivate class NoLoginsView: UIView {
+private class NoLoginsView: UIView {
 
     // We use the search bar height to maintain visual balance with the whitespace on this screen. The
     // title label is centered visually using the empty view + search bar height as the size to center with.
@@ -592,7 +658,7 @@ fileprivate class NoLoginsView: UIView {
 }
 
 /// View to display to the user while we are loading the logins
-fileprivate class LoadingLoginsView: UIView {
+private class LoadingLoginsView: UIView {
 
     var searchBarHeight: CGFloat = 0 {
         didSet {

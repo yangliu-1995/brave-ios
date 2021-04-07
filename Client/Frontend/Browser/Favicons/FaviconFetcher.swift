@@ -3,21 +3,24 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import Foundation
 import Data
-import Storage
-import Shared
-import SwiftyJSON
+import Foundation
 import Fuzi
 import SDWebImage
+import Shared
+import Storage
+import SwiftyJSON
 
 private let log = Logger.browserLogger
 
 /// Handles obtaining favicons for URLs from local files, database or internet
 class FaviconFetcher {
-    private static let queue = DispatchQueue(label: "faviconfetcher-queue",
-                                             qos: .userInitiated, attributes: .concurrent)
-    
+    private static let queue = DispatchQueue(
+        label: "faviconfetcher-queue",
+        qos: .userInitiated,
+        attributes: .concurrent
+    )
+
     /// The size requirement for the favicon
     enum Kind {
         /// Load favicons marked as `apple-touch-icon`.
@@ -28,7 +31,7 @@ class FaviconFetcher {
         ///
         /// Usage: History, Search, Tab Tray
         case favicon
-        
+
         fileprivate var iconType: IconType {
             switch self {
             case .largeIcon: return .appleIcon
@@ -36,14 +39,14 @@ class FaviconFetcher {
             }
         }
     }
-    
+
     struct FaviconAttributes {
         var image: UIImage?
         var backgroundColor: UIColor?
         var contentMode: UIView.ContentMode = .scaleAspectFit
         var includePadding: Bool = false
     }
-    
+
     private let url: URL
     private let domain: Domain
     private let kind: Kind
@@ -58,33 +61,35 @@ class FaviconFetcher {
     }()
     private var dataTasks: [URLSessionDataTask] = []
     private var imageOps: [SDWebImageOperation] = []
-    
+
     static let defaultFaviconImage = #imageLiteral(resourceName: "defaultFavicon")
-    
+
     init(siteURL: URL, kind: Kind, domain: Domain? = nil) {
         self.url = siteURL
         self.kind = kind
-        self.domain = domain ?? Domain.getOrCreate(
-            forUrl: siteURL,
-            persistent: !PrivateBrowsingManager.shared.isPrivateBrowsing
-        )
+        self.domain =
+            domain
+            ?? Domain.getOrCreate(
+                forUrl: siteURL,
+                persistent: !PrivateBrowsingManager.shared.isPrivateBrowsing
+            )
     }
-    
+
     deinit {
         dataTasks.forEach { $0.cancel() }
         imageOps.forEach { $0.cancel() }
         cancelLoadTask()
     }
-    
+
     private func faviconOnFileMatchesFetchKind(_ faviconType: Int16?) -> Bool {
         guard let faviconType = faviconType else { return false }
-        return faviconType == Int16(kind.iconType.rawValue) ||
-            IconType(rawValue: Int(faviconType))?.isPreferredTo(kind.iconType) == true
+        return faviconType == Int16(kind.iconType.rawValue)
+            || IconType(rawValue: Int(faviconType))?.isPreferredTo(kind.iconType) == true
     }
-    
+
     // fileprivate to use it in the UIImageExtension
     fileprivate var loadTaskCancellable: DispatchWorkItem?
-    
+
     /// Begin the search for a favicon for the site. `completion` will always
     /// be called on the main thread.
     ///
@@ -97,22 +102,23 @@ class FaviconFetcher {
     ///     4. Monogram (letter + background color)
     func load(_ cachedOnly: Bool = false, _ completion: @escaping (URL, FaviconAttributes) -> Void) {
         // Getting CoreData's properties before entering background thread to avoid threading conflicts.
-        
+
         // Fetch icon logic:
         // 1. Check if current domain has a favicon.
         var favicon = domain.favicon
-        
+
         // 2. Private mode uses their own in-memory only favicons.
         // If no in-memory favicon is found we look if there's any persisted one(from normal browsing mode)
         // and use that one until in-memory favicon is saved.
         if favicon == nil,
-            PrivateBrowsingManager.shared.isPrivateBrowsing {
+            PrivateBrowsingManager.shared.isPrivateBrowsing
+        {
             favicon = Domain.getPersistedDomain(for: url)?.favicon
         }
-        
+
         let faviconType = favicon?.type
         let faviconUrl = favicon?.url
-        
+
         loadTaskCancellable = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
             if let icon = self.customIcon {
@@ -128,33 +134,40 @@ class FaviconFetcher {
                 }
                 return
             }
-            self.fetchIcon(faviconUrl: faviconUrl, faviconType: faviconType,
-                           cachedOnly: cachedOnly) { url, attributes in
+            self.fetchIcon(
+                faviconUrl: faviconUrl,
+                faviconType: faviconType,
+                cachedOnly: cachedOnly
+            ) { url, attributes in
                 DispatchQueue.main.async {
                     completion(url, attributes)
                 }
             }
         }
-        
+
         if let task = loadTaskCancellable {
             FaviconFetcher.queue.async(execute: task)
         }
     }
-    
+
     func cancelLoadTask() {
         loadTaskCancellable?.cancel()
         loadTaskCancellable = nil
     }
-    
+
     // MARK: - Custom Icons
-    
+
     /// Icon attributes for any custom icon overrides
     ///
     /// If the app does not contain a custom icon for the site provided `nil`
     /// will be returned
     var customIcon: FaviconAttributes? {
-        guard let folder = FileManager.default.getOrCreateFolder(name: NTPDownloader.faviconOverridesDirectory) else {
-                return nil
+        guard
+            let folder = FileManager.default.getOrCreateFolder(
+                name: NTPDownloader.faviconOverridesDirectory
+            )
+        else {
+            return nil
         }
         let fileName = url.absoluteString.toBase64()
         let backgroundName = fileName + NTPDownloader.faviconOverridesBackgroundSuffix
@@ -162,7 +175,7 @@ class FaviconFetcher {
         do {
             let colorString = try String(contentsOf: backgroundPath)
             let colorFromHex = UIColor(colorString: colorString)
-            
+
             if FileManager.default.fileExists(atPath: folder.appendingPathComponent(fileName).path) {
                 let imagePath = folder.appendingPathComponent(fileName)
                 if let image = UIImage(contentsOfFile: imagePath.path) {
@@ -178,9 +191,9 @@ class FaviconFetcher {
         }
         return nil
     }
-    
+
     // MARK: - Bundled Icons
-    
+
     /// Icon attributes for icons that are bundled in the app by default.
     ///
     /// If the app does not contain the icon for the site provided `nil` will be
@@ -206,7 +219,7 @@ class FaviconFetcher {
             contentMode: .center
         )
     }
-    
+
     private static let multiRegionDomains = ["craigslist", "google", "amazon"]
     private static let bundledIcons: [String: (color: UIColor, url: String)] = {
         guard let filePath = Bundle.main.path(forResource: "top_sites", ofType: "json") else {
@@ -218,9 +231,11 @@ class FaviconFetcher {
             let json = JSON(file)
             var icons: [String: (color: UIColor, url: String)] = [:]
             json.forEach({
-                guard let url = $0.1["domain"].string, let color = $0.1["background_color"].string?.lowercased(),
-                    var path = $0.1["image_url"].string else {
-                        return
+                guard let url = $0.1["domain"].string,
+                    let color = $0.1["background_color"].string?.lowercased(),
+                    var path = $0.1["image_url"].string
+                else {
+                    return
                 }
                 path = path.replacingOccurrences(of: ".png", with: "")
                 let filePath = Bundle.main.path(forResource: "TopSites/" + path, ofType: "png")
@@ -228,7 +243,10 @@ class FaviconFetcher {
                     if color == "#fff" {
                         icons[url] = (UIColor.white, filePath)
                     } else {
-                        icons[url] = (UIColor(colorString: color.replacingOccurrences(of: "#", with: "")), filePath)
+                        icons[url] = (
+                            UIColor(colorString: color.replacingOccurrences(of: "#", with: "")),
+                            filePath
+                        )
                     }
                 }
             })
@@ -238,53 +256,71 @@ class FaviconFetcher {
             return [:]
         }
     }()
-     
+
     // MARK: - Fetched Icons
-    
-    private func downloadIcon(url: URL, addingToDatabase: Bool, completion: @escaping (UIImage?) -> Void) {
+
+    private func downloadIcon(
+        url: URL,
+        addingToDatabase: Bool,
+        completion: @escaping (UIImage?) -> Void
+    ) {
         // Fetch favicon directly
         var imageOperation: SDWebImageOperation?
-        
+
         let onProgress: ImageCacheProgress = { receivedSize, expectedSize, _ in
-            if receivedSize > FaviconHandler.maximumFaviconSize || expectedSize > FaviconHandler.maximumFaviconSize {
+            if receivedSize > FaviconHandler.maximumFaviconSize
+                || expectedSize > FaviconHandler.maximumFaviconSize
+            {
                 imageOperation?.cancel()
             }
         }
-        
+
         let onCompletion: ImageCacheCompletion = { [weak self] image, _, _, cacheType, url in
             guard let self = self else { return }
             let favicon = Favicon(url: url.absoluteString, date: Date(), type: self.kind.iconType)
-            
+
             if let image = image {
                 favicon.width = Int(image.size.width)
                 favicon.height = Int(image.size.height)
                 if addingToDatabase {
-                    FaviconMO.add(favicon, forSiteUrl: self.url,
-                                  persistent: !PrivateBrowsingManager.shared.isPrivateBrowsing)
+                    FaviconMO.add(
+                        favicon,
+                        forSiteUrl: self.url,
+                        persistent: !PrivateBrowsingManager.shared.isPrivateBrowsing
+                    )
                 }
-                
+
                 completion(image)
             } else {
                 favicon.width = 0
                 favicon.height = 0
-                
+
                 completion(nil)
             }
         }
-        
-        imageOperation = WebImageCacheWithNoPrivacyProtectionManager.shared.load(from: url, progress: onProgress, completion: onCompletion)
+
+        imageOperation = WebImageCacheWithNoPrivacyProtectionManager.shared.load(
+            from: url,
+            progress: onProgress,
+            completion: onCompletion
+        )
         if let op = imageOperation {
             imageOps.append(op)
         }
     }
-    
-    private func fetchIcon(faviconUrl: String?, faviconType: Int16?, cachedOnly: Bool, _ completion: @escaping (URL, FaviconAttributes) -> Void) {
+
+    private func fetchIcon(
+        faviconUrl: String?,
+        faviconType: Int16?,
+        cachedOnly: Bool,
+        _ completion: @escaping (URL, FaviconAttributes) -> Void
+    ) {
         // Attempt to find favicon cached for the given Domain
         if let urlString = faviconUrl, let type = faviconType, let url = URL(string: urlString) {
             // Verify that the favicon we have on file is what we want to pull
             // If not, we will just default to monogram to avoid blurry images
             if faviconOnFileMatchesFetchKind(type) {
-                
+
                 // If loading from cache only is specified,
                 // Return monogram image if there is no cache.
                 if cachedOnly {
@@ -294,12 +330,15 @@ class FaviconFetcher {
                         return
                     }
                 }
-                
+
                 downloadIcon(url: url, addingToDatabase: false) { [weak self] image in
                     guard let self = self else { return }
                     if let image = image {
                         Self.isIconBackgroundTransparentAroundEdges(image) { isTransparent in
-                            completion(self.url, FaviconAttributes(image: image, includePadding: isTransparent))
+                            completion(
+                                self.url,
+                                FaviconAttributes(image: image, includePadding: isTransparent)
+                            )
                         }
                     } else {
                         completion(self.url, self.monogramFavicon)
@@ -333,21 +372,25 @@ class FaviconFetcher {
             completion(self.url, self.monogramFavicon)
         }
     }
-    
+
     private static var attributesForHTMLCache: [URL: FaviconAttributes] = [:]
-    
+
     /// Download the HTML of a page and use that to parse favicons out of the
     /// `<head>` tags.
     ///
     /// - Note: Ensure any changes regarding icon fetching/scoring is also
     /// updated in `MetadataHelper.js` to ensure both methods of fetching
     /// favicons remain consistent.
-    private func parseHTMLForFavicons(for url: URL, _ completion: @escaping (FaviconAttributes) -> Void) {
+    private func parseHTMLForFavicons(
+        for url: URL,
+        _ completion: @escaping (FaviconAttributes) -> Void
+    ) {
         let pageTask = session.dataTask(with: url) { [weak self] (data, response, error) in
             guard let self = self else { return }
             guard let data = data, error == nil,
-                  let root = try? HTMLDocument(data: data),
-                  let url = response?.url else {
+                let root = try? HTMLDocument(data: data),
+                let url = response?.url
+            else {
                 completion(self.monogramFavicon)
                 return
             }
@@ -358,42 +401,49 @@ class FaviconFetcher {
                 if let refresh = meta["http-equiv"]?.lowercased(), refresh == "refresh",
                     let content = meta["content"],
                     let index = content.range(of: "URL="),
-                    let url = NSURL(string: String(content.suffix(from: index.upperBound))) {
+                    let url = NSURL(string: String(content.suffix(from: index.upperBound)))
+                {
                     reloadUrl = url as URL
                 }
             }
-            
+
             if let url = reloadUrl {
                 self.parseHTMLForFavicons(for: url, completion)
                 return
             }
-            
-            let xpath = self.kind == .largeIcon ?
-                "//head//link[contains(@rel, 'apple-touch-icon')]" :
-                "//head//link[contains(@rel, 'icon')]"
+
+            let xpath =
+                self.kind == .largeIcon
+                ? "//head//link[contains(@rel, 'apple-touch-icon')]"
+                : "//head//link[contains(@rel, 'icon')]"
             var highestScore: Double = -1.0
             var icon: Favicon?
             // Look for a favicon with the sizes closest to the goal
             let goal = self.kind == .largeIcon ? 180.0 * 180.0 : 48 * 48
             for link in root.xpath(xpath) {
                 guard let href = link["href"] else { continue }
-                let size = link["sizes"]?
+                let size =
+                    link["sizes"]?
                     .split(separator: "x")
                     .compactMap { Double($0) }
                     .reduce(0, { $0 * $1 }) ?? 0.0
                 let score = 1.0 - (abs(size - goal)) / goal
-                
+
                 if score > highestScore, let faviconURL = URL(string: href, relativeTo: url) {
                     highestScore = score
-                    icon = Favicon(url: faviconURL.absoluteString, date: Date(), type: self.kind.iconType)
+                    icon = Favicon(
+                        url: faviconURL.absoluteString,
+                        date: Date(),
+                        type: self.kind.iconType
+                    )
                 }
             }
-            
+
             guard let favicon = icon, let faviconURL = URL(string: favicon.url) else {
                 completion(self.monogramFavicon)
                 return
             }
-            
+
             self.downloadIcon(url: faviconURL, addingToDatabase: true) { [weak self] image in
                 guard let self = self else { return }
                 if let image = image {
@@ -406,9 +456,9 @@ class FaviconFetcher {
         pageTask.resume()
         self.dataTasks.append(pageTask)
     }
-    
+
     // MARK: - Monogram Favicons
-    
+
     private var monogramFavicon: FaviconAttributes {
         func backgroundColor() -> UIColor {
             guard let hash = url.baseDomain?.hashValue else {
@@ -423,7 +473,7 @@ class FaviconFetcher {
             backgroundColor: backgroundColor()
         )
     }
-    
+
     /// Obtain the letter which will be used for monogram favicons based one of
     /// the following (in order):
     ///     1. The `baseDomain`'s first character (i.e. www.amazon.co.uk becomes
@@ -442,17 +492,18 @@ class FaviconFetcher {
         guard let finalFallback = url.absoluteString.first else {
             return "W"
         }
-        return (url.baseDomain?.first ??
-            fallbackCharacter ??
-            url.host?.first ??
-            finalFallback).uppercased()
+        return (url.baseDomain?.first ?? fallbackCharacter ?? url.host?.first ?? finalFallback)
+            .uppercased()
     }
-    
+
     // MARK: - Misc
-    
+
     /// Determines if the downloaded image should be padded because its edges
     /// are for the most part transparent
-    static func isIconBackgroundTransparentAroundEdges(_ icon: UIImage, completion: @escaping (_ isTransparent: Bool) -> Void) {
+    static func isIconBackgroundTransparentAroundEdges(
+        _ icon: UIImage,
+        completion: @escaping (_ isTransparent: Bool) -> Void
+    ) {
         if icon.size.width.isZero || icon.size.height.isZero {
             DispatchQueue.main.async {
                 completion(false)
@@ -468,8 +519,9 @@ class FaviconFetcher {
             }
             let iconSize = CGSize(width: cgImage.width, height: cgImage.height)
             let alphaInfo = cgImage.alphaInfo
-            let hasAlphaChannel = alphaInfo == .first || alphaInfo == .last ||
-                alphaInfo == .premultipliedFirst || alphaInfo == .premultipliedLast
+            let hasAlphaChannel =
+                alphaInfo == .first || alphaInfo == .last || alphaInfo == .premultipliedFirst
+                || alphaInfo == .premultipliedLast
             if hasAlphaChannel, let dataProvider = cgImage.dataProvider {
                 let length = CFDataGetLength(dataProvider.data)
                 // Sample the image edges to determine if it has tranparent pixels
@@ -497,10 +549,10 @@ class FaviconFetcher {
                     }
                     // We've already scanned the first and last pixel during
                     // top/bottom pass
-                    for y in 1..<Int(iconSize.height)-1 {
+                    for y in 1..<Int(iconSize.height) - 1 {
                         updateScore(x: 0, y: y)
                     }
-                    for y in 1..<Int(iconSize.height)-1 {
+                    for y in 1..<Int(iconSize.height) - 1 {
                         updateScore(x: Int(iconSize.width), y: y)
                     }
                     DispatchQueue.main.async {
@@ -522,7 +574,7 @@ private struct AssociatedObjectKeys {
 }
 
 extension UIImageView {
-    
+
     /// The associated favicon fetcher for a UIImageView to ensure we don't
     /// immediately cancel the FaviconFetcher load when the function call goes
     /// out of scope.
@@ -530,19 +582,35 @@ extension UIImageView {
     /// Must use objc associated objects because we are extending UIKit in an
     /// extension
     private var faviconFetcher: FaviconFetcher? {
-        get { objc_getAssociatedObject(self, &AssociatedObjectKeys.faviconFetcher) as? FaviconFetcher }
-        set { objc_setAssociatedObject(self, &AssociatedObjectKeys.faviconFetcher, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+        get {
+            objc_getAssociatedObject(self, &AssociatedObjectKeys.faviconFetcher) as? FaviconFetcher
+        }
+        set {
+            objc_setAssociatedObject(
+                self,
+                &AssociatedObjectKeys.faviconFetcher,
+                newValue,
+                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+            )
+        }
     }
-    
+
     /// The monogram label for default favicons.
     ///
     /// Must use objc associated objects because we are extending UIKit in an
     /// extension.
     private var monogramLabel: UILabel? {
         get { objc_getAssociatedObject(self, &AssociatedObjectKeys.monogramLabel) as? UILabel }
-        set { objc_setAssociatedObject(self, &AssociatedObjectKeys.monogramLabel, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+        set {
+            objc_setAssociatedObject(
+                self,
+                &AssociatedObjectKeys.monogramLabel,
+                newValue,
+                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+            )
+        }
     }
-    
+
     /// Removes any monogram labels that may have been added to the image in the
     /// past
     func clearMonogramFavicon() {
@@ -550,7 +618,7 @@ extension UIImageView {
         monogramLabel = nil
         backgroundColor = nil
     }
-    
+
     /// Load the favicon from a site URL directly into a `UIImageView`. If no
     /// favicon is found, a monogram will be used where the letter is determined
     /// based on `fallbackMonogramCharacter` or the site URL.
@@ -561,30 +629,35 @@ extension UIImageView {
     ///
     /// If cachedOnly is specified, this function will NOT attempt to download the favIcon!
     ///
-    func loadFavicon(for siteURL: URL,
-                     domain: Domain? = nil,
-                     fallbackMonogramCharacter: Character? = nil,
-                     cachedOnly: Bool = false,
-                     completion: (() -> Void)? = nil) {
+    func loadFavicon(
+        for siteURL: URL,
+        domain: Domain? = nil,
+        fallbackMonogramCharacter: Character? = nil,
+        cachedOnly: Bool = false,
+        completion: (() -> Void)? = nil
+    ) {
         clearMonogramFavicon()
         faviconFetcher = FaviconFetcher(siteURL: siteURL, kind: .favicon, domain: domain)
         faviconFetcher?.load(cachedOnly) { [weak self] _, attributes in
             guard let self = self,
-                  let cancellable = self.faviconFetcher?.loadTaskCancellable,
-                  !cancellable.isCancelled  else {
+                let cancellable = self.faviconFetcher?.loadTaskCancellable,
+                !cancellable.isCancelled
+            else {
                 completion?()
                 return
             }
-            
+
             if let image = attributes.image {
                 self.image = image
             } else {
                 // Monogram favicon attributes
-                let label = self.monogramLabel ?? UILabel().then {
-                    $0.appearanceTextColor = .white
-                    $0.appearanceBackgroundColor = .clear
-                    $0.minimumScaleFactor = 0.5
-                }
+                let label =
+                    self.monogramLabel
+                    ?? UILabel().then {
+                        $0.appearanceTextColor = .white
+                        $0.appearanceBackgroundColor = .clear
+                        $0.minimumScaleFactor = 0.5
+                    }
                 label.text = FaviconFetcher.monogramLetter(
                     for: siteURL,
                     fallbackCharacter: fallbackMonogramCharacter
@@ -603,7 +676,7 @@ extension UIImageView {
             completion?()
         }
     }
-    
+
     /// Cancel any pending favicon load task. This is to prevent race condition UI glitches with reusable table/collection view cells.
     func cancelFaviconLoad() {
         faviconFetcher?.cancelLoadTask()

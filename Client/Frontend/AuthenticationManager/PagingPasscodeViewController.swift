@@ -3,12 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
+
 private let PaneSwipeDuration: TimeInterval = 0.3
 
 /// Base class for implementing a Passcode configuration screen with multiple 'panes'.
 class PagingPasscodeViewController: BasePasscodeViewController {
     var completion: (() -> Void)?
-    
+
     fileprivate lazy var pager: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.isPagingEnabled = true
@@ -35,9 +36,15 @@ class PagingPasscodeViewController: BasePasscodeViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         panes.enumerated().forEach { index, pane in
-            pane.frame = CGRect(origin: CGPoint(x: CGFloat(index) * pager.frame.width, y: 0), size: pager.frame.size)
+            pane.frame = CGRect(
+                origin: CGPoint(x: CGFloat(index) * pager.frame.width, y: 0),
+                size: pager.frame.size
+            )
         }
-        pager.contentSize = CGSize(width: CGFloat(panes.count) * pager.frame.width, height: pager.frame.height)
+        pager.contentSize = CGSize(
+            width: CGFloat(panes.count) * pager.frame.width,
+            height: pager.frame.height
+        )
         scrollToPaneAtIndex(currentPaneIndex)
         if self.authenticationInfo?.isLocked() ?? false {
             return
@@ -86,8 +93,17 @@ extension PagingPasscodeViewController {
     }
 
     func scrollToPaneAtIndex(_ index: Int) {
-        UIView.animate(withDuration: PaneSwipeDuration, delay: 0, options: [], animations: {
-            self.pager.contentOffset = CGPoint(x: CGFloat(self.currentPaneIndex) * self.pager.frame.width, y: 0)
-        }, completion: nil)
+        UIView.animate(
+            withDuration: PaneSwipeDuration,
+            delay: 0,
+            options: [],
+            animations: {
+                self.pager.contentOffset = CGPoint(
+                    x: CGFloat(self.currentPaneIndex) * self.pager.frame.width,
+                    y: 0
+                )
+            },
+            completion: nil
+        )
     }
 }

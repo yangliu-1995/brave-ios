@@ -2,8 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import Foundation
 import Data
+import Foundation
 import Shared
 
 /// Bookmark editing has four states.
@@ -14,7 +14,7 @@ enum BookmarkEditMode {
     case editBookmark(_ bookmark: Bookmarkv2)
     case editFolder(_ folder: Bookmarkv2)
     case editFavorite(_ favorite: Bookmarkv2)
-    
+
     /// Returns a initial, default save location if none is provided
     var initialSaveLocation: BookmarkSaveLocation {
         switch self {
@@ -29,7 +29,7 @@ enum BookmarkEditMode {
             return .favorites
         }
     }
-    
+
     /// Returns a folder which is edited, otherwise retuns nil.
     /// This is required to exclude the folder from showing in
     /// folder hierarchy.
@@ -39,28 +39,29 @@ enum BookmarkEditMode {
         default: return nil
         }
     }
-    
+
     /// Returns a title for view controller.
     var title: String {
         switch self {
         case .addBookmark(_, _): return Strings.newBookmarkTitle
-        case .addFolder(_): return  Strings.newFolderTitle
-        case .editBookmark(_): return  Strings.editBookmarkTitle
-        case .editFolder(_): return  Strings.editFolderTitle
-        case .editFavorite(_): return  Strings.editFavoriteTitle
+        case .addFolder(_): return Strings.newFolderTitle
+        case .editBookmark(_): return Strings.editBookmarkTitle
+        case .editFolder(_): return Strings.editFolderTitle
+        case .editFavorite(_): return Strings.editFavoriteTitle
         }
     }
-    
+
     private func folderOrRoot(bookmarkOrFolder: Bookmarkv2) -> BookmarkSaveLocation {
         guard let parent = bookmarkOrFolder.parent else { return .rootLevel }
         return .folder(folder: parent)
     }
-    
+
     var specialCells: [AddEditBookmarkTableViewController.SpecialCell] {
         // Order of cells matters.
         switch self {
         case .addFolder(_), .editFolder(_): return [.rootLevel]
-        case .addBookmark(_), .editBookmark(_), .editFavorite(_): return [.addFolder, .favorites, .rootLevel]
+        case .addBookmark(_), .editBookmark(_), .editFavorite(_):
+            return [.addFolder, .favorites, .rootLevel]
         }
     }
 }

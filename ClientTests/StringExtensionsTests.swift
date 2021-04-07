@@ -4,6 +4,7 @@
 
 import Foundation
 import XCTest
+
 @testable import Client
 
 class StringExtensionsTests: XCTestCase {
@@ -40,7 +41,12 @@ class StringExtensionsTests: XCTestCase {
     }
 
     func testPercentEscaping() {
-        func roundtripTest(_ input: String, _ expected: String, file: StaticString = #file, line: UInt = #line) {
+        func roundtripTest(
+            _ input: String,
+            _ expected: String,
+            file: StaticString = #file,
+            line: UInt = #line
+        ) {
             let observed = input.escape()!
             XCTAssertEqual(observed, expected, "input is \(input)", file: file, line: line)
             let roundtrip = observed.unescape()
@@ -48,10 +54,13 @@ class StringExtensionsTests: XCTestCase {
         }
 
         roundtripTest("https://mozilla.com", "https://mozilla.com")
-        roundtripTest("http://www.cnn.com/2017/09/25/politics/north-korea-fm-us-bombers/index.html", "http://www.cnn.com/2017/09/25/politics/north-korea-fm-us-bombers/index.html")
+        roundtripTest(
+            "http://www.cnn.com/2017/09/25/politics/north-korea-fm-us-bombers/index.html",
+            "http://www.cnn.com/2017/09/25/politics/north-korea-fm-us-bombers/index.html"
+        )
         roundtripTest("http://mozilla.com/?a=foo&b=bar", "http://mozilla.com/%3Fa%3Dfoo%26b%3Dbar")
     }
-    
+
     func testCapitalizeFirst() {
         XCTAssertEqual("test".capitalizeFirstLetter, "Test")
         XCTAssertEqual("TEST".capitalizeFirstLetter, "TEST")
@@ -59,25 +68,25 @@ class StringExtensionsTests: XCTestCase {
         XCTAssertEqual("tEST".capitalizeFirstLetter, "TEST")
         XCTAssertEqual("test test".capitalizeFirstLetter, "Test test")
     }
-    
+
     func testRemoveUnicodeFromFilename() {
         let files = [
             "foo-\u{200F}cod.jpg",
             "regedt\u{202e}gpj.apk",
         ]
-        
+
         let nounicodes = [
             "foo-cod.jpg",
-            "regedtgpj.apk"
+            "regedtgpj.apk",
         ]
-        
+
         for (file, nounicode) in zip(files, nounicodes) {
             XCTAssert(file != nounicode)
             let strip = HTTPDownload.stripUnicode(fromFilename: file)
             XCTAssert(strip == nounicode)
         }
     }
-    
+
     func testWithSecureUrlScheme() {
         XCTAssertEqual("test".withSecureUrlScheme, "https://test")
         XCTAssertEqual("http://test".withSecureUrlScheme, "https://test")

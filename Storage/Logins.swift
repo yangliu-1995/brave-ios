@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import WebKit
 import Shared
+import WebKit
 import XCGLogger
 
 private var log = Logger.syncLogger
@@ -34,7 +34,7 @@ public enum NonCommutativeLoginField: Indexable {
     case username(to: String?)
     case httpRealm(to: String?)
     case formSubmitURL(to: String?)
-    case timeCreated(to: MicrosecondTimestamp)                  // Should be immutable.
+    case timeCreated(to: MicrosecondTimestamp)  // Should be immutable.
     case timeLastUsed(to: MicrosecondTimestamp)
     case timePasswordChanged(to: MicrosecondTimestamp)
 
@@ -90,11 +90,10 @@ public typealias LoginDeltas = (
 
 public typealias TimestampedLoginDeltas = (at: Timestamp, changed: LoginDeltas)
 
-/**
- * LoginData is a wrapper around NSURLCredential and NSURLProtectionSpace to allow us to add extra fields where needed.
- **/
+/// LoginData is a wrapper around NSURLCredential and NSURLProtectionSpace to allow us to add extra fields where needed.
+
 public protocol LoginData: class {
-    var guid: String { get set }                 // It'd be nice if this were read-only.
+    var guid: String { get set }  // It'd be nice if this were read-only.
     var credentials: URLCredential { get }
     var protectionSpace: URLProtectionSpace { get }
     var hostname: String { get }
@@ -185,22 +184,34 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
 
         // Logins with empty hostnames are not valid.
         if hostname.isEmpty {
-            return Maybe(failure: LoginDataError(description: "Can't add a login with an empty hostname."))
+            return Maybe(
+                failure: LoginDataError(description: "Can't add a login with an empty hostname.")
+            )
         }
 
         // Logins with empty passwords are not valid.
         if password.isEmpty {
-            return Maybe(failure: LoginDataError(description: "Can't add a login with an empty password."))
+            return Maybe(
+                failure: LoginDataError(description: "Can't add a login with an empty password.")
+            )
         }
 
         // Logins with both a formSubmitURL and httpRealm are not valid.
         if let _ = formSubmitURL, let _ = httpRealm {
-            return Maybe(failure: LoginDataError(description: "Can't add a login with both a httpRealm and formSubmitURL."))
+            return Maybe(
+                failure: LoginDataError(
+                    description: "Can't add a login with both a httpRealm and formSubmitURL."
+                )
+            )
         }
 
         // Login must have at least a formSubmitURL or httpRealm.
         if (formSubmitURL == nil) && (httpRealm == nil) {
-            return Maybe(failure: LoginDataError(description: "Can't add a login without a httpRealm or formSubmitURL."))
+            return Maybe(
+                failure: LoginDataError(
+                    description: "Can't add a login without a httpRealm or formSubmitURL."
+                )
+            )
         }
 
         // All good.
@@ -215,25 +226,34 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
     // Essentially: should we sync a change?
     // Desktop ignores usernameField and hostnameField.
     open func isSignificantlyDifferentFrom(_ login: LoginData) -> Bool {
-        return login.password != self.password ||
-               login.hostname != self.hostname ||
-               login.username != self.username ||
-               login.formSubmitURL != self.formSubmitURL ||
-               login.httpRealm != self.httpRealm
+        return login.password != self.password || login.hostname != self.hostname
+            || login.username != self.username || login.formSubmitURL != self.formSubmitURL
+            || login.httpRealm != self.httpRealm
     }
 
     /* Used for testing purposes since formSubmitURL should be given back to use from the Logins.js script */
-    open class func createWithHostname(_ hostname: String, username: String, password: String, formSubmitURL: String?) -> LoginData {
-        let loginData = Login(hostname: hostname, username: username, password: password) as LoginData
+    open class func createWithHostname(
+        _ hostname: String,
+        username: String,
+        password: String,
+        formSubmitURL: String?
+    ) -> LoginData {
+        let loginData =
+            Login(hostname: hostname, username: username, password: password) as LoginData
         loginData.formSubmitURL = formSubmitURL
         return loginData
     }
 
-    open class func createWithHostname(_ hostname: String, username: String, password: String) -> LoginData {
+    open class func createWithHostname(_ hostname: String, username: String, password: String)
+        -> LoginData
+    {
         return Login(hostname: hostname, username: username, password: password) as LoginData
     }
 
-    open class func createWithCredential(_ credential: URLCredential, protectionSpace: URLProtectionSpace) -> LoginData {
+    open class func createWithCredential(
+        _ credential: URLCredential,
+        protectionSpace: URLProtectionSpace
+    ) -> LoginData {
         return Login(credential: credential, protectionSpace: protectionSpace) as LoginData
     }
 
@@ -252,11 +272,22 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
             port = 0
         }
 
-        self.protectionSpace = URLProtectionSpace(host: host, port: port, protocol: scheme, realm: nil, authenticationMethod: nil)
+        self.protectionSpace = URLProtectionSpace(
+            host: host,
+            port: port,
+            protocol: scheme,
+            realm: nil,
+            authenticationMethod: nil
+        )
     }
 
     convenience init(hostname: String, username: String, password: String) {
-        self.init(guid: Bytes.generateGUID(), hostname: hostname, username: username, password: password)
+        self.init(
+            guid: Bytes.generateGUID(),
+            hostname: hostname,
+            username: username,
+            password: password
+        )
     }
 
     // Why do we need this initializer to be marked as required? Because otherwise we can't
@@ -278,14 +309,15 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
             "username": username ?? "",
             "password": password,
             "usernameField": usernameField ?? "",
-            "passwordField": passwordField ?? ""
+            "passwordField": passwordField ?? "",
         ]
     }
 
     open class func fromScript(_ url: URL, script: [String: Any]) -> LoginData? {
         guard let username = script["username"] as? String,
-              let password = script["password"] as? String else {
-                return nil
+            let password = script["password"] as? String
+        else {
+            return nil
         }
 
         guard let origin = getPasswordOrigin(url.absoluteString) else {
@@ -313,7 +345,8 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
         var realm: String?
         if let uri = URL(string: uriString),
             let scheme = uri.scheme, !scheme.isEmpty,
-            let host = uri.host {
+            let host = uri.host
+        {
             if allowJS && scheme == "javascript" {
                 return "javascript:"
             }
@@ -357,7 +390,9 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
         let commutative: [CommutativeLoginField]
 
         if self.timesUsed > 0 && self.timesUsed != from.timesUsed {
-            commutative = [CommutativeLoginField.timesUsed(increment: self.timesUsed - from.timesUsed)]
+            commutative = [
+                CommutativeLoginField.timesUsed(increment: self.timesUsed - from.timesUsed)
+            ]
         } else {
             commutative = []
         }
@@ -386,7 +421,9 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
             nonCommutative.append(NonCommutativeLoginField.timeLastUsed(to: self.timeLastUsed))
         }
         if self.timeLastUsed > 0 && self.timePasswordChanged != from.timePasswordChanged {
-            nonCommutative.append(NonCommutativeLoginField.timePasswordChanged(to: self.timePasswordChanged))
+            nonCommutative.append(
+                NonCommutativeLoginField.timePasswordChanged(to: self.timePasswordChanged)
+            )
         }
 
         var nonConflicting = [NonConflictingLoginField]()
@@ -401,8 +438,13 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
         return (commutative, nonCommutative, nonConflicting)
     }
 
-    fileprivate class func mergeDeltaFields<T: Indexable>(_ count: Int, a: [T], b: [T], preferBToA: Bool) -> [T] {
-        var deltas = Array<T?>(repeating: nil, count: count)
+    fileprivate class func mergeDeltaFields<T: Indexable>(
+        _ count: Int,
+        a: [T],
+        b: [T],
+        preferBToA: Bool
+    ) -> [T] {
+        var deltas = [T?](repeating: nil, count: count)
 
         // Let's start with the 'a's.
         for f in a {
@@ -444,7 +486,12 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
         } else if bNonCommutative.isEmpty {
             nonCommutative = aNonCommutative
         } else {
-            nonCommutative = mergeDeltaFields(NonCommutativeLoginField.entries, a: aNonCommutative, b: bNonCommutative, preferBToA: bLatest)
+            nonCommutative = mergeDeltaFields(
+                NonCommutativeLoginField.entries,
+                a: aNonCommutative,
+                b: bNonCommutative,
+                preferBToA: bLatest
+            )
         }
 
         if aNonConflicting.isEmpty {
@@ -452,7 +499,12 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
         } else if bNonCommutative.isEmpty {
             nonConflicting = aNonConflicting
         } else {
-            nonConflicting = mergeDeltaFields(NonConflictingLoginField.entries, a: aNonConflicting, b: bNonConflicting, preferBToA: bLatest)
+            nonConflicting = mergeDeltaFields(
+                NonConflictingLoginField.entries,
+                a: aNonConflicting,
+                b: bNonConflicting,
+                preferBToA: bLatest
+            )
         }
 
         return (
@@ -526,7 +578,12 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
             }
         }
 
-        let out = Login(guid: guid, hostname: hostname, username: username ?? "", password: password)
+        let out = Login(
+            guid: guid,
+            hostname: hostname,
+            username: username ?? "",
+            password: password
+        )
         out.timesUsed = timesUsed
         out.httpRealm = httpRealm
         out.formSubmitURL = formSubmitURL
@@ -540,14 +597,20 @@ open class Login: CustomStringConvertible, LoginData, LoginUsageData, Equatable 
     }
 }
 
-public func ==(lhs: Login, rhs: Login) -> Bool {
+public func == (lhs: Login, rhs: Login) -> Bool {
     return lhs.credentials == rhs.credentials && lhs.protectionSpace == rhs.protectionSpace
 }
 
 open class ServerLogin: Login {
     var serverModified: Timestamp = 0
 
-    public init(guid: String, hostname: String, username: String, password: String, modified: Timestamp) {
+    public init(
+        guid: String,
+        hostname: String,
+        username: String,
+        password: String,
+        modified: Timestamp
+    ) {
         self.serverModified = modified
         super.init(guid: guid, hostname: hostname, username: username, password: password)
     }
@@ -570,8 +633,13 @@ class LocalLogin: Login {
 public protocol BrowserLogins {
     func getUsageDataForLoginByGUID(_ guid: GUID) -> Deferred<Maybe<LoginUsageData>>
     func getLoginDataForGUID(_ guid: GUID) -> Deferred<Maybe<Login>>
-    func getLoginsForProtectionSpace(_ protectionSpace: URLProtectionSpace) -> Deferred<Maybe<Cursor<LoginData>>>
-    func getLoginsForProtectionSpace(_ protectionSpace: URLProtectionSpace, withUsername username: String?) -> Deferred<Maybe<Cursor<LoginData>>>
+    func getLoginsForProtectionSpace(_ protectionSpace: URLProtectionSpace) -> Deferred<
+        Maybe<Cursor<LoginData>>
+    >
+    func getLoginsForProtectionSpace(
+        _ protectionSpace: URLProtectionSpace,
+        withUsername username: String?
+    ) -> Deferred<Maybe<Cursor<LoginData>>>
     func getAllLogins() -> Deferred<Maybe<Cursor<Login>>>
     func searchLoginsWithQuery(_ query: String?) -> Deferred<Maybe<Cursor<Login>>>
 
@@ -579,7 +647,8 @@ public protocol BrowserLogins {
     // are responsible for querying first if they care.
     @discardableResult func addLogin(_ login: LoginData) -> Success
 
-    @discardableResult func updateLoginByGUID(_ guid: GUID, new: LoginData, significant: Bool) -> Success
+    @discardableResult func updateLoginByGUID(_ guid: GUID, new: LoginData, significant: Bool)
+        -> Success
 
     // Add the use of a login by GUID.
     @discardableResult func addUseOfLoginByGUID(_ guid: GUID) -> Success
@@ -603,7 +672,8 @@ public protocol SyncableLogins: AccountRemovalDelegate {
     /**
      * Chains through the provided timestamp.
      */
-    func markAsSynchronized<T: Collection>(_: T, modified: Timestamp) -> Deferred<Maybe<Timestamp>> where T.Iterator.Element == GUID
+    func markAsSynchronized<T: Collection>(_: T, modified: Timestamp) -> Deferred<Maybe<Timestamp>>
+    where T.Iterator.Element == GUID
     func markAsDeleted<T: Collection>(_ guids: T) -> Success where T.Iterator.Element == GUID
 
     /**

@@ -8,23 +8,23 @@ import Foundation
 class HeadlineCardView: FeedCardBackgroundButton, FeedCardContent {
     var actionHandler: ((Int, FeedItemAction) -> Void)?
     var contextMenu: FeedItemMenu?
-    
+
     let feedView = FeedItemView(layout: .brandedHeadline).then {
         $0.isUserInteractionEnabled = false
     }
-    
+
     private var contextMenuDelegate: NSObject?
-    
+
     required init() {
         super.init(frame: .zero)
-        
+
         addSubview(feedView)
         feedView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
+
         addTarget(self, action: #selector(tappedSelf), for: .touchUpInside)
-        
+
         let contextMenuDelegate = FeedContextMenuDelegate(
             performedPreviewAction: { [weak self] in
                 self?.actionHandler?(0, .opened())
@@ -35,28 +35,32 @@ class HeadlineCardView: FeedCardBackgroundButton, FeedCardContent {
         )
         addInteraction(UIContextMenuInteraction(delegate: contextMenuDelegate))
         self.contextMenuDelegate = contextMenuDelegate
-        
+
         isAccessibilityElement = true
     }
-    
+
     override var accessibilityLabel: String? {
         get { feedView.accessibilityLabel }
-        set { assertionFailure("Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored") }
+        set {
+            assertionFailure(
+                "Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored"
+            )
+        }
     }
-    
+
     @objc private func tappedSelf() {
         actionHandler?(0, .opened())
     }
 }
 
 class SmallHeadlineCardView: HeadlineCardView {
-    
+
     required init() {
         super.init()
-        
+
         feedView.titleLabel.font = .systemFont(ofSize: 14, weight: .semibold)
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()
@@ -66,21 +70,23 @@ class SmallHeadlineCardView: HeadlineCardView {
 class SmallHeadlinePairCardView: UIView, FeedCardContent {
     var actionHandler: ((Int, FeedItemAction) -> Void)?
     var contextMenu: FeedItemMenu?
-    
+
     private let stackView = UIStackView().then {
         $0.distribution = .fillEqually
         $0.spacing = 20
     }
-    
-    let smallHeadelineCardViews: (left: SmallHeadlineCardView, right: SmallHeadlineCardView) = (SmallHeadlineCardView(), SmallHeadlineCardView())
-    
+
+    let smallHeadelineCardViews: (left: SmallHeadlineCardView, right: SmallHeadlineCardView) = (
+        SmallHeadlineCardView(), SmallHeadlineCardView()
+    )
+
     required init() {
         super.init(frame: .zero)
-        
+
         addSubview(stackView)
         stackView.addArrangedSubview(smallHeadelineCardViews.left)
         stackView.addArrangedSubview(smallHeadelineCardViews.right)
-        
+
         smallHeadelineCardViews.left.actionHandler = { [weak self] _, action in
             self?.actionHandler?(0, action)
         }
@@ -93,12 +99,12 @@ class SmallHeadlinePairCardView: UIView, FeedCardContent {
         smallHeadelineCardViews.right.contextMenu = FeedItemMenu({ [weak self] _ -> UIMenu? in
             return self?.contextMenu?.menu?(1)
         })
-        
+
         stackView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
     }
-    
+
     @available(*, unavailable)
     required init(coder: NSCoder) {
         fatalError()

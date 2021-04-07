@@ -10,24 +10,25 @@ public struct AppReview {
     static let secondThreshold = 41
     static let lastThreshold = 121
     static let minimumDaysBetweenReviewRequest = 60
-    
+
     public static func shouldRequestReview(date: Date = Date()) -> Bool {
         let launchCount = Preferences.Review.launchCount.value
         let threshold = Preferences.Review.threshold.value
-        
+
         var daysSinceLastRequest = 0
         if let previousRequest = Preferences.Review.lastReviewDate.value {
-            daysSinceLastRequest = Calendar.current.dateComponents([.day], from: previousRequest, to: date).day ?? 0
+            daysSinceLastRequest =
+                Calendar.current.dateComponents([.day], from: previousRequest, to: date).day ?? 0
         } else {
             daysSinceLastRequest = minimumDaysBetweenReviewRequest
         }
-        
+
         if launchCount <= threshold || daysSinceLastRequest < minimumDaysBetweenReviewRequest {
             return false
         }
-        
+
         Preferences.Review.lastReviewDate.value = date
-        
+
         switch threshold {
         case firstThreshold:
             Preferences.Review.threshold.value = secondThreshold
@@ -36,7 +37,7 @@ public struct AppReview {
         default:
             break
         }
-        
+
         return true
     }
 }

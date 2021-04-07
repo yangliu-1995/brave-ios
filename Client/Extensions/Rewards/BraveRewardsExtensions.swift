@@ -2,22 +2,22 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import Foundation
 import BraveRewards
 import BraveShared
+import Foundation
 import Shared
 
 extension BraveRewards {
-    
+
     /// Whether or not Brave Rewards is available/can be enabled
     public static var isAvailable: Bool {
         #if MOZ_CHANNEL_DEBUG
-        return true
+            return true
         #else
-        return DCDevice.current.isSupported
+            return DCDevice.current.isSupported
         #endif
     }
-    
+
     /// Whether or not rewards is enabled
     @objc public var isEnabled: Bool {
         get {
@@ -34,7 +34,7 @@ extension BraveRewards {
             }
         }
     }
-    
+
     public func createWalletIfNeeded(_ completion: (() -> Void)? = nil) {
         if isCreatingWallet {
             // completion block will be hit by previous call
@@ -46,15 +46,22 @@ extension BraveRewards {
             completion?()
         }
     }
-    
+
     public var isCreatingWallet: Bool {
         get { objc_getAssociatedObject(self, &AssociatedKeys.isCreatingWallet) as? Bool ?? false }
-        set { objc_setAssociatedObject(self, &AssociatedKeys.isCreatingWallet, newValue, .OBJC_ASSOCIATION_ASSIGN) }
+        set {
+            objc_setAssociatedObject(
+                self,
+                &AssociatedKeys.isCreatingWallet,
+                newValue,
+                .OBJC_ASSOCIATION_ASSIGN
+            )
+        }
     }
 }
 
 private struct AssociatedKeys {
-  static var isCreatingWallet: Int = 0
+    static var isCreatingWallet: Int = 0
 }
 
 extension DrainStatus: RepresentableOptionType {

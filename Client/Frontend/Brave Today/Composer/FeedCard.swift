@@ -11,7 +11,7 @@ struct FeedPair: Equatable {
     var first: FeedItem
     /// The second item
     var second: FeedItem
-    
+
     init(_ first: FeedItem, _ second: FeedItem) {
         self.first = first
         self.second = second
@@ -31,10 +31,15 @@ enum FeedCard: Equatable {
     /// A pair of `headline` items that should be displayed side by side horizontally with equal sizes
     case headlinePair(_ pair: FeedPair)
     /// A group of items that can be displayed in a number of different configurations
-    case group(_ feeds: [FeedItem], title: String, direction: NSLayoutConstraint.Axis, displayBrand: Bool)
+    case group(
+        _ feeds: [FeedItem],
+        title: String,
+        direction: NSLayoutConstraint.Axis,
+        displayBrand: Bool
+    )
     /// A numbered group of items which will always be displayed in a vertical list.
     case numbered(_ feeds: [FeedItem], title: String)
-    
+
     /// Obtain an estimated height for this card given a width it will be displayed with
     func estimatedHeight(for width: CGFloat) -> CGFloat {
         switch self {
@@ -50,7 +55,7 @@ enum FeedCard: Equatable {
             return 400
         }
     }
-    
+
     /// A list of feed items that are present in the card
     var items: [FeedItem] {
         switch self {
@@ -62,7 +67,7 @@ enum FeedCard: Equatable {
             return items
         }
     }
-    
+
     /// Creates a new card that has replaced an item it is displaying with a replacement
     ///
     /// If `item` is not being displayed by this card this function returns itself

@@ -27,14 +27,26 @@ public class Preferences {
 
 extension Preferences {
     public final class DAU {
-        public static let lastLaunchInfo = Option<[Int?]?>(key: "dau.last-launch-info", default: nil)
-        static let weekOfInstallation = Option<String?>(key: "dau.week-of-installation", default: nil)
+        public static let lastLaunchInfo = Option<[Int?]?>(
+            key: "dau.last-launch-info",
+            default: nil
+        )
+        static let weekOfInstallation = Option<String?>(
+            key: "dau.week-of-installation",
+            default: nil
+        )
         // On old codebase we checked existence of `dau_stat` to determine whether it's first server ping.
         // We need to translate that to use the new `firstPingParam` preference.
         static let firstPingParam: Option<Bool> =
-            Option<Bool>(key: "dau.first-ping", default: Preferences.DAU.lastLaunchInfo.value == nil)
+            Option<Bool>(
+                key: "dau.first-ping",
+                default: Preferences.DAU.lastLaunchInfo.value == nil
+            )
         /// Date of installation, this preference is removed after 14 days of usage.
-        public static let installationDate = Option<Date?>(key: "dau.installation-date", default: nil)
+        public static let installationDate = Option<Date?>(
+            key: "dau.installation-date",
+            default: nil
+        )
     }
     public final class URP {
         static let nextCheckDate = Option<TimeInterval?>(key: "urp.next-check-date", default: nil)
@@ -42,32 +54,56 @@ extension Preferences {
         static let customHeaderData = Option<Data?>(key: "urp.custom-header-data", default: nil)
         static let downloadId = Option<String?>(key: "urp.referral.download-id", default: nil)
         public static let referralCode = Option<String?>(key: "urp.referral.code", default: nil)
-        static let referralCodeDeleteDate = Option<TimeInterval?>(key: "urp.referral.delete-date", default: nil)
+        static let referralCodeDeleteDate = Option<TimeInterval?>(
+            key: "urp.referral.delete-date",
+            default: nil
+        )
         /// Whether the ref code lookup has still yet to occur
-        public static let referralLookupOutstanding = Option<Bool?>(key: "urp.referral.lookkup-completed", default: nil)
+        public static let referralLookupOutstanding = Option<Bool?>(
+            key: "urp.referral.lookkup-completed",
+            default: nil
+        )
     }
-    
+
     public final class NTP {
-        public static let ntpCheckDate = Option<TimeInterval?>(key: "ntp.next-check-date", default: nil)
+        public static let ntpCheckDate = Option<TimeInterval?>(
+            key: "ntp.next-check-date",
+            default: nil
+        )
     }
-    
+
     public final class BraveToday {
-        public static let isShowingOptIn = Option<Bool>(key: "brave-today.showing-opt-in", default: false)
-        public static let userOptedIn = Option<Bool>(key: "brave-today.user-opted-in", default: false)
+        public static let isShowingOptIn = Option<Bool>(
+            key: "brave-today.showing-opt-in",
+            default: false
+        )
+        public static let userOptedIn = Option<Bool>(
+            key: "brave-today.user-opted-in",
+            default: false
+        )
         public static let isEnabled = Option<Bool>(key: "brave-today.enabled", default: true)
-        public static let languageChecked = Option<Bool>(key: "brave-today.language-checked", default: false)
-        public static let debugEnvironment = Option<String?>(key: "brave-today.debug.environment", default: nil)
+        public static let languageChecked = Option<Bool>(
+            key: "brave-today.language-checked",
+            default: false
+        )
+        public static let debugEnvironment = Option<String?>(
+            key: "brave-today.debug.environment",
+            default: nil
+        )
     }
-    
+
     public final class Review {
         /// Application Launch Count (how many times the application has been launched)
         public static let launchCount = Option<Int>(key: "review.launch-count", default: 0)
         /// Review Threshold (the total amount of launches needed for the next review to show up)
-        static let threshold = Option<Int>(key: "review.threshold", default: AppReview.firstThreshold)
+        static let threshold = Option<Int>(
+            key: "review.threshold",
+            default: AppReview.firstThreshold
+        )
         /// Last Review Date
         static let lastReviewDate = Option<Date?>(key: "review.last-date", default: nil)
     }
-    
+
     final class BlockStats {
         static let adsCount = Option<Int>(key: "stats.adblock", default: 0)
         static let trackersCount = Option<Int>(key: "stats.tracking", default: 0)
@@ -81,62 +117,140 @@ extension Preferences {
         public static let adblock = Option<String?>(key: "blockfile.adblock", default: nil)
         public static let httpse = Option<String?>(key: "blockfile.httpse", default: nil)
     }
-    
+
     public final class ProductNotificationBenchmarks {
-        public static let firstTimeBlockingShown = Option<Bool>(key: "product-benchmark.firstTimeBlocking", default: false)
-        public static let privacyProtectionBlockShown = Option<Bool>(key: "product-benchmark.privacyProtectionBlockShown", default: false)
-        public static let httpsUpgradeShown = Option<Bool>(key: "product-benchmark.httpsUpgradeShown", default: false)
-        public static let videoAdBlockShown = Option<Bool>(key: "product-benchmark.videoAdBlockShown", default: false)
-        public static let trackerTierCount = Option<Int>(key: "product-benchmark.trackerTierCount", default: 0)
+        public static let firstTimeBlockingShown = Option<Bool>(
+            key: "product-benchmark.firstTimeBlocking",
+            default: false
+        )
+        public static let privacyProtectionBlockShown = Option<Bool>(
+            key: "product-benchmark.privacyProtectionBlockShown",
+            default: false
+        )
+        public static let httpsUpgradeShown = Option<Bool>(
+            key: "product-benchmark.httpsUpgradeShown",
+            default: false
+        )
+        public static let videoAdBlockShown = Option<Bool>(
+            key: "product-benchmark.videoAdBlockShown",
+            default: false
+        )
+        public static let trackerTierCount = Option<Int>(
+            key: "product-benchmark.trackerTierCount",
+            default: 0
+        )
     }
-    
+
     public final class Shields {
-        public static let allShields = [blockAdsAndTracking, httpsEverywhere, blockPhishingAndMalware, googleSafeBrowsing, blockScripts, fingerprintingProtection, blockImages]
-        
+        public static let allShields = [
+            blockAdsAndTracking, httpsEverywhere, blockPhishingAndMalware, googleSafeBrowsing,
+            blockScripts, fingerprintingProtection, blockImages,
+        ]
+
         /// Shields will block ads and tracking if enabled
-        public static let blockAdsAndTracking = Option<Bool>(key: "shields.block-ads-and-tracking", default: true)
+        public static let blockAdsAndTracking = Option<Bool>(
+            key: "shields.block-ads-and-tracking",
+            default: true
+        )
         /// Websites will be upgraded to HTTPS if a loaded page attempts to use HTTP
-        public static let httpsEverywhere = Option<Bool>(key: "shields.https-everywhere", default: true)
+        public static let httpsEverywhere = Option<Bool>(
+            key: "shields.https-everywhere",
+            default: true
+        )
         /// Enable Google Safe Browsing
-        public static let googleSafeBrowsing = Option<Bool>(key: "shields.google-safe-browsing", default: true)
+        public static let googleSafeBrowsing = Option<Bool>(
+            key: "shields.google-safe-browsing",
+            default: true
+        )
         /// Shields will block websites related to potential phishing and malware
-        public static let blockPhishingAndMalware = Option<Bool>(key: "shields.block-phishing-and-malware", default: true)
+        public static let blockPhishingAndMalware = Option<Bool>(
+            key: "shields.block-phishing-and-malware",
+            default: true
+        )
         /// Disables JavaScript execution in the browser
         public static let blockScripts = Option<Bool>(key: "shields.block-scripts", default: false)
         /// Enforces fingerprinting protection on the users session
-        public static let fingerprintingProtection = Option<Bool>(key: "shields.fingerprinting-protection", default: false)
+        public static let fingerprintingProtection = Option<Bool>(
+            key: "shields.fingerprinting-protection",
+            default: false
+        )
         /// Disables image loading in the browser
         public static let blockImages = Option<Bool>(key: "shields.block-images", default: false)
         /// In addition to global adblocking rules, adds custom country based rules.
         /// This setting is enabled by default for all locales.
-        public static let useRegionAdBlock = Option<Bool>(key: "shields.regional-adblock", default: true)
+        public static let useRegionAdBlock = Option<Bool>(
+            key: "shields.regional-adblock",
+            default: true
+        )
         /// Version of downloaded data file for adblock stats.
-        public static let adblockStatsDataVersion = Option<Int?>(key: "stats.adblock-data-version", default: nil)
+        public static let adblockStatsDataVersion = Option<Int?>(
+            key: "stats.adblock-data-version",
+            default: nil
+        )
         /// Whether or not advanced controls in the shields UI are visible by default
-        public static let advancedControlsVisible = Option<Bool>(key: "shields.advanced-controls-visible", default: false)
+        public static let advancedControlsVisible = Option<Bool>(
+            key: "shields.advanced-controls-visible",
+            default: false
+        )
     }
-    
+
     public final class Rewards {
-        public static let myFirstAdShown = Option<Bool>(key: "rewards.ads.my-first-ad-shown", default: false)
-        public static let hideRewardsIcon = Option<Bool>(key: "rewards.new-hide-rewards-icon", default: false)
-        public static let rewardsToggledOnce = Option<Bool>(key: "rewards.rewards-toggled-once", default: false)
+        public static let myFirstAdShown = Option<Bool>(
+            key: "rewards.ads.my-first-ad-shown",
+            default: false
+        )
+        public static let hideRewardsIcon = Option<Bool>(
+            key: "rewards.new-hide-rewards-icon",
+            default: false
+        )
+        public static let rewardsToggledOnce = Option<Bool>(
+            key: "rewards.rewards-toggled-once",
+            default: false
+        )
         public static let isUsingBAP = Option<Bool?>(key: "rewards.is-using-bap", default: nil)
-        public static let seenDataMigrationFailureError = Option<Bool>(key: "rewards.seen-data-migration-failure-error", default: false)
-        public static let migratedLegacyWallet = Option<Bool>(key: "rewards.migrated-legacy-wallet", default: false)
-        public static let dismissedLegacyWalletTransfer = Option<Bool>(key: "rewards.dismissed-legacy-wallet-transfer", default: false)
-        public static let transferDrainID = Option<String?>(key: "rewards.legacy-wallet-transfer-drain-id", default: nil)
-        public static let lastTransferStatus = Option<Int?>(key: "rewards.legacy-wallet-transfer-status", default: nil)
-        public static let lastTransferStatusDismissed = Option<Int?>(key: "rewards.legacy-wallet-transfer-last-dismissed-status", default: nil)
-        public static let transferCompletionAcknowledged = Option<Bool>(key: "rewards.legacy-wallet-transfer-completion-acknowledged", default: false)
-        public static let transferUnavailableLastSeen = Option<TimeInterval?>(key: "rewards.transfer-unavailable-warning-last-seen-date", default: nil)
-        public static let drainStatusOverride = Option<Int?>(key: "rewards.drain-status-override", default: nil)
-        
+        public static let seenDataMigrationFailureError = Option<Bool>(
+            key: "rewards.seen-data-migration-failure-error",
+            default: false
+        )
+        public static let migratedLegacyWallet = Option<Bool>(
+            key: "rewards.migrated-legacy-wallet",
+            default: false
+        )
+        public static let dismissedLegacyWalletTransfer = Option<Bool>(
+            key: "rewards.dismissed-legacy-wallet-transfer",
+            default: false
+        )
+        public static let transferDrainID = Option<String?>(
+            key: "rewards.legacy-wallet-transfer-drain-id",
+            default: nil
+        )
+        public static let lastTransferStatus = Option<Int?>(
+            key: "rewards.legacy-wallet-transfer-status",
+            default: nil
+        )
+        public static let lastTransferStatusDismissed = Option<Int?>(
+            key: "rewards.legacy-wallet-transfer-last-dismissed-status",
+            default: nil
+        )
+        public static let transferCompletionAcknowledged = Option<Bool>(
+            key: "rewards.legacy-wallet-transfer-completion-acknowledged",
+            default: false
+        )
+        public static let transferUnavailableLastSeen = Option<TimeInterval?>(
+            key: "rewards.transfer-unavailable-warning-last-seen-date",
+            default: nil
+        )
+        public static let drainStatusOverride = Option<Int?>(
+            key: "rewards.drain-status-override",
+            default: nil
+        )
+
         public enum EnvironmentOverride: Int {
             case none
             case staging
             case prod
             case dev
-            
+
             public var name: String {
                 switch self {
                 case .none: return "None"
@@ -145,25 +259,33 @@ extension Preferences {
                 case .dev: return "Dev"
                 }
             }
-            
+
             public static var sortedCases: [EnvironmentOverride] {
                 return [.none, .dev, .staging, .prod]
             }
         }
         /// In debug/beta, this is the overriden environment.
-        public static let environmentOverride = Option<Int>(key: "rewards.environment-override",
-                                                            default: EnvironmentOverride.none.rawValue)
-        
+        public static let environmentOverride = Option<Int>(
+            key: "rewards.environment-override",
+            default: EnvironmentOverride.none.rawValue
+        )
+
         /// In debut/beta, the number of seconds before an ad should automatically dismiss
-        public static let adsDurationOverride = Option<Int?>(key: "rewards.ads.dismissal-override", default: nil)
-        
+        public static let adsDurationOverride = Option<Int?>(
+            key: "rewards.ads.dismissal-override",
+            default: nil
+        )
+
         /// Whether or not the user successfully enrolled before
-        public static let didEnrollDeviceCheck = Option<Bool>(key: "rewards.devicecheck.did.enroll", default: false)
+        public static let didEnrollDeviceCheck = Option<Bool>(
+            key: "rewards.devicecheck.did.enroll",
+            default: false
+        )
     }
 }
 
 extension Preferences {
-    
+
     /// An entry in the `Preferences`
     ///
     /// `ValueType` defines the type of value that will stored in the UserDefaults object
@@ -178,12 +300,15 @@ extension Preferences {
         @Published public var value: ValueType {
             didSet {
                 if value == oldValue { return }
-                
+
                 // Check if `ValueType` is something that can be nil
                 if value is ExpressibleByNilLiteral {
                     // We have to use a weird workaround to determine if it can be placed in the UserDefaults.
                     // `nil` (NSNull when its bridged to ObjC) can be placed in a dictionary, but not in UserDefaults.
-                    let dictionary = NSMutableDictionary(object: value, forKey: self.key as NSString)
+                    let dictionary = NSMutableDictionary(
+                        object: value,
+                        forKey: self.key as NSString
+                    )
                     // If the value we pull out of the dictionary is NSNull, we know its nil and should remove it
                     // from the UserDefaults rather than attempt to set it
                     if let value = dictionary[self.key], value is NSNull {
@@ -195,7 +320,7 @@ extension Preferences {
                     container.set(value, forKey: self.key)
                 }
                 container.synchronize()
-                
+
                 let key = self.key
                 observers.forEach {
                     $0.preferencesDidChange(for: key)
@@ -214,9 +339,13 @@ extension Preferences {
         public func reset() {
             value = defaultValue
         }
-        
+
         /// Creates a preference
-        public init(key: String, default: ValueType, container: UserDefaults = Preferences.defaultContainer) {
+        public init(
+            key: String,
+            default: ValueType,
+            container: UserDefaults = Preferences.defaultContainer
+        ) {
             self.key = key
             self.container = container
             self.defaultValue = `default`
@@ -236,11 +365,17 @@ extension URL: UserDefaultsEncodable {}
 extension Data: UserDefaultsEncodable {}
 extension Date: UserDefaultsEncodable {}
 extension Array: UserDefaultsEncodable where Element: UserDefaultsEncodable {}
-extension Dictionary: UserDefaultsEncodable where Key: StringProtocol, Value: UserDefaultsEncodable {}
+extension Dictionary: UserDefaultsEncodable
+where Key: StringProtocol, Value: UserDefaultsEncodable {}
 
 extension Preferences {
     /// Migrate a given key from `Prefs` into a specific option
-    public class func migrate<T>(keyPrefix: String, key: String, to option: Preferences.Option<T>, transform: ((T) -> T)? = nil) {
+    public class func migrate<T>(
+        keyPrefix: String,
+        key: String,
+        to option: Preferences.Option<T>,
+        transform: ((T) -> T)? = nil
+    ) {
         let userDefaults = UserDefaults(suiteName: AppInfo.sharedContainerIdentifier)
 
         let profileKey = "\(keyPrefix)\(key)"
@@ -258,26 +393,53 @@ extension Preferences {
             Logger.browserLogger.info("Could not migrate legacy pref with key: \"\(profileKey)\".")
         }
     }
-    
+
     public class func migrateBraveShared(keyPrefix: String) {
         // DAU
         migrate(keyPrefix: keyPrefix, key: "dau_stat", to: Preferences.DAU.lastLaunchInfo)
-        migrate(keyPrefix: keyPrefix, key: "week_of_installation", to: Preferences.DAU.weekOfInstallation)
-        
+        migrate(
+            keyPrefix: keyPrefix,
+            key: "week_of_installation",
+            to: Preferences.DAU.weekOfInstallation
+        )
+
         // URP
-        migrate(keyPrefix: keyPrefix, key: "urpDateCheckPrefsKey", to: Preferences.URP.nextCheckDate)
-        migrate(keyPrefix: keyPrefix, key: "urpRetryCountdownPrefsKey", to: Preferences.URP.retryCountdown)
-        migrate(keyPrefix: keyPrefix, key: "CustomHeaderDataPrefs", to: Preferences.URP.customHeaderData)
+        migrate(
+            keyPrefix: keyPrefix,
+            key: "urpDateCheckPrefsKey",
+            to: Preferences.URP.nextCheckDate
+        )
+        migrate(
+            keyPrefix: keyPrefix,
+            key: "urpRetryCountdownPrefsKey",
+            to: Preferences.URP.retryCountdown
+        )
+        migrate(
+            keyPrefix: keyPrefix,
+            key: "CustomHeaderDataPrefs",
+            to: Preferences.URP.customHeaderData
+        )
         migrate(keyPrefix: keyPrefix, key: "downloadIdPrefsKey", to: Preferences.URP.downloadId)
         migrate(keyPrefix: keyPrefix, key: "referralCodePrefsKey", to: Preferences.URP.referralCode)
-        migrate(keyPrefix: keyPrefix, key: "referralCodeDeleteTimePrefsKey", to: Preferences.URP.referralCodeDeleteDate)
-        
+        migrate(
+            keyPrefix: keyPrefix,
+            key: "referralCodeDeleteTimePrefsKey",
+            to: Preferences.URP.referralCodeDeleteDate
+        )
+
         // Block Stats
         migrate(keyPrefix: keyPrefix, key: "adblock", to: Preferences.BlockStats.adsCount)
-        migrate(keyPrefix: keyPrefix, key: "tracking_protection", to: Preferences.BlockStats.trackersCount)
+        migrate(
+            keyPrefix: keyPrefix,
+            key: "tracking_protection",
+            to: Preferences.BlockStats.trackersCount
+        )
         migrate(keyPrefix: keyPrefix, key: "httpse", to: Preferences.BlockStats.httpsUpgradeCount)
-        migrate(keyPrefix: keyPrefix, key: "fp_protection", to: Preferences.BlockStats.fingerprintingCount)
+        migrate(
+            keyPrefix: keyPrefix,
+            key: "fp_protection",
+            to: Preferences.BlockStats.fingerprintingCount
+        )
         migrate(keyPrefix: keyPrefix, key: "safebrowsing", to: Preferences.BlockStats.phishingCount)
     }
 }
-

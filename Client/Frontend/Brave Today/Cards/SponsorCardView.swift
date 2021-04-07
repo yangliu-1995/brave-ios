@@ -8,23 +8,23 @@ import Foundation
 class SponsorCardView: FeedCardBackgroundButton, FeedCardContent {
     var actionHandler: ((Int, FeedItemAction) -> Void)?
     var contextMenu: FeedItemMenu?
-    
+
     let feedView = FeedItemView(layout: .bannerThumbnail).then {
         $0.isUserInteractionEnabled = false
     }
-    
+
     private var contextMenuDelegate: NSObject?
-    
+
     required init() {
         super.init(frame: .zero)
-        
+
         addSubview(feedView)
         feedView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
+
         addTarget(self, action: #selector(tappedSelf), for: .touchUpInside)
-        
+
         let contextMenuDelegate = FeedContextMenuDelegate(
             performedPreviewAction: { [weak self] in
                 self?.actionHandler?(0, .opened())
@@ -35,15 +35,19 @@ class SponsorCardView: FeedCardBackgroundButton, FeedCardContent {
         )
         addInteraction(UIContextMenuInteraction(delegate: contextMenuDelegate))
         self.contextMenuDelegate = contextMenuDelegate
-        
+
         isAccessibilityElement = true
     }
-    
+
     override var accessibilityLabel: String? {
         get { feedView.accessibilityLabel }
-        set { assertionFailure("Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored") }
+        set {
+            assertionFailure(
+                "Accessibility label is inherited from a subview: \(String(describing: newValue)) ignored"
+            )
+        }
     }
-    
+
     @objc private func tappedSelf() {
         actionHandler?(0, .opened())
     }

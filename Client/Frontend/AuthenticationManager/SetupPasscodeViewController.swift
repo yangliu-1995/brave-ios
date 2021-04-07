@@ -18,11 +18,11 @@ class SetupPasscodeViewController: PagingPasscodeViewController, PasscodeInputVi
             PasscodePane(title: Strings.authenticationReenterPasscode, passcodeSize: 6),
         ]
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         panes.forEach { $0.codeInputView.delegate = self }
@@ -59,7 +59,9 @@ class SetupPasscodeViewController: PagingPasscodeViewController, PasscodeInputVi
     }
 
     fileprivate func createPasscodeWithCode(_ code: String) {
-        KeychainWrapper.sharedAppContainerKeychain.setAuthenticationInfo(AuthenticationKeychainInfo(passcode: code))
+        KeychainWrapper.sharedAppContainerKeychain.setAuthenticationInfo(
+            AuthenticationKeychainInfo(passcode: code)
+        )
 
         NotificationCenter.default.post(name: .passcodeDidCreate, object: nil)
     }

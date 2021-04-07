@@ -1,10 +1,10 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
-import Shared
-import Data
-import BraveShared
 import BraveRewards
+import BraveShared
+import Data
+import Shared
+import UIKit
 
 /// Sometimes during heavy operations we want to prevent user from navigating back, changing screen etc.
 protocol NavigationPrevention {
@@ -14,41 +14,41 @@ protocol NavigationPrevention {
 
 class SyncWelcomeViewController: SyncViewController {
     private var overlayView: UIView?
-    
+
     private var isLoading: Bool = false {
         didSet {
             overlayView?.removeFromSuperview()
-            
+
             // Toggle 'restore' button.
             navigationItem.rightBarButtonItem?.isEnabled = !isLoading
-            
+
             // Prevent dismissing the modal by swipe when migration happens.
             navigationController?.isModalInPresentation = isLoading == true
-            
+
             if !isLoading { return }
-            
+
             let overlay = UIView().then {
                 $0.backgroundColor = UIColor.black.withAlphaComponent(0.5)
                 let activityIndicator = UIActivityIndicatorView().then { indicator in
                     indicator.startAnimating()
                     indicator.autoresizingMask = [.flexibleWidth, .flexibleHeight]
                 }
-                
+
                 $0.addSubview(activityIndicator)
             }
-            
+
             view.addSubview(overlay)
             overlay.snp.makeConstraints {
                 $0.edges.equalToSuperview()
             }
-            
+
             overlayView = overlay
         }
     }
-    
+
     private var syncServiceObserver: AnyObject?
     private var syncDeviceInfoObserver: AnyObject?
-    
+
     lazy var mainStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -61,7 +61,10 @@ class SyncWelcomeViewController: SyncViewController {
     lazy var syncImage: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "sync-art"))
         // Shrinking image a bit on smaller devices.
-        imageView.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 250), for: .vertical)
+        imageView.setContentCompressionResistancePriority(
+            UILayoutPriority(rawValue: 250),
+            for: .vertical
+        )
         imageView.contentMode = .scaleAspectFit
 
         return imageView
@@ -128,7 +131,7 @@ class SyncWelcomeViewController: SyncViewController {
         button.addTarget(self, action: #selector(existingUserAction), for: .touchUpInside)
         return button
     }()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -143,15 +146,19 @@ class SyncWelcomeViewController: SyncViewController {
         }
 
         // Adding top margin to the image.
-        let syncImageStackView = UIStackView(arrangedSubviews: [UIView.spacer(.vertical, amount: 60), syncImage])
+        let syncImageStackView = UIStackView(arrangedSubviews: [
+            UIView.spacer(.vertical, amount: 60), syncImage,
+        ])
         syncImageStackView.axis = .vertical
         mainStackView.addArrangedSubview(syncImageStackView)
 
         textStackView.addArrangedSubview(titleLabel)
         // Side margins for description text.
-        let descriptionStackView = UIStackView(arrangedSubviews: [UIView.spacer(.horizontal, amount: 8),
-                                                                  descriptionLabel,
-                                                                  UIView.spacer(.horizontal, amount: 8)])
+        let descriptionStackView = UIStackView(arrangedSubviews: [
+            UIView.spacer(.horizontal, amount: 8),
+            descriptionLabel,
+            UIView.spacer(.horizontal, amount: 8),
+        ])
 
         textStackView.addArrangedSubview(descriptionStackView)
         mainStackView.addArrangedSubview(textStackView)
@@ -160,7 +167,7 @@ class SyncWelcomeViewController: SyncViewController {
         buttonsStackView.addArrangedSubview(existingUserButton)
         mainStackView.addArrangedSubview(buttonsStackView)
     }
-    
+
     /// Sync setup failure is handled here because it can happen from few places in children VCs(new chain, qr code, codewords)
     /// This makes all presented Sync View Controllers to dismiss, cleans up any sync setup and shows user a friendly message.
     private func handleSyncSetupFailure() {
@@ -173,7 +180,7 @@ class SyncWelcomeViewController: SyncViewController {
             }
         }
     }
-    
+
     @objc func newToSyncAction() {
         handleSyncSetupFailure()
         let addDevice = SyncSelectDeviceTypeViewController()
@@ -182,8 +189,14 @@ class SyncWelcomeViewController: SyncViewController {
                 self.syncServiceObserver = nil
                 guard BraveSyncAPI.shared.isInSyncGroup else {
                     addDevice.disableNavigationPrevention()
-                    let alert = UIAlertController(title: Strings.syncUnsuccessful, message: Strings.syncUnableCreateGroup, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: Strings.OKString, style: .default, handler: nil))
+                    let alert = UIAlertController(
+                        title: Strings.syncUnsuccessful,
+                        message: Strings.syncUnableCreateGroup,
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(
+                        UIAlertAction(title: Strings.OKString, style: .default, handler: nil)
+                    )
                     addDevice.present(alert, animated: true, completion: nil)
                     return
                 }
@@ -193,7 +206,7 @@ class SyncWelcomeViewController: SyncViewController {
                 view.navigationItem.hidesBackButton = true
                 self.navigationController?.pushViewController(view, animated: true)
             }
-            
+
             if BraveSyncAPI.shared.isInSyncGroup {
                 pushAddDeviceVC()
                 return
@@ -204,41 +217,41 @@ class SyncWelcomeViewController: SyncViewController {
                 self.syncDeviceInfoObserver = nil
                 pushAddDeviceVC()
             }
-            
+
             BraveSyncAPI.shared.joinSyncGroup(codeWords: BraveSyncAPI.shared.getSyncCode())
             BraveSyncAPI.shared.syncEnabled = true
         }
 
         self.navigationController?.pushViewController(addDevice, animated: true)
     }
-    
+
     @objc func existingUserAction() {
         handleSyncSetupFailure()
         let pairCamera = SyncPairCameraViewController()
-        
+
         pairCamera.syncHandler = { codeWords in
             pairCamera.enableNavigationPrevention()
-            
+
             self.syncDeviceInfoObserver = BraveSyncAPI.addDeviceStateObserver {
                 self.syncServiceObserver = nil
                 self.syncDeviceInfoObserver = nil
                 pairCamera.disableNavigationPrevention()
                 self.pushSettings()
             }
- 
+
             BraveSyncAPI.shared.joinSyncGroup(codeWords: codeWords)
             BraveSyncAPI.shared.syncEnabled = true
         }
-        
+
         self.navigationController?.pushViewController(pairCamera, animated: true)
     }
-    
+
     private func pushSettings() {
         if !DeviceInfo.hasConnectivity() {
             present(SyncAlerts.noConnection, animated: true)
             return
         }
-        
+
         let syncSettingsVC = SyncSettingsTableViewController(style: .grouped)
         syncSettingsVC.disableBackButton = true
         navigationController?.pushViewController(syncSettingsVC, animated: true)

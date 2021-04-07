@@ -3,9 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import Storage
-
 import Shared
+import Storage
 import XCGLogger
 
 enum ShortcutType: String {
@@ -42,19 +41,30 @@ class QuickActions: NSObject {
     var launchedShortcutItem: UIApplicationShortcutItem?
 
     // MARK: Handling Quick Actions
-    @discardableResult func handleShortCutItem(_ shortcutItem: UIApplicationShortcutItem, withBrowserViewController bvc: BrowserViewController ) -> Bool {
+    @discardableResult func handleShortCutItem(
+        _ shortcutItem: UIApplicationShortcutItem,
+        withBrowserViewController bvc: BrowserViewController
+    ) -> Bool {
 
         // Verify that the provided `shortcutItem`'s `type` is one handled by the application.
         guard let shortCutType = ShortcutType(fullType: shortcutItem.type) else { return false }
 
         DispatchQueue.main.async {
-            self.handleShortCutItemOfType(shortCutType, userData: shortcutItem.userInfo, browserViewController: bvc)
+            self.handleShortCutItemOfType(
+                shortCutType,
+                userData: shortcutItem.userInfo,
+                browserViewController: bvc
+            )
         }
 
         return true
     }
 
-    fileprivate func handleShortCutItemOfType(_ type: ShortcutType, userData: [String: NSSecureCoding]?, browserViewController: BrowserViewController) {
+    fileprivate func handleShortCutItemOfType(
+        _ type: ShortcutType,
+        userData: [String: NSSecureCoding]?,
+        browserViewController: BrowserViewController
+    ) {
         switch type {
         case .newTab:
             handleOpenNewTab(withBrowserViewController: browserViewController, isPrivate: false)
@@ -63,7 +73,10 @@ class QuickActions: NSObject {
         }
     }
 
-    fileprivate func handleOpenNewTab(withBrowserViewController bvc: BrowserViewController, isPrivate: Bool) {
+    fileprivate func handleOpenNewTab(
+        withBrowserViewController bvc: BrowserViewController,
+        isPrivate: Bool
+    ) {
         bvc.openBlankNewTab(attemptLocationFieldFocus: true, isPrivate: isPrivate)
     }
 }

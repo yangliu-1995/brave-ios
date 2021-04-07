@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
-import SnapKit
-import Shared
 import BraveShared
+import Shared
+import SnapKit
+import UIKit
 
 class BottomToolbarView: UIView, ToolbarProtocol {
     weak var tabToolbarDelegate: ToolbarDelegate?
@@ -25,7 +25,9 @@ class BottomToolbarView: UIView, ToolbarProtocol {
     private let contentView = UIStackView()
 
     fileprivate override init(frame: CGRect) {
-        actionButtons = [backButton, forwardButton, addTabButton, searchButton, tabsButton, menuButton]
+        actionButtons = [
+            backButton, forwardButton, addTabButton, searchButton, tabsButton, menuButton,
+        ]
         super.init(frame: frame)
         setupAccessibility()
 
@@ -34,17 +36,19 @@ class BottomToolbarView: UIView, ToolbarProtocol {
         addButtons(actionButtons)
         contentView.axis = .horizontal
         contentView.distribution = .fillEqually
-        
-        addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(didSwipeToolbar(_:))))
+
+        addGestureRecognizer(
+            UIPanGestureRecognizer(target: self, action: #selector(didSwipeToolbar(_:)))
+        )
     }
-    
+
     private var isSearchButtonEnabled: Bool = false {
         didSet {
             addTabButton.isHidden = isSearchButtonEnabled
             searchButton.isHidden = !addTabButton.isHidden
         }
     }
-    
+
     func setSearchButtonState(url: URL?) {
         isSearchButtonEnabled = url?.isAboutHomeURL == true
     }
@@ -89,7 +93,7 @@ class BottomToolbarView: UIView, ToolbarProtocol {
         context.addLine(to: CGPoint(x: end.x, y: end.y))
         context.strokePath()
     }
-    
+
     private var previousX: CGFloat = 0.0
     @objc private func didSwipeToolbar(_ pan: UIPanGestureRecognizer) {
         switch pan.state {
@@ -122,7 +126,7 @@ extension BottomToolbarView: Themeable {
     var themeableChildren: [Themeable?]? {
         return actionButtons
     }
-    
+
     func applyTheme(_ theme: Theme) {
         styleChildren(theme: theme)
         backgroundColor = theme.colors.footer

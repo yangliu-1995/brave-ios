@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Foundation
-import SnapKit
 import Shared
+import SnapKit
 import SwiftKeychainWrapper
 
 /// Delegate available for PasscodeEntryViewController consumers to be notified of the validation of a passcode.
@@ -17,25 +17,27 @@ import SwiftKeychainWrapper
 class PasscodeEntryViewController: BasePasscodeViewController {
     weak var delegate: PasscodeEntryDelegate?
     fileprivate var passcodePane: PasscodePane
-    
+
     private var passcodeCheckTimer: Timer?
-    
+
     override init() {
         let authInfo = KeychainWrapper.sharedAppContainerKeychain.authenticationInfo()
         passcodePane = PasscodePane(title: nil, passcodeSize: authInfo?.passcode?.count ?? 6)
 
         super.init()
-        
-        passcodePane.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(passcodeCheckSetup)))
+
+        passcodePane.addGestureRecognizer(
+            UITapGestureRecognizer(target: self, action: #selector(passcodeCheckSetup))
+        )
         passcodePane.isUserInteractionEnabled = true
         passcodePane.accessibilityLabel = Strings.authenticationTouchForKeyboard
         passcodePane.accessibilityTraits = [.allowsDirectInteraction]
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = Strings.authenticationEnterPasscodeTitle
@@ -50,15 +52,15 @@ class PasscodeEntryViewController: BasePasscodeViewController {
         super.viewWillAppear(animated)
         passcodePane.codeInputView.delegate = self
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+
         passcodeCheckSetup()
     }
-    
+
     @objc func passcodeCheckSetup() {
-        
+
         if authenticationInfo?.isLocked() == true {
             disableUserInteraction()
             setUpTimer()
@@ -67,7 +69,7 @@ class PasscodeEntryViewController: BasePasscodeViewController {
             passcodePane.codeInputView.becomeFirstResponder()
         }
     }
-    
+
     private func disableUserInteraction() {
         displayLockoutError()
         // Don't show the keyboard or allow typing if we're locked out.
@@ -84,20 +86,23 @@ class PasscodeEntryViewController: BasePasscodeViewController {
         delegate?.userDidCancelValidation?()
         super.dismissAnimated()
     }
-    
+
     private func setUpTimer() {
         passcodeCheckTimer?.invalidate()
         passcodeCheckTimer = nil
-        
+
         guard let authInfo = authenticationInfo, let timeLeft = authInfo.lockoutTimeLeft else {
-                return
+            return
         }
-        
-        passcodeCheckTimer = Timer.scheduledTimer(timeInterval: timeLeft,
-                                                  target: self,
-                                                  selector: #selector(passcodeCheckSetup),
-                                                  userInfo: nil, repeats: false)
-        
+
+        passcodeCheckTimer = Timer.scheduledTimer(
+            timeInterval: timeLeft,
+            target: self,
+            selector: #selector(passcodeCheckSetup),
+            userInfo: nil,
+            repeats: false
+        )
+
         disableUserInteraction()
     }
 }
@@ -111,14 +116,13 @@ extension PasscodeEntryViewController: PasscodeInputViewDelegate {
         } else {
             passcodePane.shakePasscode()
             failIncorrectPasscode(inputView)
-            
+
             setUpTimer()
 
             // Store mutations on authentication info object
             KeychainWrapper.sharedAppContainerKeychain.setAuthenticationInfo(authenticationInfo)
         }
-        
+
         passcodePane.codeInputView.resetCode()
     }
 }
-

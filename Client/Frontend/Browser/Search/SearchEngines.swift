@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import BraveShared
 import Foundation
 import Shared
-import BraveShared
 import Storage
 import XCGLogger
 
@@ -26,7 +26,7 @@ enum SearchEngineError: Error {
 enum DefaultEngineType: String {
     case standard = "search.default.name"
     case privateMode = "search.defaultprivate.name"
-    
+
     var option: Preferences.Option<String?> {
         switch self {
         case .standard: return Preferences.Search.defaultEngineName
@@ -35,62 +35,62 @@ enum DefaultEngineType: String {
     }
 }
 
-/**
- * Manage a set of Open Search engines.
- *
- * The search engines are ordered.  Individual search engines can be enabled and disabled.  The
- * first search engine is distinguished and labeled the "default" search engine; it can never be
- * disabled.  Search suggestions should always be sourced from the default search engine.
- *
- * Two additional bits of information are maintained: whether the user should be shown "opt-in to
- * search suggestions" UI, and whether search suggestions are enabled.
- *
- * Users can set standard tab default search engine and private tab search engine.
- *
- * Consumers will almost always use `defaultEngine` if they want a single search engine, and
- * `quickSearchEngines()` if they want a list of enabled quick search engines (possibly empty,
- * since the default engine is never included in the list of enabled quick search engines, and
- * it is possible to disable every non-default quick search engine).
- *
- * The search engines are backed by a write-through cache into a ProfilePrefs instance.  This class
- * is not thread-safe -- you should only access it on a single thread (usually, the main thread)!
- */
+/// Manage a set of Open Search engines.
+///
+/// The search engines are ordered.  Individual search engines can be enabled and disabled.  The
+/// first search engine is distinguished and labeled the "default" search engine; it can never be
+/// disabled.  Search suggestions should always be sourced from the default search engine.
+///
+/// Two additional bits of information are maintained: whether the user should be shown "opt-in to
+/// search suggestions" UI, and whether search suggestions are enabled.
+///
+/// Users can set standard tab default search engine and private tab search engine.
+///
+/// Consumers will almost always use `defaultEngine` if they want a single search engine, and
+/// `quickSearchEngines()` if they want a list of enabled quick search engines (possibly empty,
+/// since the default engine is never included in the list of enabled quick search engines, and
+/// it is possible to disable every non-default quick search engine).
+///
+/// The search engines are backed by a write-through cache into a ProfilePrefs instance.  This class
+/// is not thread-safe -- you should only access it on a single thread (usually, the main thread)!
 class SearchEngines {
     fileprivate let fileAccessor: FileAccessor
-    
+
     init(files: FileAccessor) {
         self.fileAccessor = files
         self.disabledEngineNames = getDisabledEngineNames()
         self.orderedEngines = getOrderedEngines()
     }
-    
+
     func searchEngineSetup() {
         setInitialDefaultEngine(InitialSearchEngines().defaultSearchEngine.rawValue)
     }
-    
+
     /// If no engine type is specified this method returns search engine for regular browsing.
     func defaultEngine(forType type: DefaultEngineType? = nil) -> OpenSearchEngine {
-        let engineType = type ?? (PrivateBrowsingManager.shared.isPrivateBrowsing ? .privateMode : .standard)
-            
+        let engineType =
+            type ?? (PrivateBrowsingManager.shared.isPrivateBrowsing ? .privateMode : .standard)
+
         if let name = engineType.option.value,
-            let defaultEngine = orderedEngines.first(where: { $0.shortName == name }) {
+            let defaultEngine = orderedEngines.first(where: { $0.shortName == name })
+        {
             return defaultEngine
         }
-        
+
         let defaultEngineName = InitialSearchEngines().defaultSearchEngine.rawValue
-        
+
         let defaultEngine = orderedEngines.first(where: { $0.engineID == defaultEngineName })
         return defaultEngine ?? orderedEngines[0]
     }
-    
+
     /// Whether or not we should show DuckDuckGo related promotions based on the users current region
     static var shouldShowDuckDuckGoPromo: Bool {
         // We want to show ddg promo in most cases so this guard returns true.
         guard let region = Locale.current.regionCode else { return true }
-        
+
         return !InitialSearchEngines.qwantDefaultRegions.contains(region)
     }
-    
+
     /// Initialize default engine and set order of remaining search engines.
     /// Call this method only at initialization(app launch or onboarding).
     /// For updating search engines use `updateDefaultEngine()` method.
@@ -98,16 +98,17 @@ class SearchEngines {
         // update engine
         DefaultEngineType.standard.option.value = engine
         DefaultEngineType.privateMode.option.value = engine
-        
+
         let priorityEngine = InitialSearchEngines().priorityEngine?.rawValue
         let defEngine = defaultEngine(forType: .standard)
-        
+
         // Sort engines, priority engine at first place
-        var newlyOrderedEngines = orderedEngines
+        var newlyOrderedEngines =
+            orderedEngines
             .filter { engine in engine.shortName != defEngine.shortName }
             .sorted { e1, e2 in e1.shortName < e2.shortName }
             .sorted { e, _ in e.engineID == priorityEngine }
-        
+
         newlyOrderedEngines.insert(defEngine, at: 0)
         orderedEngines = newlyOrderedEngines
     }
@@ -115,24 +116,28 @@ class SearchEngines {
     /// Updates selected default engine, order of remaining search engines remains intact.
     func updateDefaultEngine(_ engine: String, forType type: DefaultEngineType) {
         type.option.value = engine
-        
+
         // The default engine is always enabled.
         enableEngine(defaultEngine(forType: type))
-        
+
         // When re-sorting engines only look at default search for standard browsing.
         if type == .standard {
             // Make sure we don't alter the private mode's default since it relies on order when its not set
-            if Preferences.Search.defaultPrivateEngineName.value == nil, let firstEngine = orderedEngines.first {
+            if Preferences.Search.defaultPrivateEngineName.value == nil,
+                let firstEngine = orderedEngines.first
+            {
                 // So set the default engine for private mode to whatever the default was before we changed the standard
                 updateDefaultEngine(firstEngine.shortName, forType: .privateMode)
             }
             // The default engine is always first in the list.
             var newlyOrderedEngines =
-                orderedEngines.filter { engine in engine.shortName != defaultEngine(forType: type).shortName }
+                orderedEngines.filter { engine in
+                    engine.shortName != defaultEngine(forType: type).shortName
+                }
             newlyOrderedEngines.insert(defaultEngine(forType: type), at: 0)
             orderedEngines = newlyOrderedEngines
         }
-            
+
     }
 
     func isEngineDefault(_ engine: OpenSearchEngine, type: DefaultEngineType? = nil) -> Bool {
@@ -153,16 +158,16 @@ class SearchEngines {
     }
 
     var quickSearchEngines: [OpenSearchEngine]! {
-        get {
-            return self.orderedEngines.filter({ (engine) in !self.isEngineDefault(engine) && self.isEngineEnabled(engine) })
-        }
+        return self.orderedEngines.filter({ (engine) in
+            !self.isEngineDefault(engine) && self.isEngineEnabled(engine)
+        })
     }
 
     var shouldShowSearchSuggestionsOptIn: Bool {
         get { return Preferences.Search.shouldShowSuggestionsOptIn.value }
         set { Preferences.Search.shouldShowSuggestionsOptIn.value = newValue }
     }
-    
+
     var shouldShowSearchSuggestions: Bool {
         get { return Preferences.Search.showSuggestions.value }
         set { Preferences.Search.showSuggestions.value = newValue }
@@ -202,13 +207,13 @@ class SearchEngines {
 
     /// Adds an engine to the front of the search engines list.
     func addSearchEngine(_ engine: OpenSearchEngine) throws {
-        guard orderedEngines.contains(where: { $0.searchTemplate != engine.searchTemplate}) else {
+        guard orderedEngines.contains(where: { $0.searchTemplate != engine.searchTemplate }) else {
             throw SearchEngineError.duplicate
         }
-        
+
         customEngines.append(engine)
         orderedEngines.insert(engine, at: 1)
-        
+
         do {
             try saveCustomEngines()
         } catch {
@@ -233,14 +238,16 @@ class SearchEngines {
     }
 
     fileprivate func customEngineFilePath() -> String {
-        let profilePath = try! self.fileAccessor.getAndEnsureDirectory() as NSString // swiftlint:disable:this force_try
+        let profilePath = try! self.fileAccessor.getAndEnsureDirectory() as NSString  // swiftlint:disable:this force_try
         return profilePath.appendingPathComponent(customSearchEnginesFileName)
     }
 
     fileprivate lazy var customEngines: [OpenSearchEngine] = {
         do {
             let data = try Data(contentsOf: URL(fileURLWithPath: customEngineFilePath()))
-            return (try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [OpenSearchEngine]) ?? []
+            return
+                (try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [OpenSearchEngine])
+                ?? []
         } catch {
             log.error("Failed to load custom search engines: \(error)")
             return []
@@ -249,10 +256,15 @@ class SearchEngines {
 
     fileprivate func saveCustomEngines() throws {
         do {
-            let data = try NSKeyedArchiver.archivedData(withRootObject: customEngines, requiringSecureCoding: true)
+            let data = try NSKeyedArchiver.archivedData(
+                withRootObject: customEngines,
+                requiringSecureCoding: true
+            )
             try data.write(to: URL(fileURLWithPath: customEngineFilePath()))
         } catch {
-            log.error("Failed to save custom engines: \(customEngines) - \(error.localizedDescription)")
+            log.error(
+                "Failed to save custom engines: \(customEngines) - \(error.localizedDescription)"
+            )
         }
     }
 
@@ -274,11 +286,14 @@ class SearchEngines {
 
     /// Get all bundled (not custom) search engines, with the default search engine first,
     /// but the others in no particular order.
-    class func getUnorderedBundledEngines(for selectedEngines: [String] = [],
-                                          isOnboarding: Bool) -> [OpenSearchEngine] {
+    class func getUnorderedBundledEngines(
+        for selectedEngines: [String] = [],
+        isOnboarding: Bool
+    ) -> [OpenSearchEngine] {
         let parser = OpenSearchParser(pluginMode: true)
 
-        guard let pluginDirectory = Bundle.main.resourceURL?.appendingPathComponent("SearchPlugins") else {
+        guard let pluginDirectory = Bundle.main.resourceURL?.appendingPathComponent("SearchPlugins")
+        else {
             assertionFailure("Search plugins not found. Check bundle")
             return []
         }
@@ -288,23 +303,31 @@ class SearchEngines {
         let engineNames = engines.map { $0.customId ?? $0.id.rawValue }
         assert(!engineNames.isEmpty, "No search engines")
 
-        return engineNames.map({ (name: $0, path: pluginDirectory.appendingPathComponent("\($0).xml").path) })
-            .filter({ FileManager.default.fileExists(atPath: $0.path) })
-            .compactMap({ parser.parse($0.path, engineID: $0.name) })
+        return engineNames.map({
+            (name: $0, path: pluginDirectory.appendingPathComponent("\($0).xml").path)
+        })
+        .filter({ FileManager.default.fileExists(atPath: $0.path) })
+        .compactMap({ parser.parse($0.path, engineID: $0.name) })
     }
 
     /// Get all known search engines, possibly as ordered by the user.
     fileprivate func getOrderedEngines() -> [OpenSearchEngine] {
-        let selectedSearchEngines = [Preferences.Search.defaultEngineName, Preferences.Search.defaultPrivateEngineName].compactMap { $0.value }
-        let unorderedEngines = customEngines
-            + SearchEngines.getUnorderedBundledEngines(for: selectedSearchEngines, isOnboarding: false)
+        let selectedSearchEngines = [
+            Preferences.Search.defaultEngineName, Preferences.Search.defaultPrivateEngineName,
+        ].compactMap { $0.value }
+        let unorderedEngines =
+            customEngines
+            + SearchEngines.getUnorderedBundledEngines(
+                for: selectedSearchEngines,
+                isOnboarding: false
+            )
 
         // might not work to change the default.
         guard let orderedEngineNames = Preferences.Search.orderedEngines.value else {
             // We haven't persisted the engine order, so return whatever order we got from disk.
             return unorderedEngines
         }
-        
+
         // We have a persisted order of engines, so try to use that order.
         // We may have found engines that weren't persisted in the ordered list
         // (if the user changed locales or added a new engine); these engines

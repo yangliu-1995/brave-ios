@@ -13,7 +13,7 @@ class FeedItemMenu {
     /// such as group cards or the headline pairs, `itemIndex` will be based on
     /// the actioned upon feed item.
     let menu: ((_ itemIndex: Int) -> UIMenu?)?
-    
+
     init(_ menu: @escaping (_ itemIndex: Int) -> UIMenu?) {
         self.menu = menu
     }

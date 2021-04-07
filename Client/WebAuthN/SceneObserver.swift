@@ -17,7 +17,7 @@ import UIKit
 class SceneObserver: NSObject {
 
     private(set) static var applicationWindow: UIWindow!
-    
+
     // This is set only once in the AppDelegate.
     class func setupApplication(window: UIWindow) {
         applicationWindow = window
@@ -25,7 +25,7 @@ class SceneObserver: NSObject {
 
     private var window: UIWindow
     private var sceneActivationClosure: () -> Void
-    
+
     // MARK: - Object lifecycle
     init(sceneActivationClosure: @escaping () -> Void) {
         self.window = SceneObserver.applicationWindow
@@ -33,23 +33,27 @@ class SceneObserver: NSObject {
         super.init()
         addSceneOnservation()
     }
-    
+
     deinit {
         removeSceneOnservation()
     }
-    
+
     // MARK: - Scene Observation
-    
+
     private var sceneDidActivateNotificationToken: NSObjectProtocol?
-    
+
     private func addSceneOnservation() {
         guard sceneDidActivateNotificationToken == nil else {
             return
         }
         let center = NotificationCenter.default
         let mainQueue = OperationQueue.main
-        
-        sceneDidActivateNotificationToken = center.addObserver(forName: UIScene.didActivateNotification, object: nil, queue: mainQueue) { [weak self] notification in
+
+        sceneDidActivateNotificationToken = center.addObserver(
+            forName: UIScene.didActivateNotification,
+            object: nil,
+            queue: mainQueue
+        ) { [weak self] notification in
             guard let self = self else {
                 return
             }
@@ -61,7 +65,7 @@ class SceneObserver: NSObject {
             }
         }
     }
-    
+
     private func removeSceneOnservation() {
         guard let token = sceneDidActivateNotificationToken else {
             return

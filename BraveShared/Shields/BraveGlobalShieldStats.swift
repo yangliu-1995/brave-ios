@@ -30,37 +30,40 @@ open class BraveGlobalShieldStats {
             postUpdateNotification()
         }
     }
-    
+
     public var scripts: Int = 0 {
         didSet {
             Preferences.BlockStats.scriptsCount.value = scripts
             postUpdateNotification()
         }
     }
-    
+
     public var images: Int = 0 {
         didSet {
             Preferences.BlockStats.imagesCount.value = images
             postUpdateNotification()
         }
     }
-    
+
     public var safeBrowsing: Int = 0 {
         didSet {
             Preferences.BlockStats.phishingCount.value = safeBrowsing
             postUpdateNotification()
         }
     }
-    
+
     public var fpProtection: Int = 0 {
         didSet {
             Preferences.BlockStats.fingerprintingCount.value = fpProtection
             postUpdateNotification()
         }
     }
-    
+
     private func postUpdateNotification() {
-        NotificationCenter.default.post(name: Notification.Name(rawValue: BraveGlobalShieldStats.didUpdateNotification), object: nil)
+        NotificationCenter.default.post(
+            name: Notification.Name(rawValue: BraveGlobalShieldStats.didUpdateNotification),
+            object: nil
+        )
     }
 
     fileprivate init() {

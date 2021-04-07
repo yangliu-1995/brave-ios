@@ -37,6 +37,7 @@ disabled_rules: # rule identifiers to exclude from running
   - unneeded_break_in_switch
   - closure_parameter_position
   - inclusive_language
+  - colon
 opt_in_rules: # some rules are only opt-in
   - closing_brace
   - opening_brace
@@ -78,8 +79,6 @@ closing_brace: error
 opening_brace: error
 return_arrow_whitespace: error
 statement_position:
-  severity: error
-colon:
   severity: error
 comma: error
 force_try: warning

@@ -4,76 +4,76 @@
 
 import UIKit
 
-public extension UILabel {
-    @objc dynamic var appearanceTextColor: UIColor! {
+extension UILabel {
+    @objc public dynamic var appearanceTextColor: UIColor! {
         get { return self.textColor }
         set { self.textColor = newValue }
     }
 }
 
-public extension UITableView {
-    @objc dynamic var appearanceSeparatorColor: UIColor? {
+extension UITableView {
+    @objc public dynamic var appearanceSeparatorColor: UIColor? {
         get { return self.separatorColor }
         set { self.separatorColor = newValue }
     }
 }
 
-public extension UITextView {
-    @objc dynamic var appearanceTextColor: UIColor? {
+extension UITextView {
+    @objc public dynamic var appearanceTextColor: UIColor? {
         get { return self.textColor }
         set { self.textColor = newValue }
     }
 }
 
-public extension UIView {
-    @objc dynamic var appearanceBackgroundColor: UIColor? {
+extension UIView {
+    @objc public dynamic var appearanceBackgroundColor: UIColor? {
         get { return self.backgroundColor }
         set { self.backgroundColor = newValue }
     }
 }
 
-public extension UITextField {
-    @objc dynamic var appearanceTextColor: UIColor? {
+extension UITextField {
+    @objc public dynamic var appearanceTextColor: UIColor? {
         get { return self.textColor }
         set { self.textColor = newValue }
     }
 }
 
-public extension UISwitch {
-    @objc dynamic var appearanceOnTintColor: UIColor? {
+extension UISwitch {
+    @objc public dynamic var appearanceOnTintColor: UIColor? {
         get { return self.onTintColor }
         set { self.onTintColor = newValue }
     }
 }
 
-public extension UIView {
-    @objc dynamic var appearanceOverrideUserInterfaceStyle: UIUserInterfaceStyle {
+extension UIView {
+    @objc public dynamic var appearanceOverrideUserInterfaceStyle: UIUserInterfaceStyle {
         get { self.overrideUserInterfaceStyle }
         set { self.overrideUserInterfaceStyle = newValue }
     }
 }
 
-public extension UINavigationBar {
-    @objc dynamic var appearanceBarTintColor: UIColor? {
+extension UINavigationBar {
+    @objc public dynamic var appearanceBarTintColor: UIColor? {
         get { return self.barTintColor }
         set { self.barTintColor = newValue }
     }
 }
 
-public extension UIToolbar {
-    @objc dynamic var appearanceBarTintColor: UIColor? {
+extension UIToolbar {
+    @objc public dynamic var appearanceBarTintColor: UIColor? {
         get { return self.barTintColor }
         set { self.barTintColor = newValue }
     }
 }
 
-public extension UIButton {
-    @objc dynamic var appearanceTextColor: UIColor! {
+extension UIButton {
+    @objc public dynamic var appearanceTextColor: UIColor! {
         get { return self.titleColor(for: .normal) }
         set { self.setTitleColor(newValue, for: .normal) }
     }
-    
-    @objc dynamic var appearanceTintColor: UIColor! {
+
+    @objc public dynamic var appearanceTintColor: UIColor! {
         get { return self.tintColor }
         set { self.tintColor = newValue }
     }

@@ -13,24 +13,24 @@ struct WebAuthnRegisterRequest: Decodable {
             var alg: Int
             var type: String
         }
-        
+
         struct User: Decodable {
             var displayName: String
             var name: String
             var id: String
         }
-        
+
         struct Rp: Decodable {
             var id: String?
             var name: String
         }
-        
+
         // This struct itself is optional
         // If present the two keys may or may not be present
         struct AuthenticatorSelection: Decodable {
             var requireResidentKey: Bool?
         }
-        
+
         let authenticatorSelection: AuthenticatorSelection?
         let pubKeyCredParams: [PubKeyCredParams]
         let user: User

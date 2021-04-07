@@ -17,9 +17,9 @@ extension LocalAdblockResourceProtocol {
             log.error("Could not find local file with name: \(name) and type :\(type)")
             return
         }
-        
+
         let url = URL(fileURLWithPath: path)
-        
+
         do {
             let data = try Data(contentsOf: url)
             completion(data)

@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import UIKit
 import SnapKit
+import UIKit
 
 public struct UrpLog {
     static let prefsKey = "urpLogs"
@@ -13,7 +13,9 @@ public struct UrpLog {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
 
-        guard let year =  components.year, let month = components.month, let day = components.day, let hour = components.hour, let minute = components.minute else {
+        guard let year = components.year, let month = components.month, let day = components.day,
+            let hour = components.hour, let minute = components.minute
+        else {
             return
         }
 

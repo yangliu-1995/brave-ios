@@ -4,11 +4,9 @@
 
 import Foundation
 
-/**
- Assertion for checking that the call is being made on the main thread.
-
- - parameter message: Message to display in case of assertion.
- */
+/// Assertion for checking that the call is being made on the main thread.
+///
+/// - parameter message: Message to display in case of assertion.
 public func assertIsMainThread(_ message: String) {
     assert(Thread.isMainThread, message)
 }
@@ -20,7 +18,7 @@ open class PerformanceTimer {
     var endTime: CFAbsoluteTime?
     let threshold: Double
     let label: String
-    
+
     public init(thresholdSeconds: Double = 0.001, label: String = "") {
         self.threshold = thresholdSeconds
         self.label = label

@@ -6,20 +6,23 @@ import Foundation
 
 private let REQUEST_KEY_PRIVILEGED = "privileged"
 
-/**
- Request that is allowed to load local resources.
+/// Request that is allowed to load local resources.
+///
+/// Pages running on the local server have same origin access all resources
+/// on the server, so we need to prevent arbitrary web pages from accessing
+/// these resources. We do so by explicitly requiring "privileged" requests
+/// in our navigation policy when loading local resources.
+///
+/// Be careful: creating a privileged request for an arbitrary URL provided
+/// by the page will break this model. Only use a privileged request when
+/// needed, and when you are sure the URL is from a trustworthy source!
 
- Pages running on the local server have same origin access all resources
- on the server, so we need to prevent arbitrary web pages from accessing
- these resources. We do so by explicitly requiring "privileged" requests
- in our navigation policy when loading local resources.
-
- Be careful: creating a privileged request for an arbitrary URL provided
- by the page will break this model. Only use a privileged request when
- needed, and when you are sure the URL is from a trustworthy source!
- **/
 class PrivilegedRequest: NSMutableURLRequest {
-    override init(url URL: URL, cachePolicy: NSURLRequest.CachePolicy, timeoutInterval: TimeInterval) {
+    override init(
+        url URL: URL,
+        cachePolicy: NSURLRequest.CachePolicy,
+        timeoutInterval: TimeInterval
+    ) {
         super.init(url: URL, cachePolicy: cachePolicy, timeoutInterval: timeoutInterval)
         setPrivileged()
     }

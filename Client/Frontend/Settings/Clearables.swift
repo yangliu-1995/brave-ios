@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import BraveShared
+import Data
 import Foundation
 import Shared
-import Data
-import BraveShared
 import WebKit
 
 private let log = Logger.browserLogger
@@ -21,17 +21,17 @@ class ClearableError: MaybeErrorType {
     init(msg: String) {
         self.msg = msg
     }
-    
+
     var description: String { return msg }
 }
 
 struct ClearableErrorType: MaybeErrorType {
     let err: Error
-    
+
     init(err: Error) {
         self.err = err
     }
-    
+
     var description: String {
         return "Couldn't clear: \(err)."
     }
@@ -40,19 +40,25 @@ struct ClearableErrorType: MaybeErrorType {
 // Remove all cookies and website data stored by the site.
 // This includes localStorage, sessionStorage, and WebSQL/IndexedDB and web cache.
 class CookiesAndCacheClearable: Clearable {
-    
+
     var label: String {
         return Strings.cookies
     }
-    
+
     func clear() -> Success {
         UserDefaults.standard.synchronize()
         let result = Deferred<Maybe<()>>()
         // need event loop to run to autorelease UIWebViews fully
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            WKWebsiteDataStore.default().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: Date(timeIntervalSinceReferenceDate: 0)) {
+            WKWebsiteDataStore.default().removeData(
+                ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+                modifiedSince: Date(timeIntervalSinceReferenceDate: 0)
+            ) {
                 UserDefaults.standard.synchronize()
-                BraveWebView.sharedNonPersistentStore().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: Date(timeIntervalSinceReferenceDate: 0)) {
+                BraveWebView.sharedNonPersistentStore().removeData(
+                    ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+                    modifiedSince: Date(timeIntervalSinceReferenceDate: 0)
+                ) {
                     UserDefaults.standard.synchronize()
                     result.fill(Maybe<()>(success: ()))
                 }
@@ -65,32 +71,40 @@ class CookiesAndCacheClearable: Clearable {
 // Clear the web cache. Note, this has to close all open tabs in order to ensure the data
 // cached in them isn't flushed to disk.
 class CacheClearable: Clearable {
-    
+
     var label: String {
         return Strings.cache
     }
-    
+
     func clear() -> Success {
         let result = Deferred<Maybe<()>>()
         // need event loop to run to autorelease UIWebViews fully
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            let localStorageClearables: Set<String> = [WKWebsiteDataTypeDiskCache,
-                                                       WKWebsiteDataTypeServiceWorkerRegistrations,
-                                                       WKWebsiteDataTypeOfflineWebApplicationCache,
-                                                       WKWebsiteDataTypeMemoryCache,
-                                                       WKWebsiteDataTypeFetchCache]
-            WKWebsiteDataStore.default().removeData(ofTypes: localStorageClearables, modifiedSince: Date(timeIntervalSinceReferenceDate: 0)) {
+            let localStorageClearables: Set<String> = [
+                WKWebsiteDataTypeDiskCache,
+                WKWebsiteDataTypeServiceWorkerRegistrations,
+                WKWebsiteDataTypeOfflineWebApplicationCache,
+                WKWebsiteDataTypeMemoryCache,
+                WKWebsiteDataTypeFetchCache,
+            ]
+            WKWebsiteDataStore.default().removeData(
+                ofTypes: localStorageClearables,
+                modifiedSince: Date(timeIntervalSinceReferenceDate: 0)
+            ) {
                 WebImageCacheManager.shared.clearDiskCache()
                 WebImageCacheManager.shared.clearMemoryCache()
                 WebImageCacheWithNoPrivacyProtectionManager.shared.clearDiskCache()
                 WebImageCacheWithNoPrivacyProtectionManager.shared.clearMemoryCache()
-                
-                BraveWebView.sharedNonPersistentStore().removeData(ofTypes: localStorageClearables, modifiedSince: Date(timeIntervalSinceReferenceDate: 0)) {
+
+                BraveWebView.sharedNonPersistentStore().removeData(
+                    ofTypes: localStorageClearables,
+                    modifiedSince: Date(timeIntervalSinceReferenceDate: 0)
+                ) {
                     result.fill(Maybe<()>(success: ()))
                 }
             }
         }
-        
+
         return result
     }
 }
@@ -99,11 +113,11 @@ class CacheClearable: Clearable {
 class HistoryClearable: Clearable {
     init() {
     }
-    
+
     var label: String {
         return Strings.browsingHistory
     }
-    
+
     func clear() -> Success {
         let result = Success()
         History.deleteAll {
@@ -120,11 +134,11 @@ class PasswordsClearable: Clearable {
     init(profile: Profile) {
         self.profile = profile
     }
-    
+
     var label: String {
         return Strings.savedLogins
     }
-    
+
     func clear() -> Success {
         // Clear our storage
         return profile.logins.removeAll() >>== { res in
@@ -145,13 +159,13 @@ class DownloadsClearable: Clearable {
     var label: String {
         return Strings.downloadedFiles
     }
-    
+
     func clear() -> Success {
         do {
             let fileManager = FileManager.default
             let downloadsLocation = try FileManager.default.downloadsPath()
             let filePaths = try fileManager.contentsOfDirectory(atPath: downloadsLocation.path)
-            
+
             try filePaths.forEach {
                 var fileUrl = downloadsLocation
                 fileUrl.appendPathComponent($0)
@@ -161,24 +175,24 @@ class DownloadsClearable: Clearable {
             // Not logging the `error` because downloaded file names can be sensitive to some users.
             log.error("Could not remove downloaded file")
         }
-        
+
         return succeed()
-        
+
     }
 }
 
 class BraveTodayClearable: Clearable {
-    
+
     let feedDataSource: FeedDataSource
-    
+
     init(feedDataSource: FeedDataSource) {
         self.feedDataSource = feedDataSource
     }
-    
+
     var label: String {
         return Strings.BraveToday.braveToday
     }
-    
+
     func clear() -> Success {
         feedDataSource.clearCachedFiles()
         return succeed()

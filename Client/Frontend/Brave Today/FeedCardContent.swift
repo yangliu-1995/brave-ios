@@ -21,7 +21,7 @@ protocol FeedCardContent {
     /// such as group cards or the headline pairs, `itemIndex` will be based on
     /// the actioned upon feed item.
     var contextMenu: FeedItemMenu? { get set }
-    
+
     /// A required initializer for making the cards content
     init()
 }

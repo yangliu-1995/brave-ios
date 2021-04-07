@@ -18,17 +18,24 @@ class CustomHeaderData: NSObject {
 
     // Initializer can't be placed in extension.
     required init?(coder aDecoder: NSCoder) {
-        guard let domainList = aDecoder.decodeObject(of: [NSString.self], forKey: CodingKeys.domain) as? [String],
-            let headerKey = aDecoder.decodeObject(of: NSString.self, forKey: CodingKeys.headerKey) as String?,
-            let headerValue = aDecoder.decodeObject(of: NSString.self, forKey: CodingKeys.headerValue) as String?
-            
-            else { return nil }
+        guard
+            let domainList = aDecoder.decodeObject(of: [NSString.self], forKey: CodingKeys.domain)
+                as? [String],
+            let headerKey = aDecoder.decodeObject(of: NSString.self, forKey: CodingKeys.headerKey)
+                as String?,
+            let headerValue = aDecoder.decodeObject(
+                of: NSString.self,
+                forKey: CodingKeys.headerValue
+            )
+                as String?
+
+        else { return nil }
 
         self.domainList = domainList
         self.headerField = headerKey
         self.headerValue = headerValue
     }
-    
+
     func cookies() -> [HTTPCookie] {
         let domains = domainList.compactMap { URL(string: $0)?.absoluteString }
         return domains.compactMap {
@@ -39,8 +46,8 @@ class CustomHeaderData: NSObject {
                 .name: "__Secure-\(headerField)",
                 .value: headerValue,
                 .secure: "TRUE",
-                .expires: NSDate(timeIntervalSinceNow: 7.days)
-                ])
+                .expires: NSDate(timeIntervalSinceNow: 7.days),
+            ])
             if cookie?.name == CustomHeaderData.securedBravePartnerKey {
                 return cookie
             }
@@ -53,7 +60,9 @@ class CustomHeaderData: NSObject {
         var customHeaders: [CustomHeaderData] = []
 
         for (_, object) in json {
-            guard let header: (String, JSON) = object["headers"].first, header.0 == CustomHeaderData.bravePartnerKey else { continue }
+            guard let header: (String, JSON) = object["headers"].first,
+                header.0 == CustomHeaderData.bravePartnerKey
+            else { continue }
 
             var domains = [String]()
 
@@ -61,7 +70,13 @@ class CustomHeaderData: NSObject {
                 domains.append(domain.1.stringValue)
             }
 
-            customHeaders.append(CustomHeaderData(domainList: domains, headerKey: header.0, headerValue: header.1.stringValue))
+            customHeaders.append(
+                CustomHeaderData(
+                    domainList: domains,
+                    headerKey: header.0,
+                    headerValue: header.1.stringValue
+                )
+            )
 
         }
 
@@ -81,7 +96,7 @@ extension CustomHeaderData: NSSecureCoding {
         aCoder.encode(headerField, forKey: CodingKeys.headerKey)
         aCoder.encode(headerValue, forKey: CodingKeys.headerValue)
     }
-    
+
     static var supportsSecureCoding: Bool {
         return true
     }

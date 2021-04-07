@@ -3,8 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import UIKit
 import Shared
+import UIKit
 
 // MARK: - SuggestionCellUX
 
@@ -33,13 +33,11 @@ protocol SuggestionCellDelegate: class {
 
 // MARK: - SuggestionCell
 
-/**
- * Cell that wraps a list of search suggestion buttons.
- */
+/// Cell that wraps a list of search suggestion buttons.
 class SuggestionCell: UITableViewCell {
 
     // MARK: Properties
-    
+
     weak var delegate: SuggestionCellDelegate?
 
     var suggestions: [String] = [] {
@@ -55,7 +53,12 @@ class SuggestionCell: UITableViewCell {
                 button.setTitle(suggestion, for: [])
 
                 button.addTarget(self, action: #selector(didSelectSuggestion), for: .touchUpInside)
-                button.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(didLongPressSuggestion)))
+                button.addGestureRecognizer(
+                    UILongPressGestureRecognizer(
+                        target: self,
+                        action: #selector(didLongPressSuggestion)
+                    )
+                )
 
                 // If this is the first image, add the search icon.
                 if contentView.subviews.isEmpty {
@@ -70,13 +73,13 @@ class SuggestionCell: UITableViewCell {
 
                 contentView.addSubview(button)
             }
-            
+
             setNeedsLayout()
         }
     }
 
     // MARK: Lifecycle
-    
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
@@ -95,7 +98,7 @@ class SuggestionCell: UITableViewCell {
     }
 
     // MARK: Internal
-    
+
     internal override func layoutSubviews() {
         super.layoutSubviews()
 
@@ -148,7 +151,12 @@ class SuggestionCell: UITableViewCell {
                 }
             }
 
-            button.frame = CGRect(x: currentLeft, y: currentTop, width: buttonSize.width, height: buttonSize.height)
+            button.frame = CGRect(
+                x: currentLeft,
+                y: currentTop,
+                width: buttonSize.width,
+                height: buttonSize.height
+            )
             button.titleLabel?.alpha = 1.0
 
             currentLeft += buttonSize.width + SuggestionCellUX.suggestionMargin
@@ -166,7 +174,7 @@ class SuggestionCell: UITableViewCell {
     }
 
     // MARK: Actions
-    
+
     @objc
     func didSelectSuggestion(_ sender: UIButton) {
         if let titleText = sender.titleLabel?.text {
@@ -186,13 +194,11 @@ class SuggestionCell: UITableViewCell {
 
 // MARK: - SuggestionButton
 
-/**
- * Rounded search suggestion button that highlights when selected.
- */
+/// Rounded search suggestion button that highlights when selected.
 private class SuggestionButton: InsetButton {
 
     // MARK: Properties
-    
+
     @objc
     override var isHighlighted: Bool {
         didSet {
@@ -201,7 +207,7 @@ private class SuggestionButton: InsetButton {
     }
 
     // MARK: Lifecycle
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
 

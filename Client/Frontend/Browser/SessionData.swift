@@ -2,16 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import Foundation
-
-import Shared
 import Data
+import Foundation
+import Shared
 
 class SessionData: NSObject, NSSecureCoding {
     let currentPage: Int
     let urls: [URL]
     let lastUsedTime: Timestamp
-    
+
     struct Keys {
         static let currentPage = "currentPage"
         static let history = "history"
@@ -23,7 +22,7 @@ class SessionData: NSObject, NSSecureCoding {
         return [
             SessionData.Keys.currentPage: String(self.currentPage),
             SessionData.Keys.lastUsedTime: String(self.lastUsedTime),
-            SessionData.Keys.urls: urls.map { $0.absoluteString }
+            SessionData.Keys.urls: urls.map { $0.absoluteString },
         ]
     }
 
@@ -55,15 +54,24 @@ class SessionData: NSObject, NSSecureCoding {
         coder.encode(urls, forKey: SessionData.Keys.urls)
         coder.encode(Int64(lastUsedTime), forKey: SessionData.Keys.lastUsedTime)
     }
-    
+
     // This is not a fully direct mapping, but rather an attempt to reconcile data differences, primarily used for tab restoration
     var savedTabData: SavedTab {
         let urlStrings = jsonDictionary[SessionData.Keys.urls] as? [String] ?? []
-        let currentURL = urlStrings[(currentPage < 0 ? max(urlStrings.count-1, 0) : currentPage)]
-        
-        return SavedTab(id: "InvalidId", title: nil, url: currentURL, isSelected: false, order: -1, screenshot: nil, history: urlStrings, historyIndex: Int16(currentPage))
+        let currentURL = urlStrings[(currentPage < 0 ? max(urlStrings.count - 1, 0) : currentPage)]
+
+        return SavedTab(
+            id: "InvalidId",
+            title: nil,
+            url: currentURL,
+            isSelected: false,
+            order: -1,
+            screenshot: nil,
+            history: urlStrings,
+            historyIndex: Int16(currentPage)
+        )
     }
-    
+
     static var supportsSecureCoding: Bool {
         return true
     }

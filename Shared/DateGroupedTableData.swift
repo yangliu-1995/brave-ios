@@ -4,7 +4,7 @@
 
 import Foundation
 
-fileprivate func getDate(dayOffset: Int) -> Date {
+private func getDate(dayOffset: Int) -> Date {
     let calendar = Calendar(identifier: .gregorian)
     let components = calendar.dateComponents([.year, .month, .day], from: Date())
     let today = calendar.date(from: components)!
@@ -15,18 +15,18 @@ public struct DateGroupedTableData<T: Equatable> {
     let todayTimestamp = getDate(dayOffset: 0).timeIntervalSince1970
     let yesterdayTimestamp = getDate(dayOffset: -1).timeIntervalSince1970
     let lastWeekTimestamp = getDate(dayOffset: -7).timeIntervalSince1970
-    
+
     var today: [(T, TimeInterval)] = []
     var yesterday: [(T, TimeInterval)] = []
     var lastWeek: [(T, TimeInterval)] = []
     var older: [(T, TimeInterval)] = []
-    
+
     public var isEmpty: Bool {
         return today.isEmpty && yesterday.isEmpty && lastWeek.isEmpty && older.isEmpty
     }
-    
+
     public init() {}
-    
+
     @discardableResult mutating public func add(_ item: T, timestamp: TimeInterval) -> IndexPath {
         if timestamp > todayTimestamp {
             today.append((item, timestamp))
@@ -42,7 +42,7 @@ public struct DateGroupedTableData<T: Equatable> {
             return IndexPath(row: older.count - 1, section: 3)
         }
     }
-    
+
     mutating public func remove(_ item: T) {
         if let index = today.firstIndex(where: { item == $0.0 }) {
             today.remove(at: index)
@@ -54,7 +54,7 @@ public struct DateGroupedTableData<T: Equatable> {
             older.remove(at: index)
         }
     }
-    
+
     public func numberOfItemsForSection(_ section: Int) -> Int {
         switch section {
         case 0:
@@ -67,7 +67,7 @@ public struct DateGroupedTableData<T: Equatable> {
             return older.count
         }
     }
-    
+
     public func itemsForSection(_ section: Int) -> [T] {
         switch section {
         case 0:
