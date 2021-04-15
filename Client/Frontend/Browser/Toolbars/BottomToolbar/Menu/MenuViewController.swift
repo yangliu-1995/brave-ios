@@ -7,6 +7,7 @@ import Storage
 import Shared
 import BraveShared
 import BraveUI
+import SwiftUI
 
 private class MenuCell: UITableViewCell {
     let iconView = UIImageView().then {
@@ -382,8 +383,21 @@ class MenuViewController: UITableViewController {
     }
     
     private func openSettings() {
-        let vc = SettingsViewController(profile: bvc.profile, tabManager: bvc.tabManager, feedDataSource: bvc.feedDataSource, rewards: bvc.rewards, legacyWallet: bvc.legacyWallet)
-        vc.settingsDelegate = bvc
+        let vc = UIHostingController(rootView: SettingsView(profile: bvc.profile, tabManager: bvc.tabManager, feedDataSource: bvc.feedDataSource, rewards: bvc.rewards, legacyWallet: bvc.legacyWallet, actionHandler: { action in
+            switch action {
+            case .openURLs(let urls):
+                break
+            case .pushViewController(let viewController):
+                guard let settingsNav = self.bvc.presentedViewController as? SettingsNavigationController else {
+                    return
+                }
+                settingsNav.pushViewController(viewController, animated: true)
+            }
+        }))
+//        let container = UINavigationController(rootViewController: vc)
+        
+//        let vc = SettingsViewController(profile: bvc.profile, tabManager: bvc.tabManager, feedDataSource: bvc.feedDataSource, rewards: bvc.rewards, legacyWallet: bvc.legacyWallet)
+//        vc.settingsDelegate = bvc
         open(vc, doneButton: DoneButton(style: .done, position: .right),
              allowSwipeToDismiss: false)
     }

@@ -399,6 +399,7 @@
 		27F443AD2135E25300296C58 /* ShareToBraveViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27F443AC2135E25300296C58 /* ShareToBraveViewController.swift */; };
 		27F443F42138843400296C58 /* BraveShareToInfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 27F443F22138843400296C58 /* BraveShareToInfoPlist.strings */; };
 		27F4798C25AF94B0004922E4 /* YubiKit in Frameworks */ = {isa = PBXBuildFile; productRef = 27F4798B25AF94B0004922E4 /* YubiKit */; };
+		27F4FAE626054271004CB1B5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27F4FAE526054271004CB1B5 /* SettingsView.swift */; };
 		27F94A3A21909A5900F4FADF /* SearchSuggestionsPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27F94A3921909A5900F4FADF /* SearchSuggestionsPromptView.swift */; };
 		27FCA8E02447708300A8CA48 /* FavoritesSectionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27FCA8DF2447708300A8CA48 /* FavoritesSectionProvider.swift */; };
 		27FCA8E3244770AB00A8CA48 /* FavoritesOverflowSectionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27FCA8E2244770AB00A8CA48 /* FavoritesOverflowSectionProvider.swift */; };
@@ -1902,6 +1903,7 @@
 		27F443AC2135E25300296C58 /* ShareToBraveViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareToBraveViewController.swift; sourceTree = "<group>"; };
 		27F443F32138843400296C58 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localizations/en.lproj/BraveShareToInfoPlist.strings; sourceTree = "<group>"; };
 		27F47A3125AFCECE004922E4 /* AdblockRust.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = AdblockRust.xcframework; sourceTree = "<group>"; };
+		27F4FAE526054271004CB1B5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		27F94A3921909A5900F4FADF /* SearchSuggestionsPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSuggestionsPromptView.swift; sourceTree = "<group>"; };
 		27FCA8DF2447708300A8CA48 /* FavoritesSectionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesSectionProvider.swift; sourceTree = "<group>"; };
 		27FCA8E2244770AB00A8CA48 /* FavoritesOverflowSectionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesOverflowSectionProvider.swift; sourceTree = "<group>"; };
@@ -4054,6 +4056,7 @@
 				278C700924F96D7000A246C8 /* BraveShieldsAndPrivacySettingsController.swift */,
 				0A42BC42260CEDA3007EBBF3 /* VPNLogs.swift */,
 				2F51767325E4024B00429692 /* PlaylistSettingsViewController.swift */,
+				27F4FAE526054271004CB1B5 /* SettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -7248,6 +7251,7 @@
 				44331DDA22552313007E3E93 /* LocationContainerView.swift in Sources */,
 				5E5E6E4625BA041E0035B6A0 /* PlaylistParticleEmitter.swift in Sources */,
 				2718780A216526240006036E /* PopupView.swift in Sources */,
+				27F4FAE626054271004CB1B5 /* SettingsView.swift in Sources */,
 				4422D4C221BFFB7600BF1855 /* comparator.cc in Sources */,
 				0A1E84452190A57F0042F782 /* SyncPairWordsViewController.swift in Sources */,
 				2746D27524A2A9FE00E38852 /* RewardsInternalsContributionPublishersListController.swift in Sources */,
