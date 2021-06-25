@@ -11,7 +11,7 @@ import LocalAuthentication
 import SwiftyJSON
 import Data
 import WebKit
-import BraveRewards
+import BraveCore
 
 extension TabBarVisibility: RepresentableOptionType {
     public var displayString: String {
