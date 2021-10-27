@@ -9,7 +9,7 @@ import SnapKit
 
 class WelcomeViewController: UIViewController {
     private let backgroundImageView = UIImageView().then {
-        $0.image = #imageLiteral(resourceName: "LaunchBackground")
+        $0.image = #imageLiteral(resourceName: "Launch_Background")
         $0.contentMode = .scaleAspectFill
     }
     

@@ -17,7 +17,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchBackground" translatesAutoresizingMaskIntoConstraints="NO" id="09M-cp-PAp">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch_Background" translatesAutoresizingMaskIntoConstraints="NO" id="09M-cp-PAp">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch_Leaves_Top" translatesAutoresizingMaskIntoConstraints="NO" id="fvr-pm-IQl">
@@ -26,8 +26,8 @@
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch_Leaves_Bottom" translatesAutoresizingMaskIntoConstraints="NO" id="sxm-V3-EUr">
                                 <rect key="frame" x="0.0" y="448" width="414" height="448"/>
                             </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchIcon" translatesAutoresizingMaskIntoConstraints="NO" id="mB6-gY-1dF">
-                                <rect key="frame" x="0.0" y="202" width="414" height="492"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch_Logo" translatesAutoresizingMaskIntoConstraints="NO" id="mB6-gY-1dF">
+                                <rect key="frame" x="0.0" y="251" width="414" height="394.5"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="pYU-rN-oKk"/>
@@ -55,10 +55,10 @@
         </scene>
     </scenes>
     <resources>
-        <image name="LaunchBackground" width="414" height="896"/>
-        <image name="LaunchIcon" width="414" height="492"/>
+        <image name="Launch_Background" width="414" height="896"/>
         <image name="Launch_Leaves_Bottom" width="414" height="448"/>
         <image name="Launch_Leaves_Top" width="414" height="227"/>
+        <image name="Launch_Logo" width="351.5" height="394.5"/>
         <namedColor name="background02">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
