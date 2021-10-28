@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="YWB-eE-Orm">
-    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
@@ -14,20 +14,20 @@
             <objects>
                 <viewController id="YWB-eE-Orm" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="0d4-YZ-zab">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch_Background" translatesAutoresizingMaskIntoConstraints="NO" id="09M-cp-PAp">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch_Leaves_Top" translatesAutoresizingMaskIntoConstraints="NO" id="fvr-pm-IQl">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="227"/>
+                                <rect key="frame" x="0.0" y="0.0" width="390" height="227"/>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch_Leaves_Bottom" translatesAutoresizingMaskIntoConstraints="NO" id="sxm-V3-EUr">
-                                <rect key="frame" x="0.0" y="448" width="414" height="448"/>
+                                <rect key="frame" x="0.0" y="396" width="390" height="448"/>
                             </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch_Logo" translatesAutoresizingMaskIntoConstraints="NO" id="mB6-gY-1dF">
-                                <rect key="frame" x="0.0" y="251" width="414" height="394.5"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch_Icon" translatesAutoresizingMaskIntoConstraints="NO" id="mkz-b5-xtQ">
+                                <rect key="frame" x="0.0" y="176" width="390" height="492"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="pYU-rN-oKk"/>
@@ -36,16 +36,16 @@
                             <constraint firstAttribute="trailing" secondItem="fvr-pm-IQl" secondAttribute="trailing" id="0Xw-54-tiX"/>
                             <constraint firstAttribute="bottom" secondItem="09M-cp-PAp" secondAttribute="bottom" id="29Y-eg-R82"/>
                             <constraint firstItem="09M-cp-PAp" firstAttribute="top" secondItem="0d4-YZ-zab" secondAttribute="top" id="3sY-CP-vZS"/>
+                            <constraint firstItem="mkz-b5-xtQ" firstAttribute="centerY" secondItem="0d4-YZ-zab" secondAttribute="centerY" id="4Jd-4J-kGp"/>
                             <constraint firstItem="fvr-pm-IQl" firstAttribute="leading" secondItem="0d4-YZ-zab" secondAttribute="leading" id="5aC-RA-upc"/>
-                            <constraint firstItem="mB6-gY-1dF" firstAttribute="centerY" secondItem="0d4-YZ-zab" secondAttribute="centerY" id="8Ik-9x-bo2"/>
                             <constraint firstItem="sxm-V3-EUr" firstAttribute="leading" secondItem="0d4-YZ-zab" secondAttribute="leading" id="BSh-EE-sMk"/>
                             <constraint firstAttribute="bottom" secondItem="sxm-V3-EUr" secondAttribute="bottom" id="Ele-Iv-QcD"/>
+                            <constraint firstItem="mkz-b5-xtQ" firstAttribute="leading" secondItem="pYU-rN-oKk" secondAttribute="leading" id="Jdp-vF-TlR"/>
                             <constraint firstItem="fvr-pm-IQl" firstAttribute="top" secondItem="0d4-YZ-zab" secondAttribute="top" id="SPU-C3-0Yx"/>
                             <constraint firstItem="09M-cp-PAp" firstAttribute="trailing" secondItem="0d4-YZ-zab" secondAttribute="trailing" id="b79-cy-pWJ"/>
-                            <constraint firstItem="mB6-gY-1dF" firstAttribute="leading" secondItem="0d4-YZ-zab" secondAttribute="leading" id="iQ6-uU-32P"/>
                             <constraint firstItem="09M-cp-PAp" firstAttribute="leading" secondItem="0d4-YZ-zab" secondAttribute="leading" id="l26-tT-my8"/>
                             <constraint firstAttribute="trailing" secondItem="sxm-V3-EUr" secondAttribute="trailing" id="pFf-Ar-E75"/>
-                            <constraint firstAttribute="trailing" secondItem="mB6-gY-1dF" secondAttribute="trailing" id="stx-WZ-zAc"/>
+                            <constraint firstItem="pYU-rN-oKk" firstAttribute="trailing" secondItem="mkz-b5-xtQ" secondAttribute="trailing" id="xsZ-Iu-FJ6"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -56,9 +56,9 @@
     </scenes>
     <resources>
         <image name="Launch_Background" width="414" height="896"/>
+        <image name="Launch_Icon" width="414" height="492"/>
         <image name="Launch_Leaves_Bottom" width="414" height="448"/>
         <image name="Launch_Leaves_Top" width="414" height="227"/>
-        <image name="Launch_Logo" width="351.5" height="394.5"/>
         <namedColor name="background02">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
