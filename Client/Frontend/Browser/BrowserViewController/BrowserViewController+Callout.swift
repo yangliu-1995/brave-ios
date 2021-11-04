@@ -30,17 +30,21 @@ extension BrowserViewController {
     func presentSyncAlertCallout() {
         //if Preferences.DebugFlag.skipNTPCallouts == true { return }
         
-        let hostingController = UIHostingController(rootView: PrivacyEverywhereView())
-        hostingController.modalPresentationStyle = .popover
+        let container = PrivacyEverywhereController {
+            print("Dismissed")
+        }
         
-        let popover = hostingController.popoverPresentationController
-        hostingController.preferredContentSize = hostingController.view.systemLayoutSizeFitting(view.bounds.size)
+        let popover = PopupViewController(contentController: container)
+        self.present(popover, animated: true)
         
-        popover?.sourceView = self.view
-        popover?.sourceRect = CGRect(x: view.center.x, y: view.center.y, width: 0, height: 0)
-        popover?.permittedArrowDirections = UIPopoverArrowDirection(rawValue: 0)
-
-        self.present(hostingController, animated: true, completion: nil)
+//        let popover = hostingController.popoverPresentationController
+//        hostingController.preferredContentSize = hostingController.view.systemLayoutSizeFitting(view.bounds.size)
+//
+//        popover?.sourceView = self.view
+//        popover?.sourceRect = CGRect(x: view.center.x, y: view.center.y, width: 0, height: 0)
+//        popover?.permittedArrowDirections = UIPopoverArrowDirection(rawValue: 0)
+//
+//        self.present(hostingController, animated: true, completion: nil)
 
 
 //        let hostingController = UIHostingController(rootView: PrivacyEverywhereView())
