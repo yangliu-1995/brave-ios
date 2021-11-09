@@ -9,19 +9,20 @@ import BraveUI
 struct PageZoomView: View {
     @State private var minValue = 0.5
     @State private var maxValue = 3.0
-    @State private var currentValue = 1.0 {
+    @State private var displayValue = "100%"
+    @Binding var currentValue: Double {
         didSet {
-            pageZoomUpdated(currentValue)
+            // FIXME: Workaround, i can't get it to update view by Double binding only.
+            displayValue = percentDisplay(for: currentValue)
         }
     }
-    private var defaultValue = 1.0
-    
-    let pageZoomUpdated: ((Double) -> Void)
+    private let defaultValue: Double 
     
     let steps: [Double] = [0.5, 0.75, 0.85, 1.0, 1.15, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
     
-    init(pageZoomUpdated: @escaping ((Double) -> Void)) {
-        self.pageZoomUpdated = pageZoomUpdated
+    init(currentValue: Binding<Double>, defaultValue: Double) {
+        self._currentValue = currentValue
+        self.defaultValue = defaultValue
     }
     
     var body: some View {
@@ -37,8 +38,10 @@ struct PageZoomView: View {
                 }
             }
         }
-        .background(Color(.braveBackground))
-        .padding()
+        .frame(maxHeight: .infinity)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
+        .background(Color(.secondaryBraveBackground))
     }
     
     var customStepper: some View {
@@ -49,7 +52,7 @@ struct PageZoomView: View {
             .padding(.leading)
             Divider()
                 .frame(height: 16)
-            Button(percentDisplay(for: currentValue)) {
+            Button(displayValue) {
                 currentValue = defaultValue
             }
             .accentColor(Color(.braveLabel))
@@ -61,7 +64,7 @@ struct PageZoomView: View {
             .padding(.trailing)
         }
         .padding(.vertical, 4)
-        .background(Color(.secondaryBraveBackground))
+        .background(Color(.braveBackground))
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
     
@@ -86,6 +89,6 @@ struct PageZoomView: View {
 
 struct PageZoomView_Previews: PreviewProvider {
     static var previews: some View {
-        PageZoomView(pageZoomUpdated: { _ in })
+        PageZoomView(currentValue: .constant(1.0), defaultValue: 1.0)
     }
 }

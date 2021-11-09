@@ -1757,12 +1757,12 @@ class BrowserViewController: UIViewController, BrowserViewControllerDelegate {
     }
     
     func showPageZoom() {
-        let pageZoom = PageZoomView(pageZoomUpdated: { [weak self] value in
-            self?.tabManager.selectedTab?.webView?.pageZoom = value
-            self?.tabManager.selectedTab?.webView?.updateConstraints()
-            self?.tabManager.selectedTab?.webView?.setNeedsLayout()
-            
-        })
+        let pageZoom = PageZoomView(currentValue: .init(get: {
+            self.tabManager.selectedTab?.webView?.value(forKey: "viewScale") as? Double ?? 1.0
+        }, set: { value in
+            self.tabManager.selectedTab?.webView?.setValue(value, forKey: "viewScale")
+        }), defaultValue: 1.0)
+        // self?.tabManager.selectedTab?.webView?.setValue(value, forKey: "viewScale")
         
         let vc = UIHostingController(rootView: pageZoom)
         
