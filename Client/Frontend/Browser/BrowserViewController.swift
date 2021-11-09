@@ -1755,6 +1755,26 @@ class BrowserViewController: UIViewController, BrowserViewControllerDelegate {
         
         UIApplication.shared.open(url, options: [:])
     }
+    
+    func showPageZoom() {
+        let pageZoom = PageZoomView(pageZoomUpdated: { [weak self] value in
+            self?.tabManager.selectedTab?.webView?.pageZoom = value
+            self?.tabManager.selectedTab?.webView?.updateConstraints()
+            self?.tabManager.selectedTab?.webView?.setNeedsLayout()
+            
+        })
+        
+        let vc = UIHostingController(rootView: pageZoom)
+        
+        alertStackView.addArrangedSubview(vc.view)
+        
+        vc.view.snp.makeConstraints {
+            $0.height.equalTo(UIConstants.toolbarHeight)
+            $0.edges.equalTo(alertStackView)
+        }
+        
+        updateViewConstraints()
+    }
 
     func updateFindInPageVisibility(visible: Bool, tab: Tab? = nil) {
         if visible {
