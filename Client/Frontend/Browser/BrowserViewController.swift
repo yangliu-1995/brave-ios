@@ -941,14 +941,15 @@ class BrowserViewController: UIViewController, BrowserViewControllerDelegate {
         presentPassCodeMigration()
         
         // Present Onboarding to new users, existing users will not see the onboarding
-        presentOnboardingIntro()
+//        presentOnboardingIntro()
         
         // Full Screen Callout Presantation
         // Priority: VPN - Default Browser - Rewards - Sync
-        presentVPNAlertCallout()
-        presentDefaultBrowserScreenCallout()
-        presentBraveRewardsScreenCallout()
-        presentSyncAlertCallout()
+//        presentVPNAlertCallout()
+//        presentDefaultBrowserScreenCallout()
+//        presentBraveRewardsScreenCallout()
+//        presentSyncAlertCallout()
+        presentReleaseNotesCallout()
                 
         screenshotHelper.viewIsVisible = true
         screenshotHelper.takePendingScreenshots(tabManager.allTabs)

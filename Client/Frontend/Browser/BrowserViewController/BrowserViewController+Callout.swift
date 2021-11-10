@@ -137,4 +137,28 @@ extension BrowserViewController {
         
         return
     }
+    
+    func presentReleaseNotesCallout() {
+//        if Preferences.DebugFlag.skipNTPCallouts == true, isfullScreenCalloutPresented { return }
+//
+//        if !FullScreenCalloutManager.shouldShowDefaultBrowserCallout(calloutType: .sync) {
+//            return
+//        }
+        
+        if isfullScreenCalloutPresented { return }
+                
+        //if !BraveSyncAPI.shared.isInSyncGroup {
+
+            let controller = ReleaseNotesViewController()
+            controller.rootView.dismiss = { [unowned controller] in
+                controller.dismiss(animated: true)
+            }
+            
+            
+            present(PopupViewController(contentController: controller), animated: true, completion: nil)
+            isfullScreenCalloutPresented = true
+        //}
+        
+        return
+    }
 }
