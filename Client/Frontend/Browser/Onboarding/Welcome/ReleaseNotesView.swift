@@ -38,7 +38,6 @@ struct ReleaseNotesView: View {
         }
         .frame(maxWidth: 450)
         .background(Color(.braveBackground))
-        .cornerRadius(20.0)
     }
     
     private var imageOverlay: some View {
@@ -86,17 +85,5 @@ struct ReleaseNotesView_Previews: PreviewProvider {
             }
             .previewDevice("iPad Pro (9.7-inch)")
         }
-    }
-}
-
-class ReleaseNotesViewController: UIHostingController<ReleaseNotesView> & PopupContentComponent {
-    
-    init() {
-        super.init(rootView: ReleaseNotesView())
-        view.backgroundColor = .clear
-    }
-    
-    @objc required dynamic init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }
