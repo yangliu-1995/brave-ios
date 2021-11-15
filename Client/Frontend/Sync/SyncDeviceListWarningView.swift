@@ -13,28 +13,33 @@ struct BasicSyncDevice: Identifiable {
     
     enum DeviceType {
         case mobile
+        case tablet
         case desktop
     }
 }
 
 struct SyncDeviceListWarningView: View {
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    
+    @State private var contentSize: CGSize = .zero
+    
     var devices: [BasicSyncDevice]
     
     var onCancel: (() -> Void)?
     var onJoin: (() -> Void)?
     
     var body: some View {
-        VStack {
+        VStack(spacing: 16.0) {
             HStack {
                 Spacer()
                 Text("List of Devices")
                     .font(.title3.weight(.medium))
                     .foregroundColor(Color(.bravePrimary))
                 Spacer(minLength: 15.0)
-                Button {
+                Button(action: {
                     onCancel?()
-                } label: {
-                    Image(uiImage: #imageLiteral(resourceName: "close-medium"))
+                }) {
+                    Image(uiImage: #imageLiteral(resourceName: "close-medium").withTintColor(.braveBackground, renderingMode: .alwaysTemplate))
                 }
             }
             .padding([.leading, .trailing, .top])
@@ -43,13 +48,25 @@ struct SyncDeviceListWarningView: View {
                 .font(.subheadline)
                 .foregroundColor(Color(.bravePrimary))
                 .padding(.horizontal)
-            List {
-                ForEach(devices) { device in
-                    DeviceView(title: device.title, isMobile: device.type == .mobile)
-                        .padding([.vertical])
+            Divider()
+            ScrollView {
+                LazyVStack {
+                    ForEach(devices) { device in
+                        DeviceView(title: device.title, type: device.type)
+                            .padding([.vertical])
+                            .background(Color(.braveBackground))
+                    }
                 }
+                .padding([.leading, .trailing])
+                .overlay(
+                    GeometryReader { geo in
+                        Color.clear.onAppear {
+                            contentSize = geo.size
+                        }
+                    }
+                )
             }
-            .listStyle(PlainListStyle())
+            .frame(maxWidth: .infinity, maxHeight: contentSize.height)
             HStack {
                 Button(action: {
                     onCancel?()
@@ -70,22 +87,22 @@ struct SyncDeviceListWarningView: View {
                         .padding()
                 }
                 .background(Color(.braveBlurple))
-                .foregroundColor(Color(.braveBackground))
+                .foregroundColor(Color(.white))
             }
             .border(Color(.braveBlurple))
         }
-        .frame(maxWidth: 450)
         .background(Color(.braveBackground))
+        .frame(maxWidth: 450)
     }
 }
 
 private struct DeviceView: View {
     let title: String
-    let isMobile: Bool
+    let type: BasicSyncDevice.DeviceType
     
     var body: some View {
         HStack(alignment: .center, spacing: 8.0) {
-            Image(systemName: isMobile ? "apps.iphone" : "desktopcomputer")
+            Image(systemName: type == .mobile ? "apps.iphone" : type == .tablet ? "apps.ipad" : "desktopcomputer")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 36.0, height: 36.0, alignment: .center)
@@ -107,8 +124,7 @@ struct SyncDeviceListWarningView_Previews: PreviewProvider {
                 
                 SyncDeviceListWarningView(devices: [
                     BasicSyncDevice(id: UUID().uuidString, title: "Mobile", type: .mobile),
-                    BasicSyncDevice(id: UUID().uuidString, title: "Desktop", type: .desktop),
-                    BasicSyncDevice(id: UUID().uuidString, title: "Mobile", type: .mobile),
+                    BasicSyncDevice(id: UUID().uuidString, title: "Tablet", type: .tablet),
                     BasicSyncDevice(id: UUID().uuidString, title: "Desktop", type: .desktop)
                 ])
             }

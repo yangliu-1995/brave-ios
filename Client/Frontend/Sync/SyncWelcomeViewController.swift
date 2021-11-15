@@ -207,20 +207,27 @@ class SyncWelcomeViewController: SyncViewController {
                 pushAddDeviceVC()
                 return
             }
+            
+            let displayWarning = { [weak self] in
+                guard let self = self else { return }
+                self.navigationController?.popToViewController(self, animated: true)
+                
+                DispatchQueue.main.async {
+                    self.displaySyncWarning { shouldJoinSyncChain in
+                        if shouldJoinSyncChain {
+                            Preferences.Chromium.syncEnabled.value = true
+                            pushAddDeviceVC()
+                        } else {
+                            BraveSyncAPI.shared.leaveSyncGroup()
+                        }
+                    }
+                }
+            }
 
             addDevice.enableNavigationPrevention()
             self.syncDeviceInfoObserver = BraveSyncAPI.addDeviceStateObserver {
                 self.syncDeviceInfoObserver = nil
-                
-                self.displaySyncWarning { shouldJoinSyncChain in
-                    if shouldJoinSyncChain {
-                        BraveSyncAPI.shared.syncEnabled = true
-                        pushAddDeviceVC()
-                    } else {
-                        BraveSyncAPI.shared.syncEnabled = false
-                        BraveSyncAPI.shared.leaveSyncGroup()
-                    }
-                }
+                displayWarning()
             }
             
             if !DeviceInfo.hasConnectivity() {
@@ -229,6 +236,7 @@ class SyncWelcomeViewController: SyncViewController {
             }
             
             BraveSyncAPI.shared.joinSyncGroup(codeWords: BraveSyncAPI.shared.getSyncCode())
+            BraveSyncAPI.shared.syncEnabled = true
         }
 
         self.navigationController?.pushViewController(addDevice, animated: true)
@@ -238,25 +246,33 @@ class SyncWelcomeViewController: SyncViewController {
         handleSyncSetupFailure()
         let pairCamera = SyncPairCameraViewController()
         
-        pairCamera.syncHandler = { codeWords in
-            pairCamera.enableNavigationPrevention()
+        pairCamera.syncHandler = { [weak self, weak pairCamera] codeWords in
+            guard let self = self else { return }
+            pairCamera?.enableNavigationPrevention()
+            
+            let displayWarning = { [weak self] in
+                guard let self = self else { return }
+                self.navigationController?.popToViewController(self, animated: true)
+                
+                DispatchQueue.main.async {
+                    self.displaySyncWarning { [weak self] shouldJoinSyncChain in
+                        guard let self = self else { return }
+                        
+                        if shouldJoinSyncChain {
+                            Preferences.Chromium.syncEnabled.value = true
+                            self.pushSettings()
+                        } else {
+                            BraveSyncAPI.shared.leaveSyncGroup()
+                        }
+                    }
+                }
+            }
             
             self.syncDeviceInfoObserver = BraveSyncAPI.addDeviceStateObserver {
                 self.syncServiceObserver = nil
                 self.syncDeviceInfoObserver = nil
-                pairCamera.disableNavigationPrevention()
-                
-                self.displaySyncWarning { [weak self] shouldJoinSyncChain in
-                    guard let self = self else { return }
-                    
-                    if shouldJoinSyncChain {
-                        BraveSyncAPI.shared.syncEnabled = true
-                        self.pushSettings()
-                    } else {
-                        BraveSyncAPI.shared.syncEnabled = false
-                        BraveSyncAPI.shared.leaveSyncGroup()
-                    }
-                }
+                pairCamera?.disableNavigationPrevention()
+                displayWarning()
             }
             
             if !DeviceInfo.hasConnectivity() {
@@ -265,6 +281,7 @@ class SyncWelcomeViewController: SyncViewController {
             }
  
             BraveSyncAPI.shared.joinSyncGroup(codeWords: codeWords)
+            BraveSyncAPI.shared.syncEnabled = true
         }
         
         self.navigationController?.pushViewController(pairCamera, animated: true)
@@ -278,32 +295,33 @@ class SyncWelcomeViewController: SyncViewController {
         }
         
         let basicDevices = devices.compactMap({ (device: BraveSyncDevice) -> BasicSyncDevice? in
-            if device.isCurrentDevice {
-                return nil
+            let deviceType: BasicSyncDevice.DeviceType
+            switch device.type {
+            case "phone":
+                deviceType = .mobile
+            case "tablet":
+                deviceType = .tablet
+            default:
+                deviceType = .desktop
             }
-            
-            return BasicSyncDevice(id: device.guid, title: device.name ?? "N/A", type: device.type == "mobile" ? .mobile : .desktop)
+            return BasicSyncDevice(id: device.guid, title: device.name ?? "N/A", type: deviceType)
         })
         
-        if basicDevices.isEmpty {
-            completion(false)
-            return
-        }
-        
         var warningView = SyncDeviceListWarningView(devices: basicDevices)
-        let popup = PopupViewController(rootView: warningView)
-        
-        warningView.onCancel = { [unowned popup] in
-            popup.dismiss(animated: true)
+        warningView.onCancel = {
+            self.dismiss(animated: true)
+            self.syncDeviceInfoObserver = nil
             completion(false)
         }
         
-        warningView.onJoin = { [unowned popup] in
-            popup.dismiss(animated: true)
+        warningView.onJoin = {
+            self.dismiss(animated: true)
+            self.syncDeviceInfoObserver = nil
             completion(true)
         }
         
-        present(popup, animated: true)
+        let popup = PopupViewController(rootView: warningView)
+        navigationController?.topViewController?.present(popup, animated: true)
     }
     
     private func pushSettings() {

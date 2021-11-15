@@ -8,6 +8,7 @@ import BraveCore
 import Data
 
 class SyncPairCameraViewController: SyncViewController {
+    private struct Scanner { static var lock = false }
     
     var syncHandler: ((String) -> Void)?
     var cameraView: SyncCameraView!
@@ -18,6 +19,11 @@ class SyncPairCameraViewController: SyncViewController {
     var loadingView: UIView!
     let loadingSpinner = UIActivityIndicatorView(style: .large).then {
         $0.color = .white
+    }
+    
+    deinit {
+        cameraView.captureSession?.stopRunning()
+        Scanner.lock = false
     }
     
     override func viewDidLoad() {
@@ -48,7 +54,6 @@ class SyncPairCameraViewController: SyncViewController {
             guard let self = self else { return }
             
             // TODO: Functional, but needs some cleanup
-            struct Scanner { static var lock = false }
             
             if Scanner.lock {
                 // Have internal, so camera error does not show
