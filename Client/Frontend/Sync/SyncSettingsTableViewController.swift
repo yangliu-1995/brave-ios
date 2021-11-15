@@ -9,6 +9,29 @@ import BraveCore
 
 private let log = Logger.browserLogger
 
+struct BraveSyncDevice: Codable {
+    let chromeVersion: String
+    let hasSharingInfo: Bool
+    let id: String
+    let guid: String
+    let isCurrentDevice: Bool
+    let supportsSelfDelete: Bool
+    let lastUpdatedTimestamp: TimeInterval
+    let name: String?
+    let os: String
+    let sendTabToSelfReceivingEnabled: Bool
+    let type: String
+    
+    func remove() {
+        // Devices other than `isCurrentDevice` can only be deleted if
+        // `supportsSelfDelete` is true. Attempting to delete another device
+        // from the sync chain that does not support it, will crash or
+        // have undefined behaviour as the other device won't know that
+        // it was deleted.
+        BraveSyncAPI.shared.removeDeviceFromSyncGroup(deviceGuid: self.guid)
+    }
+}
+
 class SyncSettingsTableViewController: UITableViewController {
     
     // MARK: Lifecycle
@@ -52,29 +75,6 @@ class SyncSettingsTableViewController: UITableViewController {
     }
     
     // MARK: Private
-    
-    private struct BraveSyncDevice: Codable {
-        let chromeVersion: String
-        let hasSharingInfo: Bool
-        let id: String
-        let guid: String
-        let isCurrentDevice: Bool
-        let supportsSelfDelete: Bool
-        let lastUpdatedTimestamp: TimeInterval
-        let name: String?
-        let os: String
-        let sendTabToSelfReceivingEnabled: Bool
-        let type: String
-        
-        func remove() {
-            // Devices other than `isCurrentDevice` can only be deleted if
-            // `supportsSelfDelete` is true. Attempting to delete another device
-            // from the sync chain that does not support it, will crash or
-            // have undefined behaviour as the other device won't know that
-            // it was deleted.
-            BraveSyncAPI.shared.removeDeviceFromSyncGroup(deviceGuid: self.guid)
-        }
-    }
     
     private var syncDeviceObserver: AnyObject?
     private var devices = [BraveSyncDevice]()
@@ -352,29 +352,19 @@ extension SyncSettingsTableViewController {
 extension SyncSettingsTableViewController {
     
     private func updateDeviceList() {
-        if let json = BraveSyncAPI.shared.getDeviceListJSON(), let data = json.data(using: .utf8) {
-            do {
-                let devices = try JSONDecoder().decode([BraveSyncDevice].self, from: data)
-                self.devices = devices
-                
-                if devices.count <= 0 {
-                    // Technically we shouldn't be calling this function..
-                    // If Desktop deletes an iOS device from the chain, we're already removed..
-                    // We should be just updating our UI and calling
-                    // `Preferences.Chromium.syncEnabled.value = false`
-                    // But I don't have a TRUE way to tell if the current device
-                    // was removed from the sync chain because `OnSelfDeviceInfoDeleted` has no callback.
-                    // So instead, we call `reset_sync` which won't hurt.
-                    BraveSyncAPI.shared.leaveSyncGroup()
-                    self.navigationController?.popToRootViewController(animated: true)
-                } else {
-                    self.tableView.reloadData()
-                }
-            } catch {
-                log.error(error)
-            }
+        devices = BraveSyncAPI.shared.deviceList
+        if devices.isEmpty {
+            // Technically we shouldn't be calling this function..
+            // If Desktop deletes an iOS device from the chain, we're already removed..
+            // We should be just updating our UI and calling
+            // `Preferences.Chromium.syncEnabled.value = false`
+            // But I don't have a TRUE way to tell if the current device
+            // was removed from the sync chain because `OnSelfDeviceInfoDeleted` has no callback.
+            // So instead, we call `reset_sync` which won't hurt.
+            BraveSyncAPI.shared.leaveSyncGroup()
+            self.navigationController?.popToRootViewController(animated: true)
         } else {
-            log.error("Something went wrong while retrieving Sync Devices..")
+            self.tableView.reloadData()
         }
     }
     

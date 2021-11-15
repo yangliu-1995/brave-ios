@@ -5,6 +5,9 @@ import Shared
 import Data
 import BraveShared
 import BraveCore
+import BraveUI
+
+private let log = Logger.browserLogger
 
 /// Sometimes during heavy operations we want to prevent user from navigating back, changing screen etc.
 protocol NavigationPrevention {
@@ -131,6 +134,10 @@ class SyncWelcomeViewController: SyncViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if !BraveSyncAPI.shared.isInSyncGroup {
+            BraveSyncAPI.shared.leaveSyncGroup()
+        }
 
         title = Strings.sync
 
@@ -177,7 +184,9 @@ class SyncWelcomeViewController: SyncViewController {
     @objc func newToSyncAction() {
         handleSyncSetupFailure()
         let addDevice = SyncSelectDeviceTypeViewController()
-        addDevice.syncInitHandler = { (title, type) in
+        addDevice.syncInitHandler = { [weak self] (title, type) in
+            guard let self = self else { return }
+            
             func pushAddDeviceVC() {
                 self.syncServiceObserver = nil
                 guard BraveSyncAPI.shared.isInSyncGroup else {
@@ -202,11 +211,24 @@ class SyncWelcomeViewController: SyncViewController {
             addDevice.enableNavigationPrevention()
             self.syncDeviceInfoObserver = BraveSyncAPI.addDeviceStateObserver {
                 self.syncDeviceInfoObserver = nil
-                pushAddDeviceVC()
+                
+                self.displaySyncWarning { shouldJoinSyncChain in
+                    if shouldJoinSyncChain {
+                        BraveSyncAPI.shared.syncEnabled = true
+                        pushAddDeviceVC()
+                    } else {
+                        BraveSyncAPI.shared.syncEnabled = false
+                        BraveSyncAPI.shared.leaveSyncGroup()
+                    }
+                }
+            }
+            
+            if !DeviceInfo.hasConnectivity() {
+                self.present(SyncAlerts.noConnection, animated: true)
+                return
             }
             
             BraveSyncAPI.shared.joinSyncGroup(codeWords: BraveSyncAPI.shared.getSyncCode())
-            BraveSyncAPI.shared.syncEnabled = true
         }
 
         self.navigationController?.pushViewController(addDevice, animated: true)
@@ -223,14 +245,65 @@ class SyncWelcomeViewController: SyncViewController {
                 self.syncServiceObserver = nil
                 self.syncDeviceInfoObserver = nil
                 pairCamera.disableNavigationPrevention()
-                self.pushSettings()
+                
+                self.displaySyncWarning { [weak self] shouldJoinSyncChain in
+                    guard let self = self else { return }
+                    
+                    if shouldJoinSyncChain {
+                        BraveSyncAPI.shared.syncEnabled = true
+                        self.pushSettings()
+                    } else {
+                        BraveSyncAPI.shared.syncEnabled = false
+                        BraveSyncAPI.shared.leaveSyncGroup()
+                    }
+                }
+            }
+            
+            if !DeviceInfo.hasConnectivity() {
+                self.present(SyncAlerts.noConnection, animated: true)
+                return
             }
  
             BraveSyncAPI.shared.joinSyncGroup(codeWords: codeWords)
-            BraveSyncAPI.shared.syncEnabled = true
         }
         
         self.navigationController?.pushViewController(pairCamera, animated: true)
+    }
+    
+    private func displaySyncWarning(completion: @escaping (_ shouldJoinSyncChain: Bool) -> Void) {
+        let devices = BraveSyncAPI.shared.deviceList
+        if devices.isEmpty {
+            completion(false)
+            return
+        }
+        
+        let basicDevices = devices.compactMap({ (device: BraveSyncDevice) -> BasicSyncDevice? in
+            if device.isCurrentDevice {
+                return nil
+            }
+            
+            return BasicSyncDevice(id: device.guid, title: device.name ?? "N/A", type: device.type == "mobile" ? .mobile : .desktop)
+        })
+        
+        if basicDevices.isEmpty {
+            completion(false)
+            return
+        }
+        
+        var warningView = SyncDeviceListWarningView(devices: basicDevices)
+        let popup = PopupViewController(rootView: warningView)
+        
+        warningView.onCancel = { [unowned popup] in
+            popup.dismiss(animated: true)
+            completion(false)
+        }
+        
+        warningView.onJoin = { [unowned popup] in
+            popup.dismiss(animated: true)
+            completion(true)
+        }
+        
+        present(popup, animated: true)
     }
     
     private func pushSettings() {

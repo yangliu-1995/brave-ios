@@ -7,6 +7,8 @@ import Foundation
 import BraveCore
 import BraveShared
 
+private let log = Logger.browserLogger
+
 extension BraveSyncAPI {
     
     public static let seedByteLength = 32
@@ -125,5 +127,21 @@ extension BraveSyncAPI {
         fileprivate func remove() {
             observer = nil
         }
+    }
+}
+
+extension BraveSyncAPI {
+    var deviceList: [BraveSyncDevice] {
+        if let json = BraveSyncAPI.shared.getDeviceListJSON(), let data = json.data(using: .utf8) {
+            do {
+                let devices = try JSONDecoder().decode([BraveSyncDevice].self, from: data)
+                return devices
+            } catch {
+                log.error(error)
+                return []
+            }
+        }
+        log.error("Something went wrong while retrieving Sync Devices..")
+        return []
     }
 }

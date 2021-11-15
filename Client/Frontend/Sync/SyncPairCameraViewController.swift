@@ -80,12 +80,15 @@ class SyncPairCameraViewController: SyncViewController {
                 })
                 
                 // If multiple calls get in here due to race conditions it isn't a big deal
-                
-                let codeWords = BraveSyncAPI.shared.syncCode(fromHexSeed: data)
-                if codeWords.isEmpty {
+                if data.isEmpty {
                     self.cameraView.cameraOverlayError()
                 } else {
-                    self.syncHandler?(codeWords)
+                    let codeWords = BraveSyncAPI.shared.syncCode(fromHexSeed: data)
+                    if codeWords.isEmpty {
+                        self.cameraView.cameraOverlayError()
+                    } else {
+                        self.syncHandler?(codeWords)
+                    }
                 }
             })
             
