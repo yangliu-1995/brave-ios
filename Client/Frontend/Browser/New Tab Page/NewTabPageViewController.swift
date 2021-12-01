@@ -166,7 +166,9 @@ class NewTabPageViewController: UIViewController {
         }
         
         background.changed = { [weak self] in
-            self?.setupBackgroundImage()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self?.setupBackgroundImage()
+            }
         }
         
         #if !NO_BRAVE_NEWS
