@@ -105,6 +105,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if !connectionOptions.urlContexts.isEmpty {
             self.scene(windowScene, openURLContexts: connectionOptions.urlContexts)
         }
+        
+        // Handle user activities
+        if let userActivity = scene.userActivity {
+            self.scene(scene, continue: userActivity)
+        }
+        
+        connectionOptions.userActivities.forEach {
+            self.scene(scene, continue: $0)
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
