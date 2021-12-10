@@ -38,12 +38,17 @@ class CrashHelper {
                 let data = try crashReporter.loadPendingCrashReportDataAndReturnError()
                 let report = try PLCrashReport(data: data)
                 if let text = PLCrashReportTextFormatter.stringValue(for: report, with: PLCrashReportTextFormatiOS) {
-                    print(text)
+                    
+                    let alert = UIAlertController(title: "Error - Crash Report", message: text, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: { _ in
+                        
+                    }))
+                    controller.present(alert, animated: true)
                 } else {
-                    print("CrashReporter: can't convert report to text")
+                    NSException(name: .genericException, reason: "CrashReporter: can't convert report to text", userInfo: nil).raise()
                 }
             } catch let error {
-                print("CrashReporter failed to load and parse with error: \(error)")
+                NSException(name: .genericException, reason: "CrashReporter failed to load and parse with error: \(error)", userInfo: nil).raise()
             }
         }
         
