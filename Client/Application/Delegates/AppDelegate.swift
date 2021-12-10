@@ -59,6 +59,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.application = application
         self.launchOptions = launchOptions
         
+        // INIT CRASH REPORTER
+        CrashHelper.setup()
+        
         // Brave Core Initialization
         BraveCoreMain.setLogHandler { severity, file, line, messageStartIndex, message in
             if !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {

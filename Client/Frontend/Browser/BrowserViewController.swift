@@ -965,6 +965,10 @@ class BrowserViewController: UIViewController, BrowserViewControllerDelegate {
             show(toast: toast, afterWaiting: ButtonToastUX.toastDelay)
         }
         showQueuedAlertIfAvailable()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            CrashHelper.displayCrash(on: self)
+        }
     }
     
     /// Whether or not to show the playlist onboarding callout this session

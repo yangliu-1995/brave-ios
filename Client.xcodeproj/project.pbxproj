@@ -1087,6 +1087,8 @@
 		CABFA8F62728651C00B73E97 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABFA8F52728651C00B73E97 /* WelcomeViewController.swift */; };
 		CAC2CB402644488600BB8D36 /* RecentSearchHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC2CB3F2644488600BB8D36 /* RecentSearchHeaderView.swift */; };
 		CAC2CB4D2644496400BB8D36 /* RecentSearchClipboardHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC2CB4C2644496400BB8D36 /* RecentSearchClipboardHeaderView.swift */; };
+		CAED1DA82763C81A009CA78B /* CrashHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAED1DA72763C81A009CA78B /* CrashHelper.swift */; };
+		CAED1DAA2763CB96009CA78B /* CrashReporter in Frameworks */ = {isa = PBXBuildFile; productRef = CAED1DA92763CB96009CA78B /* CrashReporter */; };
 		CE7F11941F3CEEC800ABFC0B /* RemoteDevices.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7F115E1F3CCEF900ABFC0B /* RemoteDevices.swift */; };
 		D018F93E1F44A71A0098F8CA /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = D018F93D1F44A7190098F8CA /* Schema.swift */; };
 		D029A04920A62DB0001DB72F /* TemporaryDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D029A04820A62DB0001DB72F /* TemporaryDocument.swift */; };
@@ -3019,6 +3021,7 @@
 		CABFA8F52728651C00B73E97 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
 		CAC2CB3F2644488600BB8D36 /* RecentSearchHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentSearchHeaderView.swift; sourceTree = "<group>"; };
 		CAC2CB4C2644496400BB8D36 /* RecentSearchClipboardHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentSearchClipboardHeaderView.swift; sourceTree = "<group>"; };
+		CAED1DA72763C81A009CA78B /* CrashHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashHelper.swift; sourceTree = "<group>"; };
 		CE7F115E1F3CCEF900ABFC0B /* RemoteDevices.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteDevices.swift; sourceTree = "<group>"; };
 		D000661320472890009BA6F6 /* __firefox__.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = __firefox__.js; sourceTree = "<group>"; };
 		D018F93D1F44A7190098F8CA /* Schema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schema.swift; sourceTree = "<group>"; };
@@ -3260,6 +3263,7 @@
 				277568F925ACF92400C129AF /* SwiftKeychainWrapper in Frameworks */,
 				27F4798C25AF94B0004922E4 /* YubiKit in Frameworks */,
 				2F5B27D72698DBA8002BF5CF /* OrderedCollections in Frameworks */,
+				CAED1DAA2763CB96009CA78B /* CrashReporter in Frameworks */,
 				277309E02721DE2E007643F6 /* BigNumber in Frameworks */,
 				277568F325ACF92400C129AF /* Fuzi in Frameworks */,
 			);
@@ -6274,6 +6278,7 @@
 				F84B21E51A0910F600AAB793 /* AppDelegate.swift */,
 				D3BE7B451B054F8600641031 /* TestAppDelegate.swift */,
 				CAADEFDF26E2707F0020DC4C /* SceneDelegate.swift */,
+				CAED1DA72763C81A009CA78B /* CrashHelper.swift */,
 			);
 			path = Delegates;
 			sourceTree = "<group>";
@@ -6890,6 +6895,7 @@
 				271F68E926EBD59F00AA2A50 /* Algorithms */,
 				271F68EF26EBDC3600AA2A50 /* Then */,
 				277309DF2721DE2E007643F6 /* BigNumber */,
+				CAED1DA92763CB96009CA78B /* CrashReporter */,
 			);
 			productName = SPMLibraries;
 			productReference = 277568D025ACF91500C129AF /* SPMLibraries.framework */;
@@ -7354,6 +7360,7 @@
 				271F68E826EBD59F00AA2A50 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
 				271F68EE26EBDC3600AA2A50 /* XCRemoteSwiftPackageReference "Then" */,
 				277309DA2721DDD2007643F6 /* XCRemoteSwiftPackageReference "Swift-BigInt" */,
+				CAED1D992763C7F0009CA78B /* XCRemoteSwiftPackageReference "plcrashreporter" */,
 			);
 			productRefGroup = F84B21BF1A090F8100AAB793 /* Products */;
 			projectDirPath = "";
@@ -8524,6 +8531,7 @@
 				448DC7D6268A5C3E00F4795C /* BraveSearchDebugMenu.swift in Sources */,
 				0AF4C59424F8003A00E500DD /* NTPDefaultBrowserCalloutProvider.swift in Sources */,
 				C4EFEECF1CEBB6F2009762A4 /* BackForwardTableViewCell.swift in Sources */,
+				CAED1DA82763C81A009CA78B /* CrashHelper.swift in Sources */,
 				E689C7301E0C7617008BAADB /* NSAttributedStringExtensions.swift in Sources */,
 				27036F9A25684F9F004EF6B6 /* AdView.swift in Sources */,
 				27A1AC0C2485A1C200344503 /* FeedDataSource.swift in Sources */,
@@ -15131,6 +15139,14 @@
 				minimumVersion = 0.0.2;
 			};
 		};
+		CAED1D992763C7F0009CA78B /* XCRemoteSwiftPackageReference "plcrashreporter" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/microsoft/plcrashreporter.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -15218,6 +15234,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2FCE87D3264195EC00B98D7E /* XCRemoteSwiftPackageReference "swift-collections" */;
 			productName = OrderedCollections;
+		};
+		CAED1DA92763CB96009CA78B /* CrashReporter */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CAED1D992763C7F0009CA78B /* XCRemoteSwiftPackageReference "plcrashreporter" */;
+			productName = CrashReporter;
 		};
 /* End XCSwiftPackageProductDependency section */
 
