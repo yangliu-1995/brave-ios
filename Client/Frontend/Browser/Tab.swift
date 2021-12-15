@@ -631,7 +631,7 @@ class Tab: NSObject {
         }
         if let path = Bundle.main.path(forResource: fileName, ofType: type),
             let source = try? String(contentsOfFile: path) {
-            let userScript = WKUserScript(source: source, injectionTime: injectionTime, forMainFrameOnly: mainFrameOnly)
+            let userScript = WKUserScript(source: source, injectionTime: injectionTime, forMainFrameOnly: mainFrameOnly, in: .page)
             webView.configuration.userContentController.addUserScript(userScript)
         }
     }
@@ -692,7 +692,7 @@ private class TabContentScriptManager: NSObject, WKScriptMessageHandler {
             if #available(iOS 14.0, *), sandboxed {
                 tab.webView?.configuration.userContentController.add(self, contentWorld: .defaultClient, name: scriptMessageHandlerName)
             } else {
-                tab.webView?.configuration.userContentController.add(self, name: scriptMessageHandlerName)
+                tab.webView?.configuration.userContentController.add(self, contentWorld: .page, name: scriptMessageHandlerName)
             }
         }
     }
@@ -714,7 +714,7 @@ class TabWebView: BraveWebView, MenuHelperInterface {
     }
 
     @objc func menuHelperFindInPage() {
-        evaluateSafeJavaScript(functionName: "getSelection().toString", sandboxed: false) { result, _ in
+        evaluateSafeJavaScript(functionName: "getSelection().toString", contentWorld: .page) { result, _ in
             let selection = result as? String ?? ""
             self.delegate?.tabWebView(self, didSelectFindInPageForSelection: selection)
         }
@@ -749,7 +749,7 @@ class TabWebView: BraveWebView, MenuHelperInterface {
 class TabWebViewMenuHelper: UIView {
     @objc func swizzledMenuHelperFindInPage() {
         if let tabWebView = superview?.superview as? TabWebView {
-            tabWebView.evaluateSafeJavaScript(functionName: "getSelection().toString", sandboxed: false) { result, _ in
+            tabWebView.evaluateSafeJavaScript(functionName: "getSelection().toString", contentWorld: .page) { result, _ in
                 let selection = result as? String ?? ""
                 tabWebView.delegate?.tabWebView(tabWebView, didSelectFindInPageForSelection: selection)
             }
@@ -798,7 +798,7 @@ extension Tab {
                 self.webView?.evaluateSafeJavaScript(
                     functionName: "window.onFetchedBackupResults",
                     args: [queryResult],
-                    sandboxed: false,
+                    contentWorld: .page,
                     escapeArgs: false)
                 
                 // Cleanup

@@ -146,10 +146,16 @@ class UserScriptManager {
                 let wrappedSource = "(function() { const SECURITY_TOKEN = '\(UserScriptManager.messageHandlerTokenString)'; \(source) })()"
 
                 if sandboxed {
-                    return WKUserScript.createInDefaultContentWorld(source: wrappedSource, injectionTime: injectionTime, forMainFrameOnly: mainFrameOnly)
-                } else {
-                    return WKUserScript(source: wrappedSource, injectionTime: injectionTime, forMainFrameOnly: mainFrameOnly)
+                    return WKUserScript(source: wrappedSource,
+                                        injectionTime: injectionTime,
+                                        forMainFrameOnly: mainFrameOnly,
+                                        in: .defaultClient)
                 }
+                
+                return WKUserScript(source: wrappedSource,
+                                    injectionTime: injectionTime,
+                                    forMainFrameOnly: mainFrameOnly,
+                                    in: .page)
             }
             return nil
         }
@@ -162,7 +168,10 @@ class UserScriptManager {
         }
         var alteredSource = source
         alteredSource = alteredSource.replacingOccurrences(of: "$<handler>", with: "FingerprintingProtection\(messageHandlerTokenString)", options: .literal)
-        return WKUserScript(source: alteredSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        return WKUserScript(source: alteredSource,
+                            injectionTime: .atDocumentStart,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
     
     private let cookieControlUserScript: WKUserScript? = {
@@ -171,7 +180,10 @@ class UserScriptManager {
             return nil
         }
         
-        return WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        return WKUserScript(source: source,
+                            injectionTime: .atDocumentStart,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
     
     // U2FUserScript is injected at document start to avoid overriding the low-level
@@ -193,7 +205,10 @@ class UserScriptManager {
         alteredSource = alteredSource.replacingOccurrences(of: "$<attest>", with: "attest\(securityTokenString)", options: .literal)
         alteredSource = alteredSource.replacingOccurrences(of: "$<handler>", with: "U2F\(messageHandlerTokenString)", options: .literal)
         
-        return WKUserScript(source: alteredSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        return WKUserScript(source: alteredSource,
+                            injectionTime: .atDocumentStart,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
     
     // PaymentRequestUserScript is injected at document start to handle
@@ -212,7 +227,10 @@ class UserScriptManager {
         alteredSource = alteredSource.replacingOccurrences(of: "$<paymentreqcallback>", with: "PaymentRequestCallback\(securityTokenString)", options: .literal)
         alteredSource = alteredSource.replacingOccurrences(of: "$<handler>", with: "PaymentRequest\(messageHandlerTokenString)", options: .literal)
         
-        return WKUserScript(source: alteredSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        return WKUserScript(source: alteredSource,
+                            injectionTime: .atDocumentStart,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
     
     // U2FLowLevelUserScript is injected at documentEnd to override the message channels
@@ -228,7 +246,10 @@ class UserScriptManager {
         alteredSource = alteredSource.replacingOccurrences(of: "$<u2f-internal>", with: "fidointernal\(securityTokenString)", options: .literal)
         alteredSource = alteredSource.replacingOccurrences(of: "$<handler>", with: "U2F\(messageHandlerTokenString)", options: .literal)
 
-        return WKUserScript(source: alteredSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        return WKUserScript(source: alteredSource,
+                            injectionTime: .atDocumentStart,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
     
     private let resourceDownloadManagerUserScript: WKUserScript? = {
@@ -241,7 +262,10 @@ class UserScriptManager {
         alteredSource = alteredSource.replacingOccurrences(of: "$<downloadManager>", with: "D\(securityTokenString)", options: .literal)
         alteredSource = alteredSource.replacingOccurrences(of: "$<handler>", with: "ResourceDownloadManager\(messageHandlerTokenString)", options: .literal)
         
-        return WKUserScript(source: alteredSource, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        return WKUserScript(source: alteredSource,
+                            injectionTime: .atDocumentEnd,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
     
     private let WindowRenderHelperScript: WKUserScript? = {
@@ -258,7 +282,10 @@ class UserScriptManager {
         alteredSource = alteredSource.replacingOccurrences(of: "$<windowRenderer>", with: "W\(securityTokenString)", options: .literal)
         alteredSource = alteredSource.replacingOccurrences(of: "$<handler>", with: "WindowRenderHelper\(messageHandlerTokenString)", options: .literal)
         
-        return WKUserScript(source: alteredSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        return WKUserScript(source: alteredSource,
+                            injectionTime: .atDocumentStart,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
     
     private let FullscreenHelperScript: WKUserScript? = {
@@ -266,7 +293,11 @@ class UserScriptManager {
             log.error("Failed to load FullscreenHelper.js")
             return nil
         }
-        return WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        
+        return WKUserScript(source: source,
+                            injectionTime: .atDocumentStart,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
     
     private let PlaylistSwizzlerScript: WKUserScript? = {
@@ -275,7 +306,11 @@ class UserScriptManager {
             log.error("Failed to load PlaylistSwizzler.js")
             return nil
         }
-        return WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        
+        return WKUserScript(source: source,
+                            injectionTime: .atDocumentStart,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
     
     private let PlaylistHelperScript: WKUserScript? = {
@@ -317,7 +352,10 @@ class UserScriptManager {
             alteredSource = alteredSource.replacingOccurrences(of: $0.key, with: $0.value, options: .literal)
         })
         
-        return WKUserScript(source: alteredSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        return WKUserScript(source: alteredSource,
+                            injectionTime: .atDocumentStart,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
     
     private let MediaBackgroundingScript: WKUserScript? = {
@@ -338,7 +376,10 @@ class UserScriptManager {
             alteredSource = alteredSource.replacingOccurrences(of: $0.key, with: $0.value, options: .literal)
         })
         
-        return WKUserScript(source: alteredSource, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        return WKUserScript(source: alteredSource,
+                            injectionTime: .atDocumentStart,
+                            forMainFrameOnly: false,
+                            in: .page)
     }()
 
     private func reloadUserScripts() {

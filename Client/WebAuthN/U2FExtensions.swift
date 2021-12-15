@@ -507,7 +507,7 @@ class U2FExtensions: NSObject {
         }
         cleanupFIDO2Registration(handle: handle)
         ensureMainThread {
-            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fido2internal\(UserScriptManager.securityTokenString).postCreate", args: [handle, "true", credentialIdString, attestationString, clientDataJSON, "", ""], sandboxed: false) { _, error in
+            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fido2internal\(UserScriptManager.securityTokenString).postCreate", args: [handle, "true", credentialIdString, attestationString, clientDataJSON, "", ""], contentWorld: .page) { _, error in
                 if error != nil {
                     let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorRegistration.rawValue
                     log.error(errorDescription)
@@ -579,7 +579,7 @@ class U2FExtensions: NSObject {
     private func sendFIDO2RegistrationError(handle: Int, errorName: String = FIDO2ErrorMessages.NotAllowedError.rawValue, errorDescription: String = Strings.U2FRegistrationError) {
         cleanupFIDO2Registration(handle: handle)
         ensureMainThread {
-            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fido2internal\(UserScriptManager.securityTokenString).postCreate", args: [handle, "true", "", "", "", errorName.toBase64(), errorDescription.toBase64()], sandboxed: false) { _, error in
+            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fido2internal\(UserScriptManager.securityTokenString).postCreate", args: [handle, "true", "", "", "", errorName.toBase64(), errorDescription.toBase64()], contentWorld: .page) { _, error in
                 if error != nil {
                     let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorRegistration.rawValue
                     log.error(errorDescription)
@@ -736,7 +736,7 @@ class U2FExtensions: NSObject {
         
         cleanupFIDO2Authentication(handle: handle)
         ensureMainThread {
-            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fido2internal\(UserScriptManager.securityTokenString).postGet", args: [handle, "true", requestId, authenticatorData, clientDataJSONString, sig, userHandle], sandboxed: false) { _, error in
+            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fido2internal\(UserScriptManager.securityTokenString).postGet", args: [handle, "true", requestId, authenticatorData, clientDataJSONString, sig, userHandle], contentWorld: .page) { _, error in
                 if error != nil {
                     let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorRegistration.rawValue
                     log.error(errorDescription)
@@ -807,7 +807,7 @@ class U2FExtensions: NSObject {
     private func sendFIDO2AuthenticationError(handle: Int, errorName: String = FIDO2ErrorMessages.NotAllowedError.rawValue, errorDescription: String = Strings.U2FAuthenticationError) {
         cleanupFIDO2Authentication(handle: handle)
         ensureMainThread {
-            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fido2internal\(UserScriptManager.securityTokenString).postGet", args: [handle, "true", "", "", "", "", "", errorName.toBase64(), errorDescription.toBase64()], sandboxed: false) { _, error in
+            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fido2internal\(UserScriptManager.securityTokenString).postGet", args: [handle, "true", "", "", "", "", "", errorName.toBase64(), errorDescription.toBase64()], contentWorld: .page) { _, error in
                 if error != nil {
                     let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorAuthentication.rawValue
                     log.error(errorDescription)
@@ -1001,7 +1001,7 @@ class U2FExtensions: NSObject {
         cleanupFIDORegistration(handle: handle)
         if requestId >= 0 {
             ensureMainThread {
-                self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postLowLevelRegister", args: [requestId, "true", version, registrationData, clientData, defaultErrorCode, ""], sandboxed: false) { _, error in
+                self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postLowLevelRegister", args: [requestId, "true", version, registrationData, clientData, defaultErrorCode, ""], contentWorld: .page) { _, error in
                     if error != nil {
                         let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorRegistration.rawValue
                         log.error(errorDescription)
@@ -1012,7 +1012,7 @@ class U2FExtensions: NSObject {
         }
 
         ensureMainThread {
-            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postRegister", args: [handle, "true", version, registrationData, clientData, defaultErrorCode, ""], sandboxed: false) { _, error in
+            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postRegister", args: [handle, "true", version, registrationData, clientData, defaultErrorCode, ""], contentWorld: .page) { _, error in
                 if error != nil {
                     let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorRegistration.rawValue
                     log.error(errorDescription)
@@ -1025,7 +1025,7 @@ class U2FExtensions: NSObject {
         cleanupFIDORegistration(handle: handle)
         if requestId >= 0 {
             ensureMainThread {
-                self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postLowLevelRegister", args: [requestId, "true", "", "", "", errorCode.rawValue, errorMessage.toBase64()], sandboxed: false) { _, error in
+                self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postLowLevelRegister", args: [requestId, "true", "", "", "", errorCode.rawValue, errorMessage.toBase64()], contentWorld: .page) { _, error in
                     if error != nil {
                         let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorRegistration.rawValue
                         log.error(errorDescription)
@@ -1036,7 +1036,7 @@ class U2FExtensions: NSObject {
         }
         
         ensureMainThread {
-            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postRegister", args: [handle, "true", "", "", "", errorCode.rawValue, errorMessage.toBase64()], sandboxed: false) { _, error in
+            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postRegister", args: [handle, "true", "", "", "", errorCode.rawValue, errorMessage.toBase64()], contentWorld: .page) { _, error in
                 if error != nil {
                     let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorRegistration.rawValue
                     log.error(errorDescription)
@@ -1154,7 +1154,7 @@ class U2FExtensions: NSObject {
         cleanupFIDOAuthentication(handle: handle)
         if requestId >= 0 {
             ensureMainThread {
-                self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postLowLevelSign", args: [requestId, "true", keyHandle, signature, clientData, defaultErrorCode, ""], sandboxed: false) { _, error in
+                self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postLowLevelSign", args: [requestId, "true", keyHandle, signature, clientData, defaultErrorCode, ""], contentWorld: .page) { _, error in
                     if error != nil {
                         let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorAuthentication.rawValue
                         log.error(errorDescription)
@@ -1165,7 +1165,7 @@ class U2FExtensions: NSObject {
         }
 
         ensureMainThread {
-            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postSign", args: [handle, "true", keyHandle, signature, clientData, defaultErrorCode, ""], sandboxed: false) { _, error in
+            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postSign", args: [handle, "true", keyHandle, signature, clientData, defaultErrorCode, ""], contentWorld: .page) { _, error in
                 if error != nil {
                     let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorAuthentication.rawValue
                     log.error(errorDescription)
@@ -1179,7 +1179,7 @@ class U2FExtensions: NSObject {
         
         if requestId >= 0 {
             ensureMainThread {
-                self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postLowLevelSign", args: [requestId, "true", "", "", "", errorCode.rawValue, errorMessage.toBase64()], sandboxed: false, completion: { _, error in
+                self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postLowLevelSign", args: [requestId, "true", "", "", "", errorCode.rawValue, errorMessage.toBase64()], contentWorld: .page, completion: { _, error in
                     if error != nil {
                         let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorAuthentication.rawValue
                         log.error(errorDescription)
@@ -1190,7 +1190,7 @@ class U2FExtensions: NSObject {
         }
         
         ensureMainThread {
-            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postSign", args: [handle, "true", "", "", "", errorCode.rawValue, errorMessage.toBase64()], sandboxed: false) { _, error in
+            self.tab?.webView?.evaluateSafeJavaScript(functionName: "fidointernal\(UserScriptManager.securityTokenString).postSign", args: [handle, "true", "", "", "", errorCode.rawValue, errorMessage.toBase64()], contentWorld: .page) { _, error in
                 if error != nil {
                     let errorDescription = error?.localizedDescription ?? U2FErrorMessages.ErrorAuthentication.rawValue
                     log.error(errorDescription)
