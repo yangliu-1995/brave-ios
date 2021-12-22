@@ -50,9 +50,7 @@ class BrowserNavigationHelper {
     }
     
     func openDownloads() {
-        guard let bvc = bvc else { return }
-        let vc = DownloadsPanel(profile: bvc.profile)
-        open(vc, doneButton: DoneButton(style: .done, position: .right))
+        FileManager.default.openBraveDownloadsFolder()
     }
     
     func openAddBookmark() {
